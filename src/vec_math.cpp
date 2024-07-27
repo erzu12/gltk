@@ -6,14 +6,6 @@ void Vec2::asArray(float *dest) {
     dest[1] = this->y;
 }
 
-Vec2::Vec2(float x, float y) {
-    Vec2 a = {x, y};
-}
-
-Vec2::Vec2() {
-    Vec2 a = {0.0f, 0.0f};
-}
-
 Vec2 Vec2::operator+(const Vec2 b) const {
     Vec2 c;
     c.x = this->x + b.x;
@@ -65,6 +57,19 @@ Vec2 Vec2::operator*= (const float b) {
     return *this;
 }
 
+Vec2 Vec2::operator* (const Vec2 b) const {
+    Vec2 c;
+    c.x = this->x * b.x;
+    c.y = this->y * b.y;
+    return c;
+}
+
+Vec2 Vec2::operator/ (const float b) const {
+    Vec2 c;
+    c.x = this->x / b;
+    c.y = this->y / b;
+    return c;
+}
 
 float Vec2::Dot(Vec2 b) const {
     return this->x * b.x + this->y * b.y;
@@ -86,6 +91,141 @@ Vec2 Vec2::Lerp(Vec2 b, float t) const {
     c.x = this->x + t * (b.x - this->x);
     c.y = this->y + t * (b.y - this->y);
     return c;
+}
+
+
+Vec3 Vec3::operator+(const Vec3 &b) const
+{
+    Vec3 c;
+    c.x = this->x + b.x;
+    c.y = this->y + b.y;
+    c.z = this->z + b.z;
+    return c;
+}
+Vec3 Vec3::operator+=(const Vec3 &b)
+{
+    this->x += b.x;
+    this->y += b.y;
+    this->z += b.z;
+    return *this;
+}
+
+Vec3 Vec3::operator-(const Vec3 &b) const
+{
+    Vec3 c;
+    c.x = this->x - b.x;
+    c.y = this->y - b.y;
+    c.z = this->z - b.z;
+    return c;
+}
+Vec3 Vec3::operator-=(const Vec3 &b)
+{
+    this->x -= b.x;
+    this->y -= b.y;
+    this->z -= b.z;
+    return *this;
+}
+
+Vec3 Vec3::operator-() const
+{
+    Vec3 c;
+    c.x = -this->x;
+    c.y = -this->y;
+    c.z = -this->z;
+    return c;
+}
+
+float Vec3::magnitude() const {
+    return sqrt(this->x * this->x + this->y * this->y + this->z * this->z); 
+}
+
+Vec3 Vec3::normalize()
+{
+    float mag = magnitude();
+    if (mag == 0)
+        return *this;
+    this->x /= mag;
+    this->y /= mag;
+    this->z /= mag;
+    return *this;
+}
+
+Vec3 Vec3::operator*(float b) const
+{
+    Vec3 c;
+    c.x = this->x * b;
+    c.y = this->y * b;
+    c.z = this->z * b;
+    return c;
+}
+
+Vec3 Vec3::operator*=(float b)
+{
+    this->x *= b;
+    this->y *= b;
+    this->z *= b;
+    return *this;
+}
+
+Vec3 Vec3::operator*(const Vec3 &b) const
+{
+    Vec3 c;
+    c.x = this->x * b.x;
+    c.y = this->y * b.y;
+    c.z = this->z * b.z;
+    return c;
+}
+
+Vec3 Vec3::operator/(float b) const
+{
+    Vec3 c;
+    c.x = this->x / b;
+    c.y = this->y / b;
+    c.z = this->z / b;
+    return c;
+}
+
+float Vec3::dot(const Vec3 &b) const { return this->x * b.x + this->y * b.y + this->z * b.z; }
+
+Vec3 Vec3::cross(const Vec3 &b) const
+{
+    Vec3 c;
+    c.x = this->y * b.z - this->z * b.y;
+    c.y = this->z * b.x - this->x * b.z;
+    c.z = this->x * b.y - this->y * b.x;
+    return c;
+}
+
+Vec3 Vec3::reflect(const Vec3 &normal) const
+{
+    return *this - normal * 2 * this->dot(normal);
+}
+
+Vec3 Vec3::max(const Vec3 &b)
+{
+    this->x = this->x > b.x ? this->x : b.x;
+    this->y = this->y > b.y ? this->y : b.y;
+    this->z = this->z > b.z ? this->z : b.z;
+    return *this;
+}
+
+Vec3 Vec3::min(const Vec3 &b)
+{
+    this->x = this->x < b.x ? this->x : b.x;
+    this->y = this->y < b.y ? this->y : b.y;
+    this->z = this->z < b.z ? this->z : b.z;
+    return *this;
+}
+
+Vec3 Vec3::lerp(const Vec3 &b, float t) const
+{
+    return *this * (1 - t) + b * t;
+}
+
+std::ostream &operator<<(std::ostream &os, const Vec3 &f3)
+{
+    os << "{" << f3.x << ", " << f3.y << ", " << f3.z << "}";
+    return os;
 }
 
 
@@ -149,6 +289,20 @@ Mat3 Mat3::translationMatrix(Vec2 translate) {
     return translateionMat;
 }
 
+Mat3 Mat3::viewMatrix(Vec2 viewSize) {
+    Mat3 viewMat;
+    viewMat.mat[0] = 2.0f / viewSize.x;
+    viewMat.mat[1] = 0.0f;
+    viewMat.mat[2] = -1.0f;
+    viewMat.mat[3] = 0.0f;
+    viewMat.mat[4] = -2.0f / viewSize.y;
+    viewMat.mat[5] = 1.0f;
+    viewMat.mat[6] = 0.0f;
+    viewMat.mat[7] = 0.0f;
+    viewMat.mat[8] = 1.0f;
+    return viewMat;
+}
+
 void Mat3::rotateMat(float angle) {
     Mat3 rotMat = rotationMat(angle);
     *this = *this * rotMat;
@@ -164,3 +318,17 @@ void Mat3::translateMat(Vec2 translate) {
     *this = *this * translateionMat;
 }
 
+float *Mat3::data() {
+    return mat.data();
+}
+
+std::array<float, 3> Mat3::operator[](int index) const {
+    return {mat[index * 3], mat[index * 3 + 1], mat[index * 3 + 2]};
+}
+
+std::ostream &operator<<(std::ostream &os, const Mat3 &m3) {
+    os << "{" << m3.mat[0] << ", " << m3.mat[1] << ", " << m3.mat[2] << "}" << std::endl;
+    os << "{" << m3.mat[3] << ", " << m3.mat[4] << ", " << m3.mat[5] << "}" << std::endl;
+    os << "{" << m3.mat[6] << ", " << m3.mat[7] << ", " << m3.mat[8] << "}" << std::endl;
+    return os;
+}

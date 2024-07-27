@@ -67,7 +67,27 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath)
     }
 }
 
-void Shader::use() {
+void Shader::UniformInt(std::string name, int value) const {
+    glUniform1i(glGetUniformLocation(*shaderProgram.get(), name.c_str()), value);
+}
+
+void Shader::UniformFloat(std::string name, float value) const {
+    glUniform1f(glGetUniformLocation(*shaderProgram.get(), name.c_str()), value);
+}
+
+void Shader::UniformVec2(std::string name, Vec2 vec) const {
+    glUniform2f(glGetUniformLocation(*shaderProgram.get(), name.c_str()), vec.x, vec.y);
+}
+
+void Shader::UniformVec3(std::string name, Vec3 vec) const {
+    glUniform3f(glGetUniformLocation(*shaderProgram.get(), name.c_str()), vec.x, vec.y, vec.z);
+}
+
+void Shader::UniformMat3(std::string name, Mat3 mat) const {
+    glUniformMatrix3fv(glGetUniformLocation(*shaderProgram.get(), name.c_str()), 1, GL_TRUE, mat.data());
+}
+
+void Shader::use() const {
     glUseProgram(*shaderProgram.get());
 }
 

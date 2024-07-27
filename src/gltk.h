@@ -1,5 +1,6 @@
 #pragma once
-
-namespace gltk {
-
-} // namespace gltk
+#include "window.h"
+#include "render.h"
+#include "shader.h"
+#include "box.h"
+#include "layout.h"

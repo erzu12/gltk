@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
+#include "vec_math.h"
 #include <memory>
 #include <vector>
 #include <bitset>
@@ -24,15 +25,18 @@ public:
     ~Window();
     void add_key_down_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
     void add_key_up_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
-    void run();
+    void run(std::function<void(Vec2)> render_callback);
 private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    static void debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
     std::vector<KeyModifiers> get_modifiers(int mods);
 
     std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window = {nullptr, glfwDestroyWindow};
     std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_down_callbacks;
     std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_up_callbacks;
+
+    int width, height;
 };
 
 enum class KeyModifiers {
