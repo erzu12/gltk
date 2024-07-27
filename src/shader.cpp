@@ -67,6 +67,9 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath)
     }
 }
 
+void Shader::use() {
+    glUseProgram(*shaderProgram.get());
+}
 
 }  // namespace neith
 

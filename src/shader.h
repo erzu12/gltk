@@ -33,6 +33,7 @@ class Shader {
 public:
     std::unique_ptr<GlResource> shaderProgram;
     Shader(std::string vertexPath, std::string fragmentPath);
+    void use();
     void UniformVec3(std::string name, float x, float y, float z);
 private:
     static std::unique_ptr<GlResource> CompileShader(std::string path, GLenum shaderType);
