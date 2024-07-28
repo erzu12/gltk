@@ -60,8 +60,13 @@ class Layout {
     Vec2 pivot = Anchors::TopLeft;
     MessureVec2 size;
 
-    std::optional<Layout*> parent;
+    std::optional<Vec2> resolvedPosition;
+    std::optional<Vec2> resolvedSize;
+    std::optional<Mat3> resolvedTransform;
+
     std::vector<Layout*> children;
+
+    void resolveTransform(Vec2 parentSize, Vec2 parentPosition);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
     Layout(Layout *parrent, MessureVec2 position, MessureVec2 size);
@@ -71,6 +76,8 @@ public:
 
     void addChild(Layout *child);
 
-    Mat3 resolveTransform();
-    Vec2 resolveSize();
+    void resolveTransform();
+
+    Mat3 getTransform();
+    Vec2 getSize();
 };

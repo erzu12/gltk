@@ -93,6 +93,10 @@ Vec2 Vec2::Lerp(Vec2 b, float t) const {
     return c;
 }
 
+std::ostream &operator<<(std::ostream &os, const Vec2 &f2) {
+    os << "{" << f2.x << ", " << f2.y << "}";
+    return os;
+}
 
 Vec3 Vec3::operator+(const Vec3 &b) const
 {

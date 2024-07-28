@@ -79,6 +79,7 @@ void Window::run(std::function<void(Vec2)> render_callback) {
         glClearColor(.1f, .1f, .1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        layout.resolveTransform();
         render_callback(Vec2(width, height));
 
         glfwSwapBuffers(window.get());
