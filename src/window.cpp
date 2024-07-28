@@ -11,6 +11,7 @@ void Window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int he
     Window *window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     window->width = width;
     window->height = height;
+    window->layout.setSize(MessureVec2(width, height));
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -28,7 +29,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
     }
 }
 
-Window::Window() {
+Window::Window() : layout(MessureVec2(600, 800)) {
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();

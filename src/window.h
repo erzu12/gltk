@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
+#include "layout.h"
 #include "vec_math.h"
 #include <memory>
 #include <vector>
@@ -26,6 +27,7 @@ public:
     void add_key_down_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
     void add_key_up_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
     void run(std::function<void(Vec2)> render_callback);
+    Layout *get_layout() { return &layout; }
 private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -37,6 +39,7 @@ private:
     std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_up_callbacks;
 
     int width, height;
+    Layout layout;
 };
 
 enum class KeyModifiers {

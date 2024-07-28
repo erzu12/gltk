@@ -4,7 +4,7 @@
 
 namespace gltk {
 
-Box::Box(Layout layout, float radius) : layout(layout), radius(radius) {
+Box::Box(Layout layout, Vec3 color, float radius) : layout(layout), color(color), radius(radius) {
     float vertices[] = {
         -0.5f, -0.5f,
         -0.5f, 0.5f,
@@ -28,15 +28,15 @@ Box::Box(Layout layout, float radius) : layout(layout), radius(radius) {
 
 void Box::draw(Vec2 viewportSize) {
     shader.use();
-    shader.UniformVec3("color", Vec3(1.0f, 0.0f, 0.0f));
-    Mat3 model = layout.resolveTransform(viewportSize);
+    shader.UniformVec3("color", color);
+    Mat3 model = layout.resolveTransform();
     Mat3 view = Mat3::viewMatrix(viewportSize);
     Mat3 transform = view * model;
     shader.UniformMat3("transform", transform);
-    Vec2 size = layout.resolveSize(viewportSize);
+    Vec2 size = layout.resolveSize();
     float clipedRadius = std::min(radius, std::min(size.x, size.y) / 2.0f);
     shader.UniformFloat("radius", clipedRadius);
-    shader.UniformVec2("pixelSize", layout.resolveSize(viewportSize));
+    shader.UniformVec2("pixelSize", layout.resolveSize());
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }

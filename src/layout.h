@@ -1,6 +1,14 @@
 #pragma once
 
 #include "vec_math.h"
+#include <optional>
+#include <vector>
+
+
+class layout_exception : public std::runtime_error {
+public:
+    layout_exception(const std::string &msg) : std::runtime_error(msg) {}
+};
 
 namespace Anchors {
     const Vec2 TopLeft = Vec2(0, 0);
@@ -51,11 +59,18 @@ class Layout {
     MessureVec2 offset;
     Vec2 pivot = Anchors::TopLeft;
     MessureVec2 size;
+
+    std::optional<Layout*> parent;
+    std::vector<Layout*> children;
 public:
-    Layout(MessureVec2 position, MessureVec2 size);
-    Layout(Vec2 anchor, MessureVec2 offset, Vec2 pivot, MessureVec2 size);
+    Layout(MessureVec2 viewportSize); // root layout defined by the window
+    Layout(Layout *parrent, MessureVec2 position, MessureVec2 size);
+    Layout(Layout *parrent, Vec2 anchor, MessureVec2 offset, Vec2 pivot, MessureVec2 size);
 
-    Mat3 resolveTransform(Vec2 parrentSize);
-    Vec2 resolveSize(Vec2 parrentSize);
+    void setSize(MessureVec2 size);
+
+    void addChild(Layout *child);
+
+    Mat3 resolveTransform();
+    Vec2 resolveSize();
 };
-
