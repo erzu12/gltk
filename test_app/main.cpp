@@ -8,27 +8,41 @@ int main () {
     });
 
     auto boxLayout = LayoutBuilder()
-        .setAnchor(Anchors::TopCenter)
         .setOffset(MessureVec2(0.0, 100))
-        .setPivot(Anchors::TopCenter)
         .setSize(MessureVec2(.5, .5))
+        .setChildPlacement(ChildPlacement::ListStretch)
         .build();
 
-    auto childBoxLayout = LayoutBuilder()
-        .setAnchor(Anchors::BottomLeft)
-        .setOffset(MessureVec2(0.0, 100))
-        .setPivot(Anchors::TopLeft)
-        .setSize(MessureVec2(.2, .2))
+    auto child1Layout = LayoutBuilder()
+        .setOffset(MessureVec2(0.0, 0.0))
+        .setSize(MessureVec2(.2, 1.0))
         .build();
+
+    auto child2Layout = LayoutBuilder()
+        .setOffset(MessureVec2(.0, 0.0))
+        .setSize(MessureVec2(.4, 1.0))
+        .build();
+
+    auto child3Layout = LayoutBuilder()
+        .setOffset(MessureVec2(.0, 0.0))
+        .setSize(MessureVec2(200, 1.0))
+        .build();
+
 
     window.get_layout()->addChild(boxLayout.get());
 
     gltk::Box box(boxLayout, Vec3(0.0f, 0.0f, 1.0f), 100.0);
-    gltk::Box childBox(childBoxLayout, Vec3(1.0f, 0.0f, 0.0f), 10.0);
-    box.addChild(childBox);
+    gltk::Box child1Box(child1Layout, Vec3(1.0f, 0.0f, 0.0f), 100.0);
+    gltk::Box child2Box(child2Layout, Vec3(0.0f, 1.0f, 0.0f), 100.0);
+    gltk::Box child3Box(child3Layout, Vec3(1.0f, 1.0f, 0.0f), 50.0);
+    box.addChild(child1Box);
+    box.addChild(child2Box);
+    box.addChild(child3Box);
     window.run([&](Vec2 viewport) {
         box.draw(viewport);
-        childBox.draw(viewport);
+        child1Box.draw(viewport);
+        child2Box.draw(viewport);
+        child3Box.draw(viewport);
     });
     return 0;
 }

@@ -26,6 +26,7 @@ namespace Anchors {
 class IMessure {
 public:
     virtual int resolve(int parrentSize) = 0;
+    virtual bool isAbsolute() = 0;
 };
 
 class AbsoluteMessure : public IMessure {
@@ -34,6 +35,7 @@ class AbsoluteMessure : public IMessure {
     public:
         AbsoluteMessure(int value) : value(value) {}
         int resolve(int parrentSize) override;
+        bool isAbsolute() override { return true; }
 };
 
 class RelativeMessure : public IMessure {
@@ -42,6 +44,7 @@ class RelativeMessure : public IMessure {
     public:
         RelativeMessure(float value) : value(value) {}
         int resolve(int parrentSize) override;
+        bool isAbsolute() override { return false; }
 };
 
 struct MessureVec2 {
@@ -55,11 +58,26 @@ struct MessureVec2 {
     Vec2 resolve(Vec2 parrentSize);
 };
 
+enum class ChildPlacement {
+    Free,
+    List,
+    ListStretch,
+};
+
+enum class Overflow {
+    None,
+    Clip,
+    Scroll,
+};
+
 class Layout {
     Vec2 anchor = Anchors::TopLeft;
     MessureVec2 offset;
     Vec2 pivot = Anchors::TopLeft;
     MessureVec2 size;
+
+    ChildPlacement childPlacement;
+    Overflow overflow;
 
     std::optional<Vec2> resolvedPosition;
     std::optional<Vec2> resolvedSize;
@@ -69,14 +87,16 @@ class Layout {
 
     std::vector<Layout*> children;
 
-    void resolveTransform(Vec2 parentSize, Vec2 parentPosition);
+    void resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
     Layout(std::optional<Layout*> parent,
            Vec2 anchor,
            MessureVec2 offset,
            Vec2 pivot,
-           MessureVec2 size
+           MessureVec2 size,
+           ChildPlacement childPlacement = ChildPlacement::Free,
+           Overflow overflow = Overflow::None
     );
 
     void setParent(Layout* parent);
@@ -100,6 +120,8 @@ public:
     LayoutBuilder& setOffset(MessureVec2 offset);
     LayoutBuilder& setAnchor(Vec2 anchor);
     LayoutBuilder& setPivot(Vec2 pivot);
+    LayoutBuilder& setChildPlacement(ChildPlacement childPlacement);
+    LayoutBuilder& setOverflow(Overflow overflow);
     std::unique_ptr<Layout> build();
 
 private:
@@ -107,4 +129,6 @@ private:
     MessureVec2 offset = MessureVec2(0, 0);
     Vec2 pivot = Anchors::TopLeft;
     MessureVec2 size = MessureVec2(0, 0);
+    ChildPlacement childPlacement = ChildPlacement::Free;
+    Overflow overflow = Overflow::None;
 };

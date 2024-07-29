@@ -5,6 +5,9 @@
 namespace gltk {
 
 Box::Box(std::unique_ptr<Layout> &layout, Vec3 color, float radius) : layout(std::move(layout)), color(color), radius(radius) {
+    if (!this->layout) {
+        throw std::invalid_argument("Layout cannot be null");
+    }
     float vertices[] = {
         -0.5f, -0.5f,
         -0.5f, 0.5f,

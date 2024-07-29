@@ -4,7 +4,22 @@
 
 Layout::Layout(MessureVec2 size) : size(size), offset(0, 0) {}
 
-Layout::Layout(std::optional<Layout*> parent, Vec2 anchor, MessureVec2 offset, Vec2 pivot, MessureVec2 size) : anchor(anchor), offset(offset), pivot(pivot), size(size) {
+Layout::Layout(
+        std::optional<Layout*> parent,
+        Vec2 anchor, 
+        MessureVec2 offset, 
+        Vec2 pivot, 
+        MessureVec2 size,
+        ChildPlacement childPlacement,
+        Overflow overflow
+) : 
+    anchor(anchor), 
+    offset(offset), 
+    pivot(pivot), 
+    size(size),
+    childPlacement(childPlacement),
+    overflow(overflow)
+{
     if (parent.has_value()) {
         parent.value()->addChild(this);
         this->parent = parent;
@@ -20,16 +35,43 @@ void Layout::setParent(Layout* parent) {
     this->parent = parent;
 }
 
-void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition) {
+void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize) {
     Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
-    Vec2 size = this->size.resolve(parentSize);
+    Vec2 size = forceSize ? parentSize : this->size.resolve(parentSize);
     Vec2 pivotOffsetFromCenter = size / 2.0f - pivot * size;
     Vec2 centerPosition = pivotPosition + pivotOffsetFromCenter;
     resolvedTransform = Mat3::translationMatrix(centerPosition) * Mat3::scalingMatrix(size);
     resolvedPosition = pivotPosition - size * pivot;
     resolvedSize = size;
-    for (Layout* child : children) {
-        child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
+    if (childPlacement == ChildPlacement::Free) {
+        for (Layout* child : children) {
+            child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
+        }
+    }
+    else if (childPlacement == ChildPlacement::ListStretch) {
+        Vec2 currentPosition = resolvedPosition.value();
+        float totalAbsoluteHeight = 0;
+        float totalRelativeHeight = 0;
+        for (Layout* child : children) {
+            if (child->size.x->isAbsolute()) {
+                totalAbsoluteHeight += child->size.x->resolve(resolvedSize.value().x);
+            }
+            else {
+                totalRelativeHeight += child->size.x->resolve(resolvedSize.value().x);
+            }
+        }
+        for (Layout* child : children) {
+            Vec2 childSize = child->size.resolve(resolvedSize.value());
+            if (child->size.x->isAbsolute()) {
+                child->resolveTransform(resolvedSize.value(), currentPosition);
+            }
+            else {
+                childSize.x = (resolvedSize.value().x - totalAbsoluteHeight) * childSize.x / totalRelativeHeight;
+                std::cout << "Child size: " << childSize << " child position: " << currentPosition << std::endl;
+                child->resolveTransform(childSize, currentPosition, true);
+            }
+            currentPosition.x += childSize.x;
+        }
     }
 }
 
@@ -92,6 +134,16 @@ LayoutBuilder& LayoutBuilder::setPivot(Vec2 pivot) {
     return *this;
 }
 
+LayoutBuilder& LayoutBuilder::setChildPlacement(ChildPlacement childPlacement) {
+    this->childPlacement = childPlacement;
+    return *this;
+}
+
+LayoutBuilder& LayoutBuilder::setOverflow(Overflow overflow) {
+    this->overflow = overflow;
+    return *this;
+}
+
 std::unique_ptr<Layout> LayoutBuilder::build() {
-    return std::make_unique<Layout>(std::nullopt, anchor, offset, pivot, size);
+    return std::make_unique<Layout>(std::nullopt, anchor, offset, pivot, size, childPlacement, overflow);
 }
