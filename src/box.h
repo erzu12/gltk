@@ -5,6 +5,7 @@
 
 namespace gltk {
 
+
 class Box {
     std::unique_ptr<Layout> layout;
     Vec3 color;
@@ -14,6 +15,8 @@ class Box {
 public:
     Box(std::unique_ptr<Layout> &layout, Vec3 color, float radius = 0.0f);
     ~Box();
+
+    void addChild(Box &child);
 
     void draw(Vec2 viewportSize);
 };

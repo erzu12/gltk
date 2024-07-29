@@ -41,6 +41,10 @@ void Box::draw(Vec2 viewportSize) {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+void Box::addChild(Box &child) {
+    layout->addChild(child.layout.get());
+}
+
 Box::~Box() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);

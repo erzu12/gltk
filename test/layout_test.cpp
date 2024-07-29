@@ -4,7 +4,7 @@
 
 TEST(LayoutTest, layoutTopLeftSquareAbsolute) {
     Layout rootLayout(MessureVec2(200, 200));
-    Layout layout(&rootLayout, MessureVec2(0, 0), MessureVec2(100, 100));
+    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -16,7 +16,7 @@ TEST(LayoutTest, layoutTopLeftSquareAbsolute) {
 
 TEST(LayoutTest, layoutTopLeftRectangleAbsolute) {
     Layout rootLayout(MessureVec2(200, 200));
-    Layout layout(&rootLayout, MessureVec2(0, 0), MessureVec2(100, 200));
+    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 200));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -28,7 +28,8 @@ TEST(LayoutTest, layoutTopLeftRectangleAbsolute) {
 
 TEST(LayoutTest, layoutTopLeftSquareRelative) {
     Layout rootLayout(MessureVec2(200, 200));
-    Layout layout(&rootLayout, MessureVec2(0, 0), MessureVec2(0.5, 0.5));
+    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 0.5));
+    rootLayout.addChild(&layout);
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -40,7 +41,7 @@ TEST(LayoutTest, layoutTopLeftSquareRelative) {
 
 TEST(LayoutTest, layoutTopLeftRectangleRelative) {
     Layout rootLayout(MessureVec2(200, 200));
-    Layout layout(&rootLayout, MessureVec2(0, 0), MessureVec2(0.5, 1.0));
+    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -52,7 +53,7 @@ TEST(LayoutTest, layoutTopLeftRectangleRelative) {
 
 TEST(LayoutTest, layoutTopLeftSquareMixed) {
     Layout rootLayout(MessureVec2(200, 200));
-    Layout layout(&rootLayout, MessureVec2(0, 0), MessureVec2(100, 0.5));
+    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, .5));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;

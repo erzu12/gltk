@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vec_math.h"
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -64,13 +65,21 @@ class Layout {
     std::optional<Vec2> resolvedSize;
     std::optional<Mat3> resolvedTransform;
 
+    std::optional<Layout*> parent;
+
     std::vector<Layout*> children;
 
     void resolveTransform(Vec2 parentSize, Vec2 parentPosition);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
-    Layout(Layout *parrent, MessureVec2 position, MessureVec2 size);
-    Layout(Layout *parrent, Vec2 anchor, MessureVec2 offset, Vec2 pivot, MessureVec2 size);
+    Layout(std::optional<Layout*> parent,
+           Vec2 anchor,
+           MessureVec2 offset,
+           Vec2 pivot,
+           MessureVec2 size
+    );
+
+    void setParent(Layout* parent);
 
     void setSize(MessureVec2 size);
 
@@ -80,4 +89,22 @@ public:
 
     Mat3 getTransform();
     Vec2 getSize();
+};
+
+
+class LayoutBuilder {
+public:
+    LayoutBuilder() = default;
+
+    LayoutBuilder& setSize(MessureVec2 size);
+    LayoutBuilder& setOffset(MessureVec2 offset);
+    LayoutBuilder& setAnchor(Vec2 anchor);
+    LayoutBuilder& setPivot(Vec2 pivot);
+    std::unique_ptr<Layout> build();
+
+private:
+    Vec2 anchor = Anchors::TopLeft;
+    MessureVec2 offset = MessureVec2(0, 0);
+    Vec2 pivot = Anchors::TopLeft;
+    MessureVec2 size = MessureVec2(0, 0);
 };

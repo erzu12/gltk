@@ -6,10 +6,26 @@ int main () {
     window.add_key_down_callback([](gltk::Key key, gltk::KeyModifierFlags mods) {
         std::cout << "Key down: " << static_cast<int>(key) << std::endl;
     });
-    auto boxLayout = std::make_unique<Layout>(window.get_layout(), Anchors::TopCenter, MessureVec2(0.0, 100), Anchors::TopCenter, MessureVec2(.5, .5));
-    auto childBoxLayout = std::make_unique<Layout>(boxLayout.get(), Anchors::BottomLeft, MessureVec2(0.0, 100), Anchors::TopLeft, MessureVec2(.2, .2));
+
+    auto boxLayout = LayoutBuilder()
+        .setAnchor(Anchors::TopCenter)
+        .setOffset(MessureVec2(0.0, 100))
+        .setPivot(Anchors::TopCenter)
+        .setSize(MessureVec2(.5, .5))
+        .build();
+
+    auto childBoxLayout = LayoutBuilder()
+        .setAnchor(Anchors::BottomLeft)
+        .setOffset(MessureVec2(0.0, 100))
+        .setPivot(Anchors::TopLeft)
+        .setSize(MessureVec2(.2, .2))
+        .build();
+
+    window.get_layout()->addChild(boxLayout.get());
+
     gltk::Box box(boxLayout, Vec3(0.0f, 0.0f, 1.0f), 100.0);
     gltk::Box childBox(childBoxLayout, Vec3(1.0f, 0.0f, 0.0f), 10.0);
+    box.addChild(childBox);
     window.run([&](Vec2 viewport) {
         box.draw(viewport);
         childBox.draw(viewport);

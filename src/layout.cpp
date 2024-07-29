@@ -1,20 +1,23 @@
 #include "layout.h"
 #include <iostream>
+#include <algorithm>
 
 Layout::Layout(MessureVec2 size) : size(size), offset(0, 0) {}
 
-Layout::Layout(Layout *parent, MessureVec2 position, MessureVec2 size) : offset(position), size(size) {
-    if (parent == nullptr) {
-        throw layout_exception("Parent layout cannot be null");
+Layout::Layout(std::optional<Layout*> parent, Vec2 anchor, MessureVec2 offset, Vec2 pivot, MessureVec2 size) : anchor(anchor), offset(offset), pivot(pivot), size(size) {
+    if (parent.has_value()) {
+        parent.value()->addChild(this);
+        this->parent = parent;
     }
-    parent->addChild(this);
 }
 
-Layout::Layout(Layout *parent, Vec2 anchor, MessureVec2 offset, Vec2 pivot, MessureVec2 size) : anchor(anchor), offset(offset), pivot(pivot), size(size) {
-    if (parent == nullptr) {
-        throw layout_exception("Parent layout cannot be null");
+void Layout::setParent(Layout* parent) {
+    if (this->parent.has_value()) {
+        auto children = &this->parent.value()->children;
+        children->erase(std::remove(children->begin(), children->end(), this), children->end());
     }
     parent->addChild(this);
+    this->parent = parent;
 }
 
 void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition) {
@@ -67,4 +70,28 @@ int AbsoluteMessure::resolve(int parentSize) {
 
 int RelativeMessure::resolve(int parentSize) {
     return value * parentSize;
+}
+
+LayoutBuilder& LayoutBuilder::setAnchor(Vec2 anchor) {
+    this->anchor = anchor;
+    return *this;
+}
+
+LayoutBuilder& LayoutBuilder::setOffset(MessureVec2 offset) {
+    this->offset = offset;
+    return *this;
+}
+
+LayoutBuilder& LayoutBuilder::setSize(MessureVec2 size) {
+    this->size = size;
+    return *this;
+}
+
+LayoutBuilder& LayoutBuilder::setPivot(Vec2 pivot) {
+    this->pivot = pivot;
+    return *this;
+}
+
+std::unique_ptr<Layout> LayoutBuilder::build() {
+    return std::make_unique<Layout>(std::nullopt, anchor, offset, pivot, size);
 }
