@@ -1,11 +1,11 @@
 #include "layout.h"
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 
 Layout::Layout(MessureVec2 size) : size(size), offset(0, 0) {}
 
 Layout::Layout(
-        std::optional<Layout*> parent,
         Vec2 anchor, 
         MessureVec2 offset, 
         Vec2 pivot, 
@@ -19,21 +19,7 @@ Layout::Layout(
     size(size),
     childPlacement(childPlacement),
     overflow(overflow)
-{
-    if (parent.has_value()) {
-        parent.value()->addChild(this);
-        this->parent = parent;
-    }
-}
-
-void Layout::setParent(Layout* parent) {
-    if (this->parent.has_value()) {
-        auto children = &this->parent.value()->children;
-        children->erase(std::remove(children->begin(), children->end(), this), children->end());
-    }
-    parent->addChild(this);
-    this->parent = parent;
-}
+{}
 
 void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize) {
     Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
@@ -44,7 +30,7 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
     resolvedPosition = pivotPosition - size * pivot;
     resolvedSize = size;
     if (childPlacement == ChildPlacement::Free) {
-        for (Layout* child : children) {
+        for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
             child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
         }
     }
@@ -52,7 +38,7 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
         Vec2 currentPosition = resolvedPosition.value();
         float totalAbsoluteHeight = 0;
         float totalRelativeHeight = 0;
-        for (Layout* child : children) {
+        for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
             if (child->size.x->isAbsolute()) {
                 totalAbsoluteHeight += child->size.x->resolve(resolvedSize.value().x);
             }
@@ -60,14 +46,13 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
                 totalRelativeHeight += child->size.x->resolve(resolvedSize.value().x);
             }
         }
-        for (Layout* child : children) {
+        for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
             Vec2 childSize = child->size.resolve(resolvedSize.value());
             if (child->size.x->isAbsolute()) {
                 child->resolveTransform(resolvedSize.value(), currentPosition);
             }
             else {
                 childSize.x = (resolvedSize.value().x - totalAbsoluteHeight) * childSize.x / totalRelativeHeight;
-                std::cout << "Child size: " << childSize << " child position: " << currentPosition << std::endl;
                 child->resolveTransform(childSize, currentPosition, true);
             }
             currentPosition.x += childSize.x;
@@ -81,14 +66,11 @@ void Layout::resolveTransform() {
         throw layout_exception("Cannot resolve size");
     }
     Vec2 currentPosition = resolvedPosition.value_or(Vec2(0, 0));
-    for (Layout* child : children) {
+    for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
         child->resolveTransform(currentSize, currentPosition);
     }
 }
 
-void Layout::addChild(Layout* child) {
-    children.push_back(child);
-}
 
 Vec2 Layout::getSize() {
     return resolvedSize.value();
@@ -100,6 +82,10 @@ Mat3 Layout::getTransform() {
 
 void Layout::setSize(MessureVec2 size) {
     this->size = size;
+}
+
+void Layout::setHirarchyNode(IHirarchyNode* hirarchyNode) {
+    this->hirarchyNode = hirarchyNode;
 }
 
 Vec2 MessureVec2::resolve(Vec2 parentSize) {
@@ -145,5 +131,5 @@ LayoutBuilder& LayoutBuilder::setOverflow(Overflow overflow) {
 }
 
 std::unique_ptr<Layout> LayoutBuilder::build() {
-    return std::make_unique<Layout>(std::nullopt, anchor, offset, pivot, size, childPlacement, overflow);
+    return std::make_unique<Layout>(anchor, offset, pivot, size, childPlacement, overflow);
 }

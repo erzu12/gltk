@@ -2,23 +2,24 @@
 
 #include "layout.h"
 #include "shader.h"
+#include "render.h"
 
 namespace gltk {
 
 
-class Box {
-    std::unique_ptr<Layout> layout;
+class Box : public IRenderable {
     Vec3 color;
     float radius;
     const Shader shader = Shader("assets/vert.glsl", "assets/frag.glsl");
     unsigned int VAO, VBO;
+    Layout *layout;
 public:
-    Box(std::unique_ptr<Layout> &layout, Vec3 color, float radius = 0.0f);
+    Box(Vec3 color, float radius = 0.0f);
     ~Box();
 
-    void addChild(Box &child);
+    void setLayout(Layout *layout);
 
-    void draw(Vec2 viewportSize);
+    void render(Mat3 &viewMatrix) override;
 };
 
 class ListBox : public Box {

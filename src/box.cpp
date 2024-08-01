@@ -4,10 +4,7 @@
 
 namespace gltk {
 
-Box::Box(std::unique_ptr<Layout> &layout, Vec3 color, float radius) : layout(std::move(layout)), color(color), radius(radius) {
-    if (!this->layout) {
-        throw std::invalid_argument("Layout cannot be null");
-    }
+Box::Box(Vec3 color, float radius) : color(color), radius(radius) {
     float vertices[] = {
         -0.5f, -0.5f,
         -0.5f, 0.5f,
@@ -29,12 +26,11 @@ Box::Box(std::unique_ptr<Layout> &layout, Vec3 color, float radius) : layout(std
     glEnableVertexAttribArray(0);
 }
 
-void Box::draw(Vec2 viewportSize) {
+void Box::render(Mat3 &viewMatrix) {
     shader.use();
     shader.UniformVec3("color", color);
     Mat3 model = layout->getTransform();
-    Mat3 view = Mat3::viewMatrix(viewportSize);
-    Mat3 transform = view * model;
+    Mat3 transform = viewMatrix * model;
     shader.UniformMat3("transform", transform);
     Vec2 size = layout->getSize();
     float clipedRadius = std::min(radius, std::min(size.x, size.y) / 2.0f);
@@ -44,8 +40,8 @@ void Box::draw(Vec2 viewportSize) {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Box::addChild(Box &child) {
-    layout->addChild(child.layout.get());
+void Box::setLayout(Layout *layout) {
+    this->layout = layout;
 }
 
 Box::~Box() {

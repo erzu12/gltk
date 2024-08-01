@@ -29,20 +29,17 @@ int main () {
         .build();
 
 
-    window.get_layout()->addChild(boxLayout.get());
+    gltk::Node node(std::move(boxLayout), std::make_unique<gltk::Box>(Vec3(0.0f, 0.0f, 1.0f), 100.0));
+    window.get_node()->addChild(node);
 
-    gltk::Box box(boxLayout, Vec3(0.0f, 0.0f, 1.0f), 100.0);
-    gltk::Box child1Box(child1Layout, Vec3(1.0f, 0.0f, 0.0f), 100.0);
-    gltk::Box child2Box(child2Layout, Vec3(0.0f, 1.0f, 0.0f), 100.0);
-    gltk::Box child3Box(child3Layout, Vec3(1.0f, 1.0f, 0.0f), 50.0);
-    box.addChild(child1Box);
-    box.addChild(child2Box);
-    box.addChild(child3Box);
+
+    gltk::Node child1Node(std::move(child1Layout), std::make_unique<gltk::Box>(Vec3(1.0f, 0.0f, 0.0f), 100.0));
+    gltk::Node child2Node(std::move(child2Layout), std::make_unique<gltk::Box>(Vec3(0.0f, 1.0f, 0.0f), 100.0));
+    gltk::Node child3Node(std::move(child3Layout), std::make_unique<gltk::Box>(Vec3(1.0f, 1.0f, 0.0f), 50.0));
+    node.addChild(child1Node);
+    node.addChild(child2Node);
+    node.addChild(child3Node);
     window.run([&](Vec2 viewport) {
-        box.draw(viewport);
-        child1Box.draw(viewport);
-        child2Box.draw(viewport);
-        child3Box.draw(viewport);
     });
     return 0;
 }

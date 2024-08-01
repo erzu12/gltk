@@ -5,6 +5,12 @@
 #include <optional>
 #include <vector>
 
+class Layout;
+
+class IHirarchyNode {
+public:
+    virtual std::vector<Layout*> getLayoutChildren() = 0;
+};
 
 class layout_exception : public std::runtime_error {
 public:
@@ -83,15 +89,12 @@ class Layout {
     std::optional<Vec2> resolvedSize;
     std::optional<Mat3> resolvedTransform;
 
-    std::optional<Layout*> parent;
-
-    std::vector<Layout*> children;
+    std::optional<IHirarchyNode*> hirarchyNode;
 
     void resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
-    Layout(std::optional<Layout*> parent,
-           Vec2 anchor,
+    Layout(Vec2 anchor,
            MessureVec2 offset,
            Vec2 pivot,
            MessureVec2 size,
@@ -99,11 +102,9 @@ public:
            Overflow overflow = Overflow::None
     );
 
-    void setParent(Layout* parent);
+    void setHirarchyNode(IHirarchyNode* hirarchyNode);
 
     void setSize(MessureVec2 size);
-
-    void addChild(Layout *child);
 
     void resolveTransform();
 
