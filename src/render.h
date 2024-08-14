@@ -2,14 +2,12 @@
 #include <queue>
 
 #include "vec_math.h"
-#include "layout.h"
 
 namespace gltk {
 
 class IRenderable {
 public:
-    virtual void render(Mat3 &viewMatrix) = 0;
-    virtual void setLayout(Layout *layout) = 0;
+    virtual void render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) = 0;
 };
 
 class Renderer {

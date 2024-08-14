@@ -5,7 +5,6 @@
 #include "GLFW/glfw3.h"
 #include "layout.h"
 #include "vec_math.h"
-#include "node.h"
 #include <memory>
 #include <vector>
 #include <bitset>
@@ -29,7 +28,7 @@ public:
     void add_key_down_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
     void add_key_up_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
     void run(std::function<void(Vec2)> render_callback);
-    Node *get_node() { return &rootNode; }
+    Layout *get_layout() { return &rootLayout; }
 
 private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -42,7 +41,7 @@ private:
     std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_up_callbacks;
 
     int width, height;
-    Node rootNode = Node(MessureVec2(600, 800));
+    Layout rootLayout = Layout(MessureVec2(600, 800));
     Renderer renderer = Renderer();
 };
 

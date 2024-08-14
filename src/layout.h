@@ -1,16 +1,14 @@
 #pragma once
 
 #include "vec_math.h"
+#include "render.h"
 #include <memory>
 #include <optional>
 #include <vector>
 
-class Layout;
+namespace gltk {
 
-class IHirarchyNode {
-public:
-    virtual std::vector<Layout*> getLayoutChildren() = 0;
-};
+class Layout;
 
 class layout_exception : public std::runtime_error {
 public:
@@ -77,6 +75,10 @@ enum class Overflow {
 };
 
 class Layout {
+    std::optional<std::unique_ptr<IRenderable>> renderable;
+    std::vector<Layout*> children;
+    std::optional<Layout*> parent;
+
     Vec2 anchor = Anchors::TopLeft;
     MessureVec2 offset;
     Vec2 pivot = Anchors::TopLeft;
@@ -89,24 +91,26 @@ class Layout {
     std::optional<Vec2> resolvedSize;
     std::optional<Mat3> resolvedTransform;
 
-    std::optional<IHirarchyNode*> hirarchyNode;
-
     void resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
-    Layout(Vec2 anchor,
+    Layout(Layout *parent,
+           Vec2 anchor,
            MessureVec2 offset,
            Vec2 pivot,
            MessureVec2 size,
            ChildPlacement childPlacement = ChildPlacement::Free,
+           std::unique_ptr<IRenderable> renderable = nullptr,
            Overflow overflow = Overflow::None
     );
 
-    void setHirarchyNode(IHirarchyNode* hirarchyNode);
+    void addChild(Layout *child);
 
     void setSize(MessureVec2 size);
 
     void resolveTransform();
+
+    void renderRecursive(const Mat3 &viewMatrix);
 
     Mat3 getTransform();
     Vec2 getSize();
@@ -115,9 +119,10 @@ public:
 
 class LayoutBuilder {
 public:
-    LayoutBuilder() = default;
+    LayoutBuilder(Layout *parent);
 
     LayoutBuilder& setSize(MessureVec2 size);
+    LayoutBuilder& setRenderable(std::unique_ptr<IRenderable> renderable);
     LayoutBuilder& setOffset(MessureVec2 offset);
     LayoutBuilder& setAnchor(Vec2 anchor);
     LayoutBuilder& setPivot(Vec2 pivot);
@@ -126,6 +131,8 @@ public:
     std::unique_ptr<Layout> build();
 
 private:
+    Layout *parent;
+    std::unique_ptr<IRenderable> renderable = nullptr;
     Vec2 anchor = Anchors::TopLeft;
     MessureVec2 offset = MessureVec2(0, 0);
     Vec2 pivot = Anchors::TopLeft;
@@ -133,3 +140,5 @@ private:
     ChildPlacement childPlacement = ChildPlacement::Free;
     Overflow overflow = Overflow::None;
 };
+
+}

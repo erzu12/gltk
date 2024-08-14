@@ -1,6 +1,5 @@
 #pragma once
 
-#include "layout.h"
 #include "shader.h"
 #include "render.h"
 
@@ -12,14 +11,11 @@ class Box : public IRenderable {
     float radius;
     const Shader shader = Shader("assets/vert.glsl", "assets/frag.glsl");
     unsigned int VAO, VBO;
-    Layout *layout;
 public:
     Box(Vec3 color, float radius = 0.0f);
     ~Box();
 
-    void setLayout(Layout *layout);
-
-    void render(Mat3 &viewMatrix) override;
+    void render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) override;
 };
 
 class ListBox : public Box {

@@ -1,16 +1,19 @@
 #include "layout.h"
-#include <iostream>
-#include <algorithm>
 #include <cassert>
+#include <iostream>
+
+namespace gltk {
 
 Layout::Layout(MessureVec2 size) : size(size), offset(0, 0) {}
 
 Layout::Layout(
+        Layout* parent,
         Vec2 anchor, 
         MessureVec2 offset, 
         Vec2 pivot, 
         MessureVec2 size,
         ChildPlacement childPlacement,
+        std::unique_ptr<IRenderable> renderable,
         Overflow overflow
 ) : 
     anchor(anchor), 
@@ -19,7 +22,15 @@ Layout::Layout(
     size(size),
     childPlacement(childPlacement),
     overflow(overflow)
-{}
+{
+    if (parent) {
+        parent->addChild(this);
+        this->parent = parent;
+    }
+    if (renderable) {
+        this->renderable = std::move(renderable);
+    }
+}
 
 void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize) {
     Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
@@ -30,7 +41,7 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
     resolvedPosition = pivotPosition - size * pivot;
     resolvedSize = size;
     if (childPlacement == ChildPlacement::Free) {
-        for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
+        for (Layout* child : children) {
             child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
         }
     }
@@ -38,7 +49,7 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
         Vec2 currentPosition = resolvedPosition.value();
         float totalAbsoluteHeight = 0;
         float totalRelativeHeight = 0;
-        for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
+        for (Layout* child : children) {
             if (child->size.x->isAbsolute()) {
                 totalAbsoluteHeight += child->size.x->resolve(resolvedSize.value().x);
             }
@@ -46,7 +57,7 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
                 totalRelativeHeight += child->size.x->resolve(resolvedSize.value().x);
             }
         }
-        for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
+        for (Layout* child : children) {
             Vec2 childSize = child->size.resolve(resolvedSize.value());
             if (child->size.x->isAbsolute()) {
                 child->resolveTransform(resolvedSize.value(), currentPosition);
@@ -61,13 +72,16 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
 }
 
 void Layout::resolveTransform() {
-    Vec2 currentSize = resolvedSize.value_or(size.resolve(Vec2(-1, -1)));
-    if (currentSize.x < 0 || currentSize.y < 0) {
+    if (size.x->isAbsolute() && size.y->isAbsolute()) {
+        resolvedSize = size.resolve(Vec2(0, 0));
+        resolvedTransform = Mat3::scalingMatrix(resolvedSize.value());
+    }
+    else {
         throw layout_exception("Cannot resolve size");
     }
     Vec2 currentPosition = resolvedPosition.value_or(Vec2(0, 0));
-    for (Layout* child : hirarchyNode.value()->getLayoutChildren()) {
-        child->resolveTransform(currentSize, currentPosition);
+    for (Layout* child : children) {
+        child->resolveTransform(*resolvedSize, currentPosition);
     }
 }
 
@@ -84,8 +98,22 @@ void Layout::setSize(MessureVec2 size) {
     this->size = size;
 }
 
-void Layout::setHirarchyNode(IHirarchyNode* hirarchyNode) {
-    this->hirarchyNode = hirarchyNode;
+void Layout::addChild(Layout *child) {
+    children.push_back(child);
+}
+
+void Layout::renderRecursive(const Mat3 &viewMatrix) {
+    if (resolvedTransform.has_value()) {
+        if (renderable.has_value()) {
+            renderable.value()->render(viewMatrix, resolvedTransform.value(), resolvedSize.value());
+        }
+        for (Layout* child : children) {
+            child->renderRecursive(viewMatrix);
+        }
+    }
+    else {
+        throw layout_exception("Cannot render layout without resolved transform");
+    }
 }
 
 Vec2 MessureVec2::resolve(Vec2 parentSize) {
@@ -100,8 +128,15 @@ int RelativeMessure::resolve(int parentSize) {
     return value * parentSize;
 }
 
+LayoutBuilder::LayoutBuilder(Layout* parent) : parent(parent) {}
+
 LayoutBuilder& LayoutBuilder::setAnchor(Vec2 anchor) {
     this->anchor = anchor;
+    return *this;
+}
+
+LayoutBuilder& LayoutBuilder::setRenderable(std::unique_ptr<IRenderable> renderable) {
+    this->renderable = std::move(renderable);
     return *this;
 }
 
@@ -131,5 +166,7 @@ LayoutBuilder& LayoutBuilder::setOverflow(Overflow overflow) {
 }
 
 std::unique_ptr<Layout> LayoutBuilder::build() {
-    return std::make_unique<Layout>(anchor, offset, pivot, size, childPlacement, overflow);
+    return std::make_unique<Layout>(parent, anchor, offset, pivot, size, childPlacement, std::move(renderable), overflow);
 }
+
+}  // namespace gltk

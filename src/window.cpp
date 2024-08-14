@@ -11,8 +11,7 @@ void Window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int he
     Window *window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
     window->width = width;
     window->height = height;
-    window->rootNode.getLayout()->setSize(MessureVec2(width, height));
-    window->rootNode.recursiveRegisterForRender(window->renderer);
+    window->rootLayout.setSize(MessureVec2(width, height));
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -80,9 +79,9 @@ void Window::run(std::function<void(Vec2)> render_callback) {
         glClearColor(.1f, .1f, .1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        rootNode.getLayout()->resolveTransform();
-        Vec2 size = rootNode.getLayout()->getSize();
-        renderer.render(Mat3::viewMatrix(size));
+        rootLayout.resolveTransform();
+        Vec2 size = rootLayout.getSize();
+        rootLayout.renderRecursive(Mat3::viewMatrix(size));
         render_callback(Vec2(width, height));
 
         glfwSwapBuffers(window.get());
