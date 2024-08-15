@@ -68,6 +68,13 @@ enum class ChildPlacement {
     ListStretch,
 };
 
+enum class ListDirection {
+    Down,
+    Right,
+    Left,
+    Up,
+};
+
 enum class Overflow {
     None,
     Clip,
@@ -85,6 +92,7 @@ class Layout {
     MessureVec2 size;
 
     ChildPlacement childPlacement;
+    ListDirection listDirection;
     Overflow overflow;
 
     std::optional<Vec2> resolvedPosition;
@@ -100,6 +108,7 @@ public:
            Vec2 pivot,
            MessureVec2 size,
            ChildPlacement childPlacement = ChildPlacement::Free,
+           ListDirection listDirection = ListDirection::Down,
            std::unique_ptr<IRenderable> renderable = nullptr,
            Overflow overflow = Overflow::None
     );
@@ -114,6 +123,13 @@ public:
 
     Mat3 getTransform();
     Vec2 getSize();
+
+private:
+    void resolveListTransform();
+    void resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition);
+
+    void adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition);
+    Vec2 getListStartPossition();
 };
 
 
@@ -127,6 +143,7 @@ public:
     LayoutBuilder& setAnchor(Vec2 anchor);
     LayoutBuilder& setPivot(Vec2 pivot);
     LayoutBuilder& setChildPlacement(ChildPlacement childPlacement);
+    LayoutBuilder& setListDirection(ListDirection listDirection);
     LayoutBuilder& setOverflow(Overflow overflow);
     std::unique_ptr<Layout> build();
 
@@ -138,6 +155,7 @@ private:
     Vec2 pivot = Anchors::TopLeft;
     MessureVec2 size = MessureVec2(0, 0);
     ChildPlacement childPlacement = ChildPlacement::Free;
+    ListDirection listDirection = ListDirection::Down;
     Overflow overflow = Overflow::None;
 };
 

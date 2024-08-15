@@ -169,7 +169,7 @@ TEST(LayoutTest, layoutListStretch3UnevenSplit) {
     ASSERT_FLOAT_EQ(transform3[0][2], 87.5f);
 }
 
-TEST(LayoutTest, layoutListAbsoluteAndRelative) {
+TEST(LayoutTest, layoutListStretchAbsoluteAndRelative) {
     Layout rootLayout(MessureVec2(200, 200));
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(40, 1.0));
@@ -186,7 +186,7 @@ TEST(LayoutTest, layoutListAbsoluteAndRelative) {
     ASSERT_FLOAT_EQ(transform2[0][2], 70.0f);
 }
 
-TEST(LayoutTest, layoutListRelativeAndAbsolute) {
+TEST(LayoutTest, layoutListStretchRelativeAndAbsolute) {
     Layout rootLayout(MessureVec2(200, 200));
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, 1.0));
@@ -206,7 +206,7 @@ TEST(LayoutTest, layoutListRelativeAndAbsolute) {
     ASSERT_FLOAT_EQ(transform2[0][2], 80.0f);
 }
 
-TEST(LayoutTest, layoutListMultiAbsolutAndRelative) {
+TEST(LayoutTest, layoutListStretchMultiAbsolutAndRelative) {
     Layout rootLayout(MessureVec2(200, 200));
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(20, 1.0));
@@ -231,6 +231,112 @@ TEST(LayoutTest, layoutListMultiAbsolutAndRelative) {
     // Child 4 should be 30 pixels wide
     ASSERT_FLOAT_EQ(transform4[0][0], 30.0f);
     ASSERT_FLOAT_EQ(transform4[0][2], 85.0f);
+}
+
+TEST(LayoutTest, layoutList2Children) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List);
+    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
+    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform1 = child1.getTransform();
+    Mat3 transform2 = child2.getTransform();
+    Mat3 listTransform = listLayout.getTransform();
+    std::cout << listTransform << std::endl;
+    std::cout << transform1 << std::endl;
+    std::cout << transform2 << std::endl;
+    // Child 1 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform1[1][1], 50.0f);
+    ASSERT_FLOAT_EQ(transform1[1][2], 25.0f);
+    // Child 2 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform2[1][1], 50.0f);
+    ASSERT_FLOAT_EQ(transform2[1][2], 75.0f);
+}
+
+TEST(LayoutTest, layoutList3Children) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List);
+    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
+    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, .3));
+    Layout child3(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 20));
+    rootLayout.resolveTransform();
+    Mat3 transform1 = child1.getTransform();
+    Mat3 transform2 = child2.getTransform();
+    Mat3 transform3 = child3.getTransform();
+    Mat3 listTransform = listLayout.getTransform();
+    std::cout << listTransform << std::endl;
+    std::cout << transform1 << std::endl;
+    std::cout << transform2 << std::endl;
+    std::cout << transform3 << std::endl;
+    // Child 1 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform1[1][1], 50.0f);
+    ASSERT_FLOAT_EQ(transform1[1][2], 25.0f);
+    // Child 2 should be 1/4 of the space
+    ASSERT_FLOAT_EQ(transform2[1][1], 30.0f);
+    ASSERT_FLOAT_EQ(transform2[1][2], 65.0f);
+    // Child 3 should be 1/4 of the space
+    ASSERT_FLOAT_EQ(transform3[1][1], 20.0f);
+    ASSERT_FLOAT_EQ(transform3[1][2], 90.0f);
+}
+
+TEST(LayoutTest, layoutListRight) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Right);
+    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
+    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
+    rootLayout.resolveTransform();
+    Mat3 transform1 = child1.getTransform();
+    Mat3 transform2 = child2.getTransform();
+    Mat3 listTransform = listLayout.getTransform();
+    std::cout << listTransform << std::endl;
+    std::cout << transform1 << std::endl;
+    std::cout << transform2 << std::endl;
+    // Child 1 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform1[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform1[0][2], 25.0f);
+    // Child 2 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform2[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform2[0][2], 75.0f);
+}
+
+TEST(LayoutTest, layoutListLeft) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Left);
+    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
+    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
+    rootLayout.resolveTransform();
+    Mat3 transform1 = child1.getTransform();
+    Mat3 transform2 = child2.getTransform();
+    Mat3 listTransform = listLayout.getTransform();
+    std::cout << listTransform << std::endl;
+    std::cout << transform1 << std::endl;
+    std::cout << transform2 << std::endl;
+    // Child 1 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform1[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform1[0][2], 75.0f);
+    // Child 2 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform2[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform2[0][2], 25.0f);
+}
+
+TEST(LayoutTest, layoutListUp) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Up);
+    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
+    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform1 = child1.getTransform();
+    Mat3 transform2 = child2.getTransform();
+    Mat3 listTransform = listLayout.getTransform();
+    std::cout << listTransform << std::endl;
+    std::cout << transform1 << std::endl;
+    std::cout << transform2 << std::endl;
+    // Child 1 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform1[1][1], 50.0f);
+    ASSERT_FLOAT_EQ(transform1[1][2], 75.0f);
+    // Child 2 should be 1/2 of the space
+    ASSERT_FLOAT_EQ(transform2[1][1], 50.0f);
+    ASSERT_FLOAT_EQ(transform2[1][2], 25.0f);
 }
 
 }  // namespace gltk

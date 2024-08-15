@@ -13,6 +13,7 @@ Layout::Layout(
         Vec2 pivot, 
         MessureVec2 size,
         ChildPlacement childPlacement,
+        ListDirection listDirection,
         std::unique_ptr<IRenderable> renderable,
         Overflow overflow
 ) : 
@@ -21,6 +22,7 @@ Layout::Layout(
     pivot(pivot), 
     size(size),
     childPlacement(childPlacement),
+    listDirection(listDirection),
     overflow(overflow)
 {
     if (parent) {
@@ -29,6 +31,72 @@ Layout::Layout(
     }
     if (renderable) {
         this->renderable = std::move(renderable);
+    }
+}
+
+void Layout::adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition) {
+    switch (listDirection) {
+        case ListDirection::Down:
+            currentPosition.y += childSize.y;
+            break;
+        case ListDirection::Right:
+            currentPosition.x += childSize.x;
+            break;
+        case ListDirection::Left:
+            currentPosition.x -= childSize.x;
+            break;
+        case ListDirection::Up:
+            currentPosition.y -= childSize.y;
+            break;
+    }
+}
+
+Vec2 Layout::getListStartPossition() {
+    if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
+        return resolvedPosition.value();
+    }
+    else {
+        Vec2 currentPosition = resolvedPosition.value() + resolvedSize.value();
+        return currentPosition;
+    }
+}
+
+void Layout::resolveListTransform() {
+    Vec2 currentPosition = getListStartPossition();
+    for (Layout* child : children) {
+        Vec2 childSize = child->size.resolve(resolvedSize.value());
+        if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
+            child->resolveTransform(resolvedSize.value(), currentPosition);
+        }
+        else {
+            child->resolveTransform(resolvedSize.value(), currentPosition - childSize);
+        }
+        adjustCurrentPosition(childSize, currentPosition);
+    }
+}
+
+void Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
+    Vec2 currentPosition = resolvedPosition.value();
+    float totalAbsoluteHeight = 0;
+    float totalRelativeHeight = 0;
+    for (Layout* child : children) {
+        if (child->size.x->isAbsolute()) {
+            totalAbsoluteHeight += child->size.x->resolve(resolvedSize.value().x);
+        }
+        else {
+            totalRelativeHeight += child->size.x->resolve(resolvedSize.value().x);
+        }
+    }
+    for (Layout* child : children) {
+        Vec2 childSize = child->size.resolve(resolvedSize.value());
+        if (child->size.x->isAbsolute()) {
+            child->resolveTransform(resolvedSize.value(), currentPosition);
+        }
+        else {
+            childSize.x = (resolvedSize.value().x - totalAbsoluteHeight) * childSize.x / totalRelativeHeight;
+            child->resolveTransform(childSize, currentPosition, true);
+        }
+        currentPosition.x += childSize.x;
     }
 }
 
@@ -46,28 +114,10 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
         }
     }
     else if (childPlacement == ChildPlacement::ListStretch) {
-        Vec2 currentPosition = resolvedPosition.value();
-        float totalAbsoluteHeight = 0;
-        float totalRelativeHeight = 0;
-        for (Layout* child : children) {
-            if (child->size.x->isAbsolute()) {
-                totalAbsoluteHeight += child->size.x->resolve(resolvedSize.value().x);
-            }
-            else {
-                totalRelativeHeight += child->size.x->resolve(resolvedSize.value().x);
-            }
-        }
-        for (Layout* child : children) {
-            Vec2 childSize = child->size.resolve(resolvedSize.value());
-            if (child->size.x->isAbsolute()) {
-                child->resolveTransform(resolvedSize.value(), currentPosition);
-            }
-            else {
-                childSize.x = (resolvedSize.value().x - totalAbsoluteHeight) * childSize.x / totalRelativeHeight;
-                child->resolveTransform(childSize, currentPosition, true);
-            }
-            currentPosition.x += childSize.x;
-        }
+        resolveListStretchTransform(parentSize, parentPosition);
+    }
+    else if (childPlacement == ChildPlacement::List) {
+        resolveListTransform();
     }
 }
 
@@ -160,13 +210,18 @@ LayoutBuilder& LayoutBuilder::setChildPlacement(ChildPlacement childPlacement) {
     return *this;
 }
 
+LayoutBuilder& LayoutBuilder::setListDirection(ListDirection listDirection) {
+    this->listDirection = listDirection;
+    return *this;
+}
+
 LayoutBuilder& LayoutBuilder::setOverflow(Overflow overflow) {
     this->overflow = overflow;
     return *this;
 }
 
 std::unique_ptr<Layout> LayoutBuilder::build() {
-    return std::make_unique<Layout>(parent, anchor, offset, pivot, size, childPlacement, std::move(renderable), overflow);
+    return std::make_unique<Layout>(parent, anchor, offset, pivot, size, childPlacement, listDirection, std::move(renderable), overflow);
 }
 
 }  // namespace gltk
