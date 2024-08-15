@@ -110,7 +110,7 @@ public:
 
     void resolveTransform();
 
-    void renderRecursive(const Mat3 &viewMatrix);
+    void registerForRenderRecursive(Renderer &renderer);
 
     Mat3 getTransform();
     Vec2 getSize();

@@ -1,5 +1,6 @@
 #include "window.h"
 #include <iostream>
+#include <thread>
 
 namespace gltk {
 
@@ -12,6 +13,7 @@ void Window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int he
     window->width = width;
     window->height = height;
     window->rootLayout.setSize(MessureVec2(width, height));
+    window->rootLayout.registerForRenderRecursive(window->renderer);
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -74,18 +76,26 @@ Window::Window() {
 }
 
 void Window::run(std::function<void(Vec2)> render_callback) {
+    glClearColor(.1f, .1f, .1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glfwSwapBuffers(window.get());
     while (!glfwWindowShouldClose(window.get()))
     {
-        glClearColor(.1f, .1f, .1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        if (renderer.willRender()) {
+            glClearColor(.1f, .1f, .1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
 
         rootLayout.resolveTransform();
         Vec2 size = rootLayout.getSize();
-        rootLayout.renderRecursive(Mat3::viewMatrix(size));
+        bool redraw = renderer.render(Mat3::viewMatrix(size));
         render_callback(Vec2(width, height));
 
-        glfwSwapBuffers(window.get());
+        if (redraw) {
+            glfwSwapBuffers(window.get());
+        }
         glfwPollEvents();
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 }
 

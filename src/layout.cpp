@@ -102,13 +102,13 @@ void Layout::addChild(Layout *child) {
     children.push_back(child);
 }
 
-void Layout::renderRecursive(const Mat3 &viewMatrix) {
+void Layout::registerForRenderRecursive(Renderer &renderer) {
     if (resolvedTransform.has_value()) {
         if (renderable.has_value()) {
-            renderable.value()->render(viewMatrix, resolvedTransform.value(), resolvedSize.value());
+            renderer.queue(renderable.value().get(), resolvedTransform.value(), resolvedSize.value());
         }
         for (Layout* child : children) {
-            child->renderRecursive(viewMatrix);
+            child->registerForRenderRecursive(renderer);
         }
     }
     else {

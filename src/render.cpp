@@ -10,15 +10,21 @@ namespace gltk {
 Renderer::Renderer() {
 }
 
-void Renderer::render(Mat3 viewMatrix) {
-    //for (; !renderables.empty(); renderables.pop()) {
-        //renderables.front()->render(viewMatrix);
-    //}
+bool Renderer::render(Mat3 viewMatrix) {
+    if (renderQueue.empty()) {
+        return false;
+    }
+    for (; !renderQueue.empty(); renderQueue.pop()) {
+        std::cout << "Rendering" << std::endl;
+        RenderData renderData = renderQueue.front();
+        renderData.renderable->render(viewMatrix, renderData.modelMatrix, renderData.size);
+    }
+    return true;
 }
 
-void Renderer::queue(IRenderable* renderable) {
+void Renderer::queue(IRenderable* renderable, Mat3 modelMatrix, Vec2 size) {
     // TODO: avoid redundant renderables
-    renderables.push(renderable);
+    renderQueue.push({renderable, modelMatrix, size}); 
 }
 
 }  // namespace gltk
