@@ -11,20 +11,28 @@ Renderer::Renderer() {
 }
 
 bool Renderer::render(Mat3 viewMatrix) {
-    if (renderQueue.empty()) {
+    if (renderQueueKeys.empty()) {
         return false;
     }
-    for (; !renderQueue.empty(); renderQueue.pop()) {
-        std::cout << "Rendering" << std::endl;
-        RenderData renderData = renderQueue.front();
-        renderData.renderable->render(viewMatrix, renderData.modelMatrix, renderData.size);
+    for (int i = 0; i < renderQueueKeys.size(); i++) {
+        renderQueueKeys[i]->render(viewMatrix, renderQueueValues[i].modelMatrix, renderQueueValues[i].size);
     }
+    renderQueueKeys.clear();
+    renderQueueValues.clear();
+
     return true;
 }
 
 void Renderer::queue(IRenderable* renderable, Mat3 modelMatrix, Vec2 size) {
-    // TODO: avoid redundant renderables
-    renderQueue.push({renderable, modelMatrix, size}); 
+    for (int i = 0; i < renderQueueKeys.size(); i++) {
+        if (renderQueueKeys[i] == renderable) {
+            renderQueueValues[i].modelMatrix = modelMatrix;
+            renderQueueValues[i].size = size;
+            return;
+        }
+    }
+    renderQueueKeys.push_back(renderable);
+    renderQueueValues.push_back({modelMatrix, size});
 }
 
 }  // namespace gltk

@@ -1,5 +1,5 @@
 #pragma once
-#include <queue>
+#include <vector>
 
 #include "vec_math.h"
 
@@ -11,17 +11,17 @@ public:
 };
 
 struct RenderData {
-    IRenderable* renderable;
     Mat3 modelMatrix;
     Vec2 size;
 };
 
 class Renderer {
-    std::queue<RenderData> renderQueue;
+    std::vector<IRenderable*> renderQueueKeys;
+    std::vector<RenderData> renderQueueValues;
 public:
     Renderer();
 
-    bool willRender() { return !renderQueue.empty(); }
+    bool willRender() { return !renderQueueKeys.empty(); }
 
     bool render(Mat3 viewMatrix);
 

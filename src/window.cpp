@@ -13,6 +13,7 @@ void Window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int he
     window->width = width;
     window->height = height;
     window->rootLayout.setSize(MessureVec2(width, height));
+    window->rootLayout.resolveTransform();
     window->rootLayout.registerForRenderRecursive(window->renderer);
 }
 
@@ -79,6 +80,8 @@ void Window::run(std::function<void(Vec2)> render_callback) {
     glClearColor(.1f, .1f, .1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glfwSwapBuffers(window.get());
+    glfwPollEvents();
+    rootLayout.resolveTransform();
     while (!glfwWindowShouldClose(window.get()))
     {
         if (renderer.willRender()) {
@@ -86,7 +89,6 @@ void Window::run(std::function<void(Vec2)> render_callback) {
             glClear(GL_COLOR_BUFFER_BIT);
         }
 
-        rootLayout.resolveTransform();
         Vec2 size = rootLayout.getSize();
         bool redraw = renderer.render(Mat3::viewMatrix(size));
         render_callback(Vec2(width, height));
