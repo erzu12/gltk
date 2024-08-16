@@ -85,27 +85,32 @@ void Layout::resolveListTransform() {
 }
 
 void Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
-    Vec2 currentPosition = resolvedPosition.value();
+    Vec2 currentPosition = getListStartPossition();
     float totalAbsoluteHeight = 0;
     float totalRelativeHeight = 0;
     for (Layout* child : children) {
-        if (child->size.x->isAbsolute()) {
-            totalAbsoluteHeight += child->size.x->resolve(resolvedSize.value().x);
+        float childSize = getListDirectionMessure(child->size)->resolve(getListDirectionValue(resolvedSize.value()));
+        if (getListDirectionMessure(child->size)->isAbsolute()) {
+            totalAbsoluteHeight += childSize;
         }
         else {
-            totalRelativeHeight += child->size.x->resolve(resolvedSize.value().x);
+            totalRelativeHeight += childSize;
         }
     }
+    
+    float remainingHeight = getListDirectionValue(resolvedSize.value()) - totalAbsoluteHeight;
+
     for (Layout* child : children) {
         Vec2 childSize = child->size.resolve(resolvedSize.value());
-        if (child->size.x->isAbsolute()) {
-            child->resolveTransform(getListParentSize(childSize), currentPosition, true, listDirection);
+        Vec2 childPosition = currentPosition;
+        if (!getListDirectionMessure(child->size)->isAbsolute()) {
+            getListDirectionValue(childSize) = remainingHeight * getListDirectionValue(childSize) / totalRelativeHeight;
         }
-        else {
-            childSize.x = (resolvedSize.value().x - totalAbsoluteHeight) * childSize.x / totalRelativeHeight;
-            child->resolveTransform(getListParentSize(childSize), currentPosition, true, listDirection);
+        if (ListDirection::Up == listDirection || ListDirection::Left == listDirection) {
+            childPosition -= childSize;
         }
-        currentPosition.x += childSize.x;
+        child->resolveTransform(getListParentSize(childSize), childPosition, true, listDirection);
+        adjustCurrentPosition(childSize, currentPosition);
     }
 }
 
@@ -152,6 +157,23 @@ void Layout::resolveTransform() {
     }
 }
 
+IMessure *Layout::getListDirectionMessure(MessureVec2 messure) {
+    if (listDirection == ListDirection::Down || listDirection == ListDirection::Up) {
+        return messure.y;
+    }
+    else {
+        return messure.x;
+    }
+}
+
+float &Layout::getListDirectionValue(Vec2 &value) {
+    if (listDirection == ListDirection::Down || listDirection == ListDirection::Up) {
+        return value.y;
+    }
+    else {
+        return value.x;
+    }
+}
 
 Vec2 Layout::getSize() {
     return resolvedSize.value();

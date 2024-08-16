@@ -131,6 +131,8 @@ private:
     void adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition);
     Vec2 getListStartPossition();
     Vec2 getListParentSize(Vec2 childSize);
+    IMessure* getListDirectionMessure(MessureVec2 messure);
+    float &getListDirectionValue(Vec2 &vec);
 };
 
 
