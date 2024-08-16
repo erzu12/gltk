@@ -99,7 +99,7 @@ class Layout {
     std::optional<Vec2> resolvedSize;
     std::optional<Mat3> resolvedTransform;
 
-    void resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false);
+    void resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
     Layout(Layout *parent,
@@ -130,6 +130,7 @@ private:
 
     void adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition);
     Vec2 getListStartPossition();
+    Vec2 getListParentSize(Vec2 childSize);
 };
 
 

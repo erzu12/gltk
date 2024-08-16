@@ -61,15 +61,24 @@ Vec2 Layout::getListStartPossition() {
     }
 }
 
+Vec2 Layout::getListParentSize(Vec2 childSize) {
+    if (ListDirection::Down == listDirection || ListDirection::Up == listDirection) {
+        return Vec2(resolvedSize.value().x, childSize.y);
+    }
+    else {
+        return Vec2(childSize.x, resolvedSize.value().y);
+    }
+}
+
 void Layout::resolveListTransform() {
     Vec2 currentPosition = getListStartPossition();
     for (Layout* child : children) {
         Vec2 childSize = child->size.resolve(resolvedSize.value());
         if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
-            child->resolveTransform(resolvedSize.value(), currentPosition);
+            child->resolveTransform(getListParentSize(childSize), currentPosition, true);
         }
         else {
-            child->resolveTransform(resolvedSize.value(), currentPosition - childSize);
+            child->resolveTransform(getListParentSize(childSize), currentPosition - childSize, true);
         }
         adjustCurrentPosition(childSize, currentPosition);
     }
@@ -90,19 +99,27 @@ void Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
     for (Layout* child : children) {
         Vec2 childSize = child->size.resolve(resolvedSize.value());
         if (child->size.x->isAbsolute()) {
-            child->resolveTransform(resolvedSize.value(), currentPosition);
+            child->resolveTransform(getListParentSize(childSize), currentPosition, true, listDirection);
         }
         else {
             childSize.x = (resolvedSize.value().x - totalAbsoluteHeight) * childSize.x / totalRelativeHeight;
-            child->resolveTransform(childSize, currentPosition, true);
+            child->resolveTransform(getListParentSize(childSize), currentPosition, true, listDirection);
         }
         currentPosition.x += childSize.x;
     }
 }
 
-void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize) {
+void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
     Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
-    Vec2 size = forceSize ? parentSize : this->size.resolve(parentSize);
+    Vec2 size = this->size.resolve(parentSize);
+    if (forceSize) {
+        if (parentListDirection == ListDirection::Down || parentListDirection == ListDirection::Up) {
+            size.y = parentSize.y;
+        }
+        else {
+            size.x = parentSize.x;
+        }
+    }
     Vec2 pivotOffsetFromCenter = size / 2.0f - pivot * size;
     Vec2 centerPosition = pivotPosition + pivotOffsetFromCenter;
     resolvedTransform = Mat3::translationMatrix(centerPosition) * Mat3::scalingMatrix(size);

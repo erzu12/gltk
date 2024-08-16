@@ -20,20 +20,24 @@ int main () {
 
     auto child1Layout = LayoutBuilder(boxLayout.get())
         .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 0.0f, 0.0f), 100.0))
-        .setPivot(Anchors::TopCenter)
-        .setAnchor(Anchors::TopCenter)
+        .setAnchor(Anchors::Center)
+        .setPivot(Anchors::Center)
         .setOffset(MessureVec2(0.0, 0.0))
-        .setSize(MessureVec2(1.0, .3))
+        .setSize(MessureVec2(0.5, .3))
         .build();
 
     auto child2Layout = LayoutBuilder(boxLayout.get())
         .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 1.0f, 0.0f), 100.0))
+        .setAnchor(Anchors::Center)
+        .setPivot(Anchors::Center)
         .setOffset(MessureVec2(.0, 0.0))
-        .setSize(MessureVec2(1., .4))
+        .setSize(MessureVec2(0.5, .4))
         .build();
 
     auto child3Layout = LayoutBuilder(boxLayout.get())
         .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 1.0f, 0.0f), 50.0))
+        .setAnchor(Anchors::Center)
+        .setPivot(Anchors::Center)
         .setOffset(MessureVec2(.0, 0.0))
         .setSize(MessureVec2(1., 200))
         .build();
