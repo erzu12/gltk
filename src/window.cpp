@@ -73,6 +73,8 @@ Window::Window() {
     glEnable( GL_DEBUG_OUTPUT );
     glDebugMessageCallback(debug_message_callback, 0 );
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 }
 

@@ -251,7 +251,7 @@ Mat3 Mat3::operator*(const Mat3 &b) const {
     return c;
 }
 
-Mat3 Mat3::rotationMat(float angle) {
+Mat3 Mat3::rotationMatrix(float angle) {
     Mat3 rotMat;
     rotMat.mat[0] = cos(angle);
     rotMat.mat[1] = -sin(angle);
@@ -307,17 +307,17 @@ Mat3 Mat3::viewMatrix(Vec2 viewSize) {
     return viewMat;
 }
 
-void Mat3::rotateMat(float angle) {
-    Mat3 rotMat = rotationMat(angle);
+void Mat3::rotateMatrix(float angle) {
+    Mat3 rotMat = rotationMatrix(angle);
     *this = *this * rotMat;
 }
 
-void Mat3::scaleMat(Vec2 scale) {
+void Mat3::scaleMatrix(Vec2 scale) {
     Mat3 scaleMat = scalingMatrix(scale);
     *this = *this * scaleMat;
 }
 
-void Mat3::translateMat(Vec2 translate) {
+void Mat3::translateMatrix(Vec2 translate) {
     Mat3 translateionMat = translationMatrix(translate);
     *this = *this * translateionMat;
 }

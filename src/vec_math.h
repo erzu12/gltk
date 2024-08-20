@@ -91,7 +91,7 @@ public:
 
     Mat3 operator*(const Mat3 &b) const;
 
-    static Mat3 rotationMat(float angle);
+    static Mat3 rotationMatrix(float angle);
 
     static Mat3 scalingMatrix(Vec2 scale);
 
@@ -99,11 +99,11 @@ public:
 
     static Mat3 viewMatrix(Vec2 viewSize);
 
-    void rotateMat(float angle);
+    void rotateMatrix(float angle);
 
-    void scaleMat(Vec2 scale);
+    void scaleMatrix(Vec2 scale);
 
-    void translateMat(Vec2 translate);
+    void translateMatrix(Vec2 translate);
 
     float *data();
 

@@ -20,12 +20,14 @@ foreach(FILE ${TEST_FILES})
     )
     target_link_libraries(
         ${FILE_NAME}
+        ${FREETYPE_LIBRARIES}
         glfw
         glad
         GTest::gtest_main
     )
     target_include_directories(${FILE_NAME} PRIVATE
         ${CMAKE_SOURCE_DIR}/extern/glad/include
+        PUBLIC ${FREETYPE_INCLUDE_DIRS}
     )
     gtest_discover_tests(${FILE_NAME})
 endforeach()

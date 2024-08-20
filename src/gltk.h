@@ -3,3 +3,4 @@
 #include "shader.h"
 #include "box.h"
 #include "layout.h"
+#include "text.h"
