@@ -5,7 +5,8 @@
 namespace gltk {
 
 
-Text::Text(Vec3 color, std::string text) : color(color), text(text) {
+Text::Text(std::string text, int fontSize, std::string font, Vec3 color, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign) : 
+    text(text), fontSize(fontSize), color(color), horizontalAlign(horizontalAlign), verticalAlign(verticalAlign) {
     float vertices[] = {
         0.0f, 0.0f,
         0.0f, 1.0f,
@@ -15,7 +16,7 @@ Text::Text(Vec3 color, std::string text) : color(color), text(text) {
         1.0f, 1.0f
     };
 
-    loadCharacters();
+    loadCharacters(font, fontSize);
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -36,14 +37,14 @@ Text::Text(Vec3 color, std::string text) : color(color), text(text) {
 void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
     shader.use();
     Vec2 renderdSize = getRenderdSize();
-    float x = modelMatrix[0][2] - renderdSize.x / 2;
-    float y = modelMatrix[1][2] - renderdSize.y / 2 + getBearing();
+    Vec2 inPos = Vec2(modelMatrix[0][2], modelMatrix[1][2]);
+    Vec2 startPos = getStartPos(inPos, size);
     shader.UniformVec3("color", color);
     for (char c : text) {
         Character ch = Characters[c];
 
-        float xpos = x + ch.bearing.x;
-        float ypos = y - ch.bearing.y;
+        float xpos = startPos.x + ch.bearing.x;
+        float ypos = startPos.y - ch.bearing.y;
 
         float w = ch.size.x;
         float h = ch.size.y;
@@ -58,22 +59,22 @@ void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        x += (ch.advance >> 6);
+        startPos.x += (ch.advance >> 6);
     }
 }
 
-void Text::loadCharacters() {
+void Text::loadCharacters(std::string font, int fontSize) {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, "/usr/share/fonts/TTF/Arial.TTF", 0, &face)) {
+    if (FT_New_Face(ft, ("/usr/share/fonts/TTF/" + font + ".TTF").c_str(), 0, &face)) {
         std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }
 
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, fontSize);
 
     
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
@@ -138,6 +139,36 @@ float Text::getBearing() {
         bearing = std::max(bearing, ch.bearing.y);
     }
     return bearing;
+}
+
+Vec2 Text::getStartPos(Vec2 inPos, Vec2 boxSize) {
+    Vec2 renderdSize = getRenderdSize();
+    Vec2 startPos = inPos;
+    startPos.y += getBearing();
+    switch (horizontalAlign) {
+        case HorizontalTextAlign::Left:
+            startPos.x -= boxSize.x / 2;
+            break;
+        case HorizontalTextAlign::Center:
+            startPos.x -= renderdSize.x / 2;
+            break;
+        case HorizontalTextAlign::Right:
+            startPos.x -= renderdSize.x - boxSize.x / 2;
+            break;
+    }
+
+    switch (verticalAlign) {
+        case VerticalTextAlign::Top:
+            startPos.y -= boxSize.y / 2;
+            break;
+        case VerticalTextAlign::Center:
+            startPos.y -= renderdSize.y / 2;
+            break;
+        case VerticalTextAlign::Bottom:
+            startPos.y -= renderdSize.y - boxSize.y / 2;
+            break;
+    }
+    return startPos;
 }
 
 Text::~Text() {

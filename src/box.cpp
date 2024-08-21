@@ -27,8 +27,6 @@ Box::Box(Vec3 color, float radius) : color(color), radius(radius) {
 }
 
 void Box::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
-    std::cout << "pos: " << modelMatrix[1][2] << std::endl;
-    std::cout << "size: " << size.y << std::endl;
     shader.use();
     shader.UniformVec3("color", color);
     Mat3 transform = viewMatrix * modelMatrix;
