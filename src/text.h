@@ -25,6 +25,8 @@ class Text : public IRenderable {
     std::map<char, Character> Characters;
 
     void loadCharacters();
+    Vec2 getRenderdSize();
+    float getBearing();
 public:
     Text(Vec3 color, std::string text);
     ~Text();

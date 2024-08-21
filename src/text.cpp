@@ -35,8 +35,9 @@ Text::Text(Vec3 color, std::string text) : color(color), text(text) {
 
 void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
     shader.use();
-    float x = modelMatrix[0][2];
-    float y = modelMatrix[1][2];
+    Vec2 renderdSize = getRenderdSize();
+    float x = modelMatrix[0][2] - renderdSize.x / 2;
+    float y = modelMatrix[1][2] - renderdSize.y / 2 + getBearing();
     shader.UniformVec3("color", color);
     for (char c : text) {
         Character ch = Characters[c];
@@ -117,6 +118,26 @@ void Text::loadCharacters() {
     glBindTexture(GL_TEXTURE_2D, 0);
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
+}
+
+Vec2 Text::getRenderdSize() {
+    float x = 0;
+    float y = 0;
+    for (char c : text) {
+        Character ch = Characters[c];
+        x += (ch.advance >> 6);
+        y = std::max(y, ch.size.y);
+    }
+    return Vec2(x, y);
+}
+
+float Text::getBearing() {
+    float bearing = 0;
+    for (char c : text) {
+        Character ch = Characters[c];
+        bearing = std::max(bearing, ch.bearing.y);
+    }
+    return bearing;
 }
 
 Text::~Text() {
