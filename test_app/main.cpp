@@ -24,14 +24,14 @@ int main () {
 
     auto dot = LayoutBuilder(childLayout.get())
         .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 1.0f, 0.0f), 10.0))
-        .setSize(MessureVec2(.7, .2))
+        .setSize(MessureVec2(.7, .5))
         .setPivot(Anchors::TopLeft)
         .setAnchor(Anchors::TopLeft)
         .build();
 
     auto textLayout = LayoutBuilder(childLayout.get())
-        .setRenderable(std::make_unique<gltk::Text>("Hello World", 48, "Arial", Vec3(), HorizontalTextAlign::Left, VerticalTextAlign::Top))
-        .setSize(MessureVec2(.7, .2))
+        .setRenderable(std::make_unique<gltk::Text>("Hello Test Text And\nWorld Test\nbakasdjl", 48, "Arial", Vec3(), HorizontalTextAlign::Center, VerticalTextAlign::Top))
+        .setSize(MessureVec2(.7, .5))
         .setPivot(Anchors::TopLeft)
         .setAnchor(Anchors::TopLeft)
         .build();

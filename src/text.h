@@ -34,6 +34,8 @@ class Text : public IRenderable {
     HorizontalTextAlign horizontalAlign;
     VerticalTextAlign verticalAlign;
     int fontSize;
+    int verticalBearing = 0;
+    float lineHeight = 1.0f;
 
     const Shader shader = Shader("assets/text.vert", "assets/text.frag");
     unsigned int VAO, VBO;
@@ -41,9 +43,11 @@ class Text : public IRenderable {
     std::map<char, Character> Characters;
 
     void loadCharacters(std::string font, int fontSize);
-    Vec2 getRenderdSize();
-    Vec2 getStartPos(Vec2 inPos, Vec2 boxSize);
-    float getBearing();
+    Vec2 getRenderdSize(std::vector<std::string> lines);
+    int getRenderdLineWidht(std::string line);
+    float getVerticalStartPos(float inPos, float boxSize, std::vector<std::string> lines);
+    float getHorizontalStartPos(float inPos, float boxSize, std::string line);
+    std::vector<std::string> splitTextToLines(std::string text, float boxWidth);
 public:
     Text(std::string text, int fontSize, std::string font = "Arial", Vec3 color = Vec3(), HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left, VerticalTextAlign verticalAlign = VerticalTextAlign::Top);
     ~Text();

@@ -36,30 +36,36 @@ Text::Text(std::string text, int fontSize, std::string font, Vec3 color, Horizon
 
 void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
     shader.use();
-    Vec2 renderdSize = getRenderdSize();
+    auto lines = splitTextToLines(text, size.x);
+    Vec2 renderdSize = getRenderdSize(lines);
     Vec2 inPos = Vec2(modelMatrix[0][2], modelMatrix[1][2]);
-    Vec2 startPos = getStartPos(inPos, size);
+    Vec2 startPos;
+    startPos.y = getVerticalStartPos(inPos.y, size.y, lines);
     shader.UniformVec3("color", color);
-    for (char c : text) {
-        Character ch = Characters[c];
+    for (std::string line : lines) {
+        startPos.x = getHorizontalStartPos(inPos.x, size.x, line);
+        for (char c : line) {
+            Character ch = Characters[c];
 
-        float xpos = startPos.x + ch.bearing.x;
-        float ypos = startPos.y - ch.bearing.y;
+            float xpos = startPos.x + ch.bearing.x;
+            float ypos = startPos.y - ch.bearing.y;
 
-        float w = ch.size.x;
-        float h = ch.size.y;
+            float w = ch.size.x;
+            float h = ch.size.y;
 
-        Mat3 characterModelMat = Mat3::translationMatrix(Vec2(xpos, ypos));
-        characterModelMat.scaleMatrix(Vec2(w, h));
+            Mat3 characterModelMat = Mat3::translationMatrix(Vec2(xpos, ypos));
+            characterModelMat.scaleMatrix(Vec2(w, h));
 
-        Mat3 transform = viewMatrix * characterModelMat;
-        shader.UniformMat3("transform", transform);
-        shader.UniformVec2("pixelSize", size);
-        glBindTexture(GL_TEXTURE_2D, ch.textureID);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+            Mat3 transform = viewMatrix * characterModelMat;
+            shader.UniformMat3("transform", transform);
+            shader.UniformVec2("pixelSize", size);
+            glBindTexture(GL_TEXTURE_2D, ch.textureID);
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        startPos.x += (ch.advance >> 6);
+            startPos.x += (ch.advance >> 6);
+        }
+        startPos.y += fontSize * lineHeight;
     }
 }
 
@@ -78,7 +84,7 @@ void Text::loadCharacters(std::string font, int fontSize) {
 
     
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
-      
+
     for (unsigned char c = 0; c < 128; c++)
     {
         // load character glyph 
@@ -114,6 +120,7 @@ void Text::loadCharacters(std::string font, int fontSize) {
             Vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
             face->glyph->advance.x
         };
+        verticalBearing = std::max(verticalBearing, face->glyph->bitmap_top);
         Characters.insert(std::pair<char, Character>(c, character));
     }
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -121,51 +128,85 @@ void Text::loadCharacters(std::string font, int fontSize) {
     FT_Done_FreeType(ft);
 }
 
-Vec2 Text::getRenderdSize() {
+std::vector<std::string> Text::splitTextToLines(std::string text, float width) {
+    std::string line = "";
+    std::string word = "";
+    std::vector<std::string> lines;
+    for (char c : text) {
+        if (c == ' ' || c == '\n') {
+            if (!line.empty() && getRenderdLineWidht(line + word) > width) {
+                lines.push_back(line);
+                line = word.substr(1);
+                word = " ";
+            } else {
+                line += word;
+                word = " ";
+            }
+        } 
+        if (c == '\n') {
+            lines.push_back(line);
+            line = "";
+            word = "";
+        } 
+        if (c != ' ' && c != '\n') {
+            word += c;
+        }
+    }
+    if (!line.empty() && getRenderdLineWidht(line + word) > width) {
+        lines.push_back(line);
+        lines.push_back(word.substr(1));
+    } else {
+        lines.push_back(line + word);
+    }
+    return lines;
+}
+
+int Text::getRenderdLineWidht(std::string line) {
+    int width = 0;
+    for (char c : line) {
+        Character ch = Characters[c];
+        width += (ch.advance >> 6);
+    }
+    return width;
+}
+
+Vec2 Text::getRenderdSize(std::vector<std::string> lines) {
     float x = 0;
     float y = 0;
-    for (char c : text) {
-        Character ch = Characters[c];
-        x += (ch.advance >> 6);
-        y = std::max(y, ch.size.y);
+    for (std::string line : lines) {
+        x = std::max(x, (float)getRenderdLineWidht(line));
+        y += fontSize * lineHeight;
     }
     return Vec2(x, y);
 }
 
-float Text::getBearing() {
-    float bearing = 0;
-    for (char c : text) {
-        Character ch = Characters[c];
-        bearing = std::max(bearing, ch.bearing.y);
-    }
-    return bearing;
-}
-
-Vec2 Text::getStartPos(Vec2 inPos, Vec2 boxSize) {
-    Vec2 renderdSize = getRenderdSize();
-    Vec2 startPos = inPos;
-    startPos.y += getBearing();
+float Text::getHorizontalStartPos(float inPos, float boxSize, std::string line) {
+    float renderdLineWidht = getRenderdLineWidht(line);
     switch (horizontalAlign) {
         case HorizontalTextAlign::Left:
-            startPos.x -= boxSize.x / 2;
-            break;
+            return inPos - boxSize / 2;
         case HorizontalTextAlign::Center:
-            startPos.x -= renderdSize.x / 2;
-            break;
+            return inPos - renderdLineWidht / 2;
         case HorizontalTextAlign::Right:
-            startPos.x -= renderdSize.x - boxSize.x / 2;
-            break;
+            return inPos + boxSize / 2 - renderdLineWidht;
     }
+    return 0;
+}
+
+float Text::getVerticalStartPos(float inPos, float boxSize, std::vector<std::string> lines) {
+    Vec2 renderdSize = getRenderdSize(lines);
+    float startPos = inPos;
+    startPos += verticalBearing;
 
     switch (verticalAlign) {
         case VerticalTextAlign::Top:
-            startPos.y -= boxSize.y / 2;
+            startPos -= boxSize / 2;
             break;
         case VerticalTextAlign::Center:
-            startPos.y -= renderdSize.y / 2;
+            startPos -= renderdSize.y / 2;
             break;
         case VerticalTextAlign::Bottom:
-            startPos.y -= renderdSize.y - boxSize.y / 2;
+            startPos -= renderdSize.y - boxSize / 2;
             break;
     }
     return startPos;
