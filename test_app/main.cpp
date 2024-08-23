@@ -10,32 +10,24 @@ int main () {
     });
 
     auto boxLayout = LayoutBuilder(window.get_layout())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 1.0f, 1.0f), 10.0))
+        //.setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 1.0f, 1.0f), 10.0))
         .setOffset(MessureVec2(10, 10))
         .setSize(MessureVec2(.5, .5))
         .build();
 
-
-    auto childLayout = LayoutBuilder(boxLayout.get())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 0.0f, 0.0f), 10.0))
-        .setOffset(MessureVec2(.5, .5))
-        .setSize(MessureVec2(.5, .5))
+    auto button = LayoutBuilder(boxLayout.get())
+        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 0.0f, 0.6f), 10.0))
+        .setSize(MessureVec2(300, 100))
+        .setPivot(Anchors::Center)
+        .setAnchor(Anchors::Center)
         .build();
 
-    auto dot = LayoutBuilder(childLayout.get())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 1.0f, 0.0f), 10.0))
-        .setSize(MessureVec2(.7, .5))
-        .setPivot(Anchors::TopLeft)
-        .setAnchor(Anchors::TopLeft)
+    auto textLayout = LayoutBuilder(button.get())
+        .setRenderable(std::make_unique<gltk::Text>("Click me", 48, "Arial", Vec3(1.0, 1.0, 1.0), HorizontalTextAlign::Center, VerticalTextAlign::Top))
+        .setSize(MessureVec2(300, 100))
+        .setPivot(Anchors::Center)
+        .setAnchor(Anchors::Center)
         .build();
-
-    auto textLayout = LayoutBuilder(childLayout.get())
-        .setRenderable(std::make_unique<gltk::Text>("Hello Test Text And\nWorld Test\nbakasdjl", 48, "Arial", Vec3(), HorizontalTextAlign::Center, VerticalTextAlign::Top))
-        .setSize(MessureVec2(.7, .5))
-        .setPivot(Anchors::TopLeft)
-        .setAnchor(Anchors::TopLeft)
-        .build();
-
 
     window.run([&](Vec2 viewport) {
     });

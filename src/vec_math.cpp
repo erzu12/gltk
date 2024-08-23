@@ -93,6 +93,10 @@ Vec2 Vec2::Lerp(Vec2 b, float t) const {
     return c;
 }
 
+bool Vec2::operator==(const Vec2 &b) const {
+    return this->x == b.x && this->y == b.y;
+}
+
 std::ostream &operator<<(std::ostream &os, const Vec2 &f2) {
     os << "{" << f2.x << ", " << f2.y << "}";
     return os;
@@ -224,6 +228,11 @@ Vec3 Vec3::min(const Vec3 &b)
 Vec3 Vec3::lerp(const Vec3 &b, float t) const
 {
     return *this * (1 - t) + b * t;
+}
+
+bool Vec3::operator==(const Vec3 &b) const
+{
+    return this->x == b.x && this->y == b.y && this->z == b.z;
 }
 
 std::ostream &operator<<(std::ostream &os, const Vec3 &f3)

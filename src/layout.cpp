@@ -4,6 +4,11 @@
 
 namespace gltk {
 
+void Bounds::add(const Bounds &other) {
+    max = Vec2(std::max(max.x, other.max.x), std::max(max.y, other.max.y));
+    min = Vec2(std::min(min.x, other.min.x), std::min(min.y, other.min.y));
+}
+
 Layout::Layout(MessureVec2 size) : size(size), offset(0, 0) {}
 
 Layout::Layout(
@@ -14,6 +19,8 @@ Layout::Layout(
         MessureVec2 size,
         ChildPlacement childPlacement,
         ListDirection listDirection,
+        Sizing horizontalSizing,
+        Sizing verticalSizing,
         std::unique_ptr<IRenderable> renderable,
         Overflow overflow
 ) : 
@@ -23,6 +30,8 @@ Layout::Layout(
     size(size),
     childPlacement(childPlacement),
     listDirection(listDirection),
+    horizontalSizing(horizontalSizing),
+    verticalSizing(verticalSizing),
     overflow(overflow)
 {
     if (parent) {
@@ -114,7 +123,7 @@ void Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
     }
 }
 
-void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
+void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
     Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
     Vec2 size = this->size.resolve(parentSize);
     if (forceSize) {
@@ -130,9 +139,27 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
     resolvedTransform = Mat3::translationMatrix(centerPosition) * Mat3::scalingMatrix(size);
     resolvedPosition = pivotPosition - size * pivot;
     resolvedSize = size;
+}
+
+void Layout::recalculateTransformFromBounds(Bounds bounds) {
+    if (Sizing::Fit == horizontalSizing) {
+        resolvedSize.value().x = bounds.max.x - bounds.min.x;
+        resolvedPosition.value().x = bounds.min.x;
+    }
+    if (Sizing::Fit == verticalSizing) {
+        resolvedSize.value().y = bounds.max.y - bounds.min.y;
+        resolvedPosition.value().y = bounds.min.y;
+    }
+    resolvedTransform = Mat3::translationMatrix(resolvedPosition.value() + resolvedSize.value() / 2.0f) * Mat3::scalingMatrix(resolvedSize.value());
+}
+
+Bounds Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
+    calculateTransform(parentSize, parentPosition, forceSize, parentListDirection);
+    Bounds childBounds;
     if (childPlacement == ChildPlacement::Free) {
         for (Layout* child : children) {
-            child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
+            Bounds retBound = child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
+            childBounds.add(retBound);
         }
     }
     else if (childPlacement == ChildPlacement::ListStretch) {
@@ -141,6 +168,14 @@ void Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSi
     else if (childPlacement == ChildPlacement::List) {
         resolveListTransform();
     }
+
+    if (Sizing::Fit == horizontalSizing) {
+        resolvedSize->x = childBounds.max.x - childBounds.min.x;
+    }
+
+    recalculateTransformFromBounds(childBounds);
+
+    return Bounds(resolvedPosition.value(), resolvedSize.value(), pivot);
 }
 
 void Layout::resolveTransform() {
@@ -260,7 +295,7 @@ LayoutBuilder& LayoutBuilder::setOverflow(Overflow overflow) {
 }
 
 std::unique_ptr<Layout> LayoutBuilder::build() {
-    return std::make_unique<Layout>(parent, anchor, offset, pivot, size, childPlacement, listDirection, std::move(renderable), overflow);
+    return std::make_unique<Layout>(parent, anchor, offset, pivot, size, childPlacement, listDirection, horizontalSizing, verticalSizing, std::move(renderable), overflow);
 }
 
 }  // namespace gltk

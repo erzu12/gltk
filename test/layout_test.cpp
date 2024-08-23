@@ -3,6 +3,34 @@
 
 namespace gltk {
 
+TEST(BoundsTest, boundsFromPositionSizePivot) {
+    Bounds bounds(Vec2(0, 0), Vec2(100, 100), Vec2(0.5, 0.5));
+    ASSERT_EQ(bounds.min, Vec2(-50, -50));
+    ASSERT_EQ(bounds.max, Vec2(50, 50));
+}
+
+TEST(BoundsTest, boundsFromPositionSizePivotTopLeft) {
+    Bounds bounds(Vec2(0, 0), Vec2(100, 100), Vec2(0, 0));
+    ASSERT_EQ(bounds.min, Vec2(0, 0));
+    ASSERT_EQ(bounds.max, Vec2(100, 100));
+}
+
+TEST(BoundsTest, boundsFromPositionSizePivotBottomRight) {
+    Bounds bounds(Vec2(0, 0), Vec2(100, 100), Vec2(1, 1));
+    ASSERT_EQ(bounds.min, Vec2(-100, -100));
+    ASSERT_EQ(bounds.max, Vec2(0, 0));
+}
+
+TEST(BoundsTest, boundsAdd) {
+    Bounds bounds1(Vec2(-50, -50), Vec2(100, 100));
+    Bounds bounds2(Vec2(0, 0), Vec2(150, 150));
+
+    bounds1.add(bounds2);
+
+    ASSERT_EQ(bounds1.min, Vec2(-50, -50));
+    ASSERT_EQ(bounds1.max, Vec2(150, 150));
+}
+
 
 TEST(LayoutTest, layoutTopLeftSquareAbsolute) {
     Layout rootLayout(MessureVec2(200, 200));
@@ -397,6 +425,62 @@ TEST(LayoutTest, layoutListUp) {
     // Child 2 should be 1/2 of the space
     ASSERT_FLOAT_EQ(transform2[1][1], 50.0f);
     ASSERT_FLOAT_EQ(transform2[1][2], 25.0f);
+}
+
+TEST(LayoutTest, layoutSizingFit) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fit);
+    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+    std::cout << child.getTransform() << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 50.0f);
+}
+
+TEST(LayoutTest, layoutSizingFitWidth) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fixed);
+    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+    std::cout << child.getTransform() << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 100.0f);
+}
+
+TEST(LayoutTest, layoutSizingFitHeight) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fixed, Sizing::Fit);
+    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+    std::cout << child.getTransform() << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 100.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 50.0f);
+}
+
+TEST(LayoutTest, layoutSizingFitMultipleChildren) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fit);
+    Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(100, 100), Anchors::TopLeft, MessureVec2(50, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 150.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 150.0f);
 }
 
 }  // namespace gltk

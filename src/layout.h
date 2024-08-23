@@ -27,6 +27,17 @@ namespace Anchors {
     const Vec2 BottomRight = Vec2(1, 1);
 }
 
+class Bounds {
+public:
+    Vec2 min;
+    Vec2 max;
+
+    Bounds() : min(Vec2(0, 0)), max(Vec2(0, 0)) {}
+    Bounds(Vec2 min, Vec2 max) : min(min), max(max) {}
+    Bounds(Vec2 position, Vec2 size, Vec2 pivot) : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
+    void add(const Bounds &other);
+};
+
 class IMessure {
 public:
     virtual int resolve(int parrentSize) = 0;
@@ -81,6 +92,19 @@ enum class Overflow {
     Scroll,
 };
 
+/*
+* Fixed: The size of the element is set by the size property.
+* Expand: The size of the element is expanded to include all of its children, if the children are larger than the element itself.
+* Shrink: The size of the element is shrunk to fit its children, if the children are smaller than the element itself.
+* Fit: The size of the element is adjusted to fit its children, ignoring the size of the element itself.
+*/
+enum class Sizing {
+    Fixed,
+    Expand,
+    Shrink,
+    Fit,
+};
+
 class Layout {
     std::optional<std::unique_ptr<IRenderable>> renderable;
     std::vector<Layout*> children;
@@ -93,13 +117,15 @@ class Layout {
 
     ChildPlacement childPlacement;
     ListDirection listDirection;
+    Sizing verticalSizing;
+    Sizing horizontalSizing;
     Overflow overflow;
 
     std::optional<Vec2> resolvedPosition;
     std::optional<Vec2> resolvedSize;
     std::optional<Mat3> resolvedTransform;
 
-    void resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
+    Bounds resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
     Layout(Layout *parent,
@@ -109,6 +135,8 @@ public:
            MessureVec2 size,
            ChildPlacement childPlacement = ChildPlacement::Free,
            ListDirection listDirection = ListDirection::Down,
+           Sizing horizontalSizing = Sizing::Fixed,
+           Sizing verticalSizing = Sizing::Fixed,
            std::unique_ptr<IRenderable> renderable = nullptr,
            Overflow overflow = Overflow::None
     );
@@ -125,6 +153,9 @@ public:
     Vec2 getSize();
 
 private:
+    void recalculateTransformFromBounds(Bounds bounds);
+    void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
+
     void resolveListTransform();
     void resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition);
 
@@ -147,6 +178,7 @@ public:
     LayoutBuilder& setPivot(Vec2 pivot);
     LayoutBuilder& setChildPlacement(ChildPlacement childPlacement);
     LayoutBuilder& setListDirection(ListDirection listDirection);
+    LayoutBuilder& setSizing(Sizing horizontalSizing, Sizing verticalSizing);
     LayoutBuilder& setOverflow(Overflow overflow);
     std::unique_ptr<Layout> build();
 
@@ -159,6 +191,8 @@ private:
     MessureVec2 size = MessureVec2(0, 0);
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
+    Sizing horizontalSizing = Sizing::Fixed;
+    Sizing verticalSizing = Sizing::Fixed;
     Overflow overflow = Overflow::None;
 };
 

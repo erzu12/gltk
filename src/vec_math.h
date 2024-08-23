@@ -40,6 +40,8 @@ public:
 
     Vec2 Lerp(Vec2 b, float t) const;
 
+    bool operator==(const Vec2 &b) const;
+
     friend std::ostream &operator<<(std::ostream &os, const Vec2 &f2);
 };
 
@@ -78,6 +80,8 @@ public:
     Vec3 min(const Vec3 &b);
 
     Vec3 lerp(const Vec3 &b, float t) const;
+
+    bool operator==(const Vec3 &b) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Vec3 &f3);
 };
