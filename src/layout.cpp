@@ -149,13 +149,21 @@ void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool force
 }
 
 void Layout::recalculateTransformFromBounds(Bounds bounds) {
-    if (Sizing::Fit == horizontalSizing) {
-        resolvedSize.value().x = bounds.max.x - bounds.min.x;
-        resolvedPosition.value().x = bounds.min.x;
+    if (Sizing::Fit == horizontalSizing || Sizing::Expand == horizontalSizing) {
+        resolvedSize.value().x = std::max(bounds.max.x - bounds.min.x, resolvedSize.value().x);
+        resolvedPosition.value().x = std::min(bounds.min.x, resolvedPosition.value().x);
     }
-    if (Sizing::Fit == verticalSizing) {
-        resolvedSize.value().y = bounds.max.y - bounds.min.y;
-        resolvedPosition.value().y = bounds.min.y;
+    if (Sizing::Fit == verticalSizing || Sizing::Expand == verticalSizing) {
+        resolvedSize.value().y = std::max(bounds.max.y - bounds.min.y, resolvedSize.value().y);
+        resolvedPosition.value().y = std::min(bounds.min.y, resolvedPosition.value().y);
+    }
+    if (Sizing::Fit == horizontalSizing || Sizing::Shrink == horizontalSizing) {
+        resolvedSize.value().x = std::min(bounds.max.x - bounds.min.x, resolvedSize.value().x);
+        resolvedPosition.value().x = std::max(bounds.min.x, resolvedPosition.value().x);
+    }
+    if (Sizing::Fit == verticalSizing || Sizing::Shrink == verticalSizing) {
+        resolvedSize.value().y = std::min(bounds.max.y - bounds.min.y, resolvedSize.value().y);
+        resolvedPosition.value().y = std::max(bounds.min.y, resolvedPosition.value().y);
     }
     resolvedTransform = Mat3::translationMatrix(resolvedPosition.value() + resolvedSize.value() / 2.0f) * Mat3::scalingMatrix(resolvedSize.value());
 }

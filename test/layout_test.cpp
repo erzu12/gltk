@@ -511,4 +511,60 @@ TEST(LayoutTest, layoutSizingFitChildListStretch) {
     ASSERT_FLOAT_EQ(transform[1][1], 50.0f);
 }
 
+TEST(LayoutTest, layoutSizingExpandSmalerThanParent) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Expand, Sizing::Expand);
+    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+    std::cout << child.getTransform() << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 100.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 100.0f);
+}
+
+TEST(LayoutTest, layoutSizingExpandLargerThanParent) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50), ChildPlacement::Free, ListDirection::Right, Sizing::Expand, Sizing::Expand);
+    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+    std::cout << child.getTransform() << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 100.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 100.0f);
+}
+
+TEST(LayoutTest, layoutSizingShrinkLargerThanParent) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50), ChildPlacement::Free, ListDirection::Right, Sizing::Shrink, Sizing::Shrink);
+    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+    std::cout << child.getTransform() << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 50.0f);
+}
+
+TEST(LayoutTest, layoutSizingShrinkSmalerThanParent) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Shrink, Sizing::Shrink);
+    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+    std::cout << child.getTransform() << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 50.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 50.0f);
+}
+
 }  // namespace gltk
