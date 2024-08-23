@@ -1,4 +1,4 @@
-[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://opensource.org/licenses/)
 [![CMake](https://github.com/erzu12/gltk/actions/workflows/build.yml/badge.svg)](https://github.com/erzu12/gltk/actions/workflows/build.yml)
 
 # Gltk
