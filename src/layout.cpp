@@ -79,21 +79,25 @@ Vec2 Layout::getListParentSize(Vec2 childSize) {
     }
 }
 
-void Layout::resolveListTransform() {
+Bounds Layout::resolveListTransform() {
     Vec2 currentPosition = getListStartPossition();
+    Bounds childBounds;
     for (Layout* child : children) {
         Vec2 childSize = child->size.resolve(resolvedSize.value());
         if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
-            child->resolveTransform(getListParentSize(childSize), currentPosition, true);
+            Bounds bounds = child->resolveTransform(getListParentSize(childSize), currentPosition, true);
+            childBounds.add(bounds);
         }
         else {
-            child->resolveTransform(getListParentSize(childSize), currentPosition - childSize, true);
+            Bounds bounds = child->resolveTransform(getListParentSize(childSize), currentPosition - childSize, true);
+            childBounds.add(bounds);
         }
         adjustCurrentPosition(childSize, currentPosition);
     }
+    return childBounds;
 }
 
-void Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
+Bounds Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
     Vec2 currentPosition = getListStartPossition();
     float totalAbsoluteHeight = 0;
     float totalRelativeHeight = 0;
@@ -109,6 +113,7 @@ void Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
     
     float remainingHeight = getListDirectionValue(resolvedSize.value()) - totalAbsoluteHeight;
 
+    Bounds childBounds;
     for (Layout* child : children) {
         Vec2 childSize = child->size.resolve(resolvedSize.value());
         Vec2 childPosition = currentPosition;
@@ -118,9 +123,11 @@ void Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
         if (ListDirection::Up == listDirection || ListDirection::Left == listDirection) {
             childPosition -= childSize;
         }
-        child->resolveTransform(getListParentSize(childSize), childPosition, true, listDirection);
+        Bounds bounds = child->resolveTransform(getListParentSize(childSize), childPosition, true, listDirection);
+        childBounds.add(bounds);
         adjustCurrentPosition(childSize, currentPosition);
     }
+    return childBounds;
 }
 
 void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
@@ -163,10 +170,10 @@ Bounds Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool force
         }
     }
     else if (childPlacement == ChildPlacement::ListStretch) {
-        resolveListStretchTransform(parentSize, parentPosition);
+        childBounds = resolveListStretchTransform(parentSize, parentPosition);
     }
     else if (childPlacement == ChildPlacement::List) {
-        resolveListTransform();
+        childBounds = resolveListTransform();
     }
 
     if (Sizing::Fit == horizontalSizing) {

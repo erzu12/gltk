@@ -97,6 +97,8 @@ enum class Overflow {
 * Expand: The size of the element is expanded to include all of its children, if the children are larger than the element itself.
 * Shrink: The size of the element is shrunk to fit its children, if the children are smaller than the element itself.
 * Fit: The size of the element is adjusted to fit its children, ignoring the size of the element itself.
+*
+* Note: Children with relative sizes will use the original size of the element, not the adjusted size.
 */
 enum class Sizing {
     Fixed,
@@ -156,8 +158,8 @@ private:
     void recalculateTransformFromBounds(Bounds bounds);
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
 
-    void resolveListTransform();
-    void resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition);
+    Bounds resolveListTransform();
+    Bounds resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition);
 
     void adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition);
     Vec2 getListStartPossition();

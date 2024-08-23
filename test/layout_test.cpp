@@ -483,4 +483,32 @@ TEST(LayoutTest, layoutSizingFitMultipleChildren) {
     ASSERT_FLOAT_EQ(transform[1][1], 150.0f);
 }
 
+TEST(LayoutTest, layoutSizingFitChildList) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::List, ListDirection::Down, Sizing::Fit, Sizing::Fit);
+    Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, .25));
+    Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, .25));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 60.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 50.0f);
+}
+
+TEST(LayoutTest, layoutSizingFitChildListStretch) {
+    Layout rootLayout(MessureVec2(200, 200));
+    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::ListStretch, ListDirection::Down, Sizing::Fit, Sizing::Fit);
+    Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, 25));
+    Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, 25));
+    rootLayout.resolveTransform();
+    Mat3 transform = parentLayout.getTransform();
+
+    std::cout << transform << std::endl;
+
+    ASSERT_FLOAT_EQ(transform[0][0], 60.0f);
+    ASSERT_FLOAT_EQ(transform[1][1], 50.0f);
+}
+
 }  // namespace gltk
