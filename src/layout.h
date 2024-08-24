@@ -2,6 +2,7 @@
 
 #include "vec_math.h"
 #include "render.h"
+#include <functional>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -97,26 +98,6 @@ enum class Sizing {
 };
 
 class Layout {
-    std::optional<std::unique_ptr<IRenderable>> renderable;
-    std::vector<Layout*> children;
-    std::optional<Layout*> parent;
-
-    Vec2 anchor = Anchors::TopLeft;
-    MessureVec2 offset;
-    Vec2 pivot = Anchors::TopLeft;
-    MessureVec2 size;
-
-    ChildPlacement childPlacement;
-    ListDirection listDirection;
-    Sizing verticalSizing;
-    Sizing horizontalSizing;
-    Overflow overflow;
-
-    std::optional<Vec2> resolvedPosition;
-    std::optional<Vec2> resolvedSize;
-    std::optional<Mat3> resolvedTransform;
-
-    Bounds resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
 public:
     Layout(MessureVec2 viewportSize); // root layout defined by the window
     Layout(Layout *parent,
@@ -138,12 +119,37 @@ public:
 
     void resolveTransform();
 
+    void clickEventRecursive(Vec2 clickPosition);
     void registerForRenderRecursive(Renderer &renderer);
+
+    void addOnClickCallback(std::function<void()> callback);
 
     Mat3 getTransform();
     Vec2 getSize();
 
 private:
+    std::optional<std::unique_ptr<IRenderable>> renderable;
+    std::vector<Layout*> children;
+    std::optional<Layout*> parent;
+
+    Vec2 anchor = Anchors::TopLeft;
+    MessureVec2 offset;
+    Vec2 pivot = Anchors::TopLeft;
+    MessureVec2 size;
+
+    ChildPlacement childPlacement;
+    ListDirection listDirection;
+    Sizing verticalSizing;
+    Sizing horizontalSizing;
+    Overflow overflow;
+
+    std::optional<Vec2> resolvedPosition;
+    std::optional<Vec2> resolvedSize;
+    std::optional<Mat3> resolvedTransform;
+
+    Bounds bounds;
+
+    Bounds resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
     void recalculateTransformFromBounds(Bounds bounds);
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
 
@@ -157,6 +163,8 @@ private:
     Vec2 getListParentSize(Vec2 childSize);
     IMessure* getListDirectionMessure(MessureVec2 messure);
     float &getListDirectionValue(Vec2 &vec);
+
+    std::vector<std::function<void()>> onClickCallbacks;
 };
 
 

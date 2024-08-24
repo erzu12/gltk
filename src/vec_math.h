@@ -128,4 +128,5 @@ class Bounds {
         Bounds(Vec2 min, Vec2 max) : min(min), max(max) {}
         Bounds(Vec2 position, Vec2 size, Vec2 pivot) : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
         void add(const Bounds &other);
+        bool contains(Vec2 point);
 };

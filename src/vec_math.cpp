@@ -362,3 +362,7 @@ void Bounds::add(const Bounds &other) {
     max = Vec2(std::max(max.x, other.max.x), std::max(max.y, other.max.y));
     min = Vec2(std::min(min.x, other.min.x), std::min(min.y, other.min.y));
 }
+
+bool Bounds::contains(Vec2 point) {
+    return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y;
+}

@@ -32,6 +32,17 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
     }
 }
 
+void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (action == GLFW_PRESS) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        float xscale, yscale;
+        glfwGetWindowContentScale(window, &xscale, &yscale);
+        Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+        w->rootLayout.clickEventRecursive(Vec2(xpos * xscale, ypos * yscale));
+    }
+}
+
 Window::Window() {
     // glfw: initialize and configure
     // ------------------------------
@@ -57,6 +68,7 @@ Window::Window() {
     glfwSetFramebufferSizeCallback(window.get(), framebuffer_size_callback);
     glfwSetWindowUserPointer(window.get(), this);
     glfwSetKeyCallback(window.get(), key_callback);
+    glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
 
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (glfwRawMouseMotionSupported()) {

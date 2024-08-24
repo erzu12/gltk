@@ -29,6 +29,10 @@ int main () {
         .setSizing(Sizing::Fit, Sizing::Fit)
         .build();
 
+    button->addOnClickCallback([]() {
+        std::cout << "Button clicked" << std::endl;
+    });
+
     window.run([&](Vec2 viewport) {
     });
     return 0;
