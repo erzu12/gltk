@@ -53,6 +53,7 @@ public:
     ~Text();
 
     void render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) override;
+    Vec2 getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) override;
 };
 
 }

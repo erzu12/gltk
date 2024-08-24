@@ -4,6 +4,10 @@
 
 namespace gltk {
 
+Vec2 Box::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
+    return Vec2();
+}
+
 Box::Box(Vec3 color, float radius) : color(color), radius(radius) {
     float vertices[] = {
         -0.5f, -0.5f,

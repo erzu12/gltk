@@ -15,6 +15,7 @@ public:
     Box(Vec3 color, float radius = 0.0f);
     ~Box();
 
+    Vec2 getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) override;
     void render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) override;
 };
 

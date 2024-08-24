@@ -32,11 +32,14 @@ public:
 
     Vec2 operator/(const float b) const;
 
-    float Dot(Vec2 b) const;
+    float Dot(const Vec2 b) const;
 
-    float Angle(Vec2 b) const;
+    float Angle(const Vec2 b) const;
 
     Vec2 Rot(float rot) const;
+
+    Vec2 max(const Vec2 b);
+    Vec2 min(const Vec2 b);
 
     Vec2 Lerp(Vec2 b, float t) const;
 
@@ -114,4 +117,15 @@ public:
     std::array<float, 3> operator[](int index) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Mat3 &m);
+};
+
+class Bounds {
+    public:
+        Vec2 min;
+        Vec2 max;
+
+        Bounds() : min(Vec2(float(INFINITY), float(INFINITY))), max(Vec2(float(-INFINITY), float(-INFINITY))) {}
+        Bounds(Vec2 min, Vec2 max) : min(min), max(max) {}
+        Bounds(Vec2 position, Vec2 size, Vec2 pivot) : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
+        void add(const Bounds &other);
 };

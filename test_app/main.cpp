@@ -23,10 +23,10 @@ int main () {
         .build();
 
     auto textLayout = LayoutBuilder(button.get())
-        .setRenderable(std::make_unique<gltk::Text>("Click me", 48, "Arial", Vec3(1.0, 1.0, 1.0), HorizontalTextAlign::Center, VerticalTextAlign::Top))
-        .setSize(MessureVec2(300, 100))
+        .setRenderable(std::make_unique<gltk::Text>("Click me", 48, "Arial", Vec3(1.0, 1.0, 1.0), HorizontalTextAlign::Left, VerticalTextAlign::Top))
         .setPivot(Anchors::Center)
         .setAnchor(Anchors::Center)
+        .setSizing(Sizing::Fit, Sizing::Fit)
         .build();
 
     window.run([&](Vec2 viewport) {

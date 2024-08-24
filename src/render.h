@@ -7,6 +7,7 @@ namespace gltk {
 
 class IRenderable {
 public:
+    virtual Vec2 getSize(Vec2 LayoutBounds, bool fixedX, bool fixedY) = 0;
     virtual void render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) = 0;
 };
 

@@ -4,10 +4,6 @@
 
 namespace gltk {
 
-void Bounds::add(const Bounds &other) {
-    max = Vec2(std::max(max.x, other.max.x), std::max(max.y, other.max.y));
-    min = Vec2(std::min(min.x, other.min.x), std::min(min.y, other.min.y));
-}
 
 Layout::Layout(MessureVec2 size) : size(size), offset(0, 0) {}
 
@@ -165,6 +161,9 @@ void Layout::recalculateTransformFromBounds(Bounds bounds) {
         resolvedSize.value().y = std::min(bounds.max.y - bounds.min.y, resolvedSize.value().y);
         resolvedPosition.value().y = std::max(bounds.min.y, resolvedPosition.value().y);
     }
+    if (resolvedSize.value().x < 0.001f || resolvedSize.value().y < 0.001f) {
+        std::cout << "WARNING: Layout was shrunk to 0 size. Layouts with Sizing Fit or Shrink should have at least one child with a fixed size" << std::endl;
+    }
     resolvedTransform = Mat3::translationMatrix(resolvedPosition.value() + resolvedSize.value() / 2.0f) * Mat3::scalingMatrix(resolvedSize.value());
 }
 
@@ -188,9 +187,29 @@ Bounds Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool force
         resolvedSize->x = childBounds.max.x - childBounds.min.x;
     }
 
-    recalculateTransformFromBounds(childBounds);
+    Bounds renderBounds = getRenderableBounds(parentSize, parentPosition);
+
+    if (renderBounds.max.x - renderBounds.min.x > 0.001f) {
+        childBounds.add(renderBounds);
+    }
+
+    if (childBounds.max.x - childBounds.min.x > 0.001f) {
+        recalculateTransformFromBounds(childBounds);
+    }
+
 
     return Bounds(resolvedPosition.value(), resolvedSize.value(), pivot);
+}
+
+Bounds Layout::getRenderableBounds(Vec2 parentSize, Vec2 parentPosition) {
+    bool fixedX = Sizing::Fixed == horizontalSizing || Sizing::Shrink == horizontalSizing;
+    bool fixedY = Sizing::Fixed == verticalSizing || Sizing::Shrink == verticalSizing;
+    Vec2 renderSize = renderable.has_value() ? renderable.value()->getSize(resolvedSize.value(), fixedX, fixedY) : Vec2(0, 0);
+    Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
+    Vec2 pivotOffsetFromCenter = renderSize / 2.0f - pivot * renderSize;
+    Vec2 centerPosition = pivotPosition + pivotOffsetFromCenter;
+    Vec2 topLeft = pivotPosition - renderSize * pivot;
+    return Bounds(topLeft, topLeft + renderSize);
 }
 
 void Layout::resolveTransform() {
@@ -301,6 +320,12 @@ LayoutBuilder& LayoutBuilder::setChildPlacement(ChildPlacement childPlacement) {
 
 LayoutBuilder& LayoutBuilder::setListDirection(ListDirection listDirection) {
     this->listDirection = listDirection;
+    return *this;
+}
+
+LayoutBuilder& LayoutBuilder::setSizing(Sizing horizontalSizing, Sizing verticalSizing) {
+    this->horizontalSizing = horizontalSizing;
+    this->verticalSizing = verticalSizing;
     return *this;
 }
 

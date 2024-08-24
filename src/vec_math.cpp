@@ -71,11 +71,11 @@ Vec2 Vec2::operator/ (const float b) const {
     return c;
 }
 
-float Vec2::Dot(Vec2 b) const {
+float Vec2::Dot(const Vec2 b) const {
     return this->x * b.x + this->y * b.y;
 }
 
-float Vec2::Angle(Vec2 b) const {
+float Vec2::Angle(const Vec2 b) const {
     return  atan2(this->x * b.y - this->y * b.x, this->x * b.x + this->y * b.y);
 }
 
@@ -84,6 +84,18 @@ Vec2 Vec2::Rot(float rot) const {
     b.x = this->x * cos(rot) - this->y * sin(rot);
     b.y = this->x * sin(rot) + this->y * cos(rot);
     return b;
+}
+
+Vec2 Vec2::max(const Vec2 b) {
+    this->x = this->x > b.x ? this->x : b.x;
+    this->y = this->y > b.y ? this->y : b.y;
+    return *this;
+}
+
+Vec2 Vec2::min(const Vec2 b) {
+    this->x = this->x < b.x ? this->x : b.x;
+    this->y = this->y < b.y ? this->y : b.y;
+    return *this;
 }
 
 Vec2 Vec2::Lerp(Vec2 b, float t) const {
@@ -344,4 +356,9 @@ std::ostream &operator<<(std::ostream &os, const Mat3 &m3) {
     os << "{" << m3.mat[3] << ", " << m3.mat[4] << ", " << m3.mat[5] << "}" << std::endl;
     os << "{" << m3.mat[6] << ", " << m3.mat[7] << ", " << m3.mat[8] << "}" << std::endl;
     return os;
+}
+
+void Bounds::add(const Bounds &other) {
+    max = Vec2(std::max(max.x, other.max.x), std::max(max.y, other.max.y));
+    min = Vec2(std::min(min.x, other.min.x), std::min(min.y, other.min.y));
 }

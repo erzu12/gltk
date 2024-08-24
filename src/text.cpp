@@ -69,6 +69,14 @@ void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
     }
 }
 
+Vec2 Text::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
+    if (!fixedX) {
+        return Vec2(getRenderdLineWidht(text), fontSize * lineHeight);
+    }
+    auto lines = splitTextToLines(text, LayoutSize.x);
+    return getRenderdSize(lines);
+}
+
 void Text::loadCharacters(std::string font, int fontSize) {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
@@ -211,6 +219,7 @@ float Text::getVerticalStartPos(float inPos, float boxSize, std::vector<std::str
     }
     return startPos;
 }
+
 
 Text::~Text() {
     glDeleteVertexArrays(1, &VAO);
