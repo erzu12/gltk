@@ -147,16 +147,16 @@ private:
     std::optional<Vec2> resolvedSize;
     std::optional<Mat3> resolvedTransform;
 
-    Bounds bounds;
+    BoundingBox bounds;
 
-    Bounds resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
-    void recalculateTransformFromBounds(Bounds bounds);
+    BoundingBox resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
+    void recalculateTransformFromBounds(BoundingBox bounds);
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
 
-    Bounds resolveListTransform();
-    Bounds resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition);
+    BoundingBox resolveListTransform();
+    BoundingBox resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition);
 
-    Bounds getRenderableBounds(Vec2 parentSize, Vec2 parentPosition);
+    BoundingBox getRenderableBounds(Vec2 parentSize, Vec2 parentPosition);
 
     void adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition);
     Vec2 getListStartPossition();
@@ -185,6 +185,9 @@ public:
 
 private:
     Layout *parent;
+    
+    bool pivotSet = false;
+
     std::unique_ptr<IRenderable> renderable = nullptr;
     Vec2 anchor = Anchors::TopLeft;
     MessureVec2 offset = MessureVec2(0, 0);

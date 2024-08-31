@@ -358,11 +358,16 @@ std::ostream &operator<<(std::ostream &os, const Mat3 &m3) {
     return os;
 }
 
-void Bounds::add(const Bounds &other) {
+void BoundingBox::add(const BoundingBox &other) {
     max = Vec2(std::max(max.x, other.max.x), std::max(max.y, other.max.y));
     min = Vec2(std::min(min.x, other.min.x), std::min(min.y, other.min.y));
 }
 
-bool Bounds::contains(Vec2 point) {
+bool BoundingBox::contains(Vec2 point) {
     return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y;
+}
+
+std::ostream &operator<<(std::ostream &os, const BoundingBox &bb) {
+    os << "{" << bb.min << ", " << bb.max << "}";
+    return os;
 }

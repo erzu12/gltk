@@ -119,14 +119,18 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Mat3 &m);
 };
 
-class Bounds {
-    public:
-        Vec2 min;
-        Vec2 max;
+class BoundingBox {
+public:
+    Vec2 min;
+    Vec2 max;
 
-        Bounds() : min(Vec2(float(INFINITY), float(INFINITY))), max(Vec2(float(-INFINITY), float(-INFINITY))) {}
-        Bounds(Vec2 min, Vec2 max) : min(min), max(max) {}
-        Bounds(Vec2 position, Vec2 size, Vec2 pivot) : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
-        void add(const Bounds &other);
-        bool contains(Vec2 point);
+    BoundingBox() : min(Vec2(float(INFINITY), float(INFINITY))), max(Vec2(float(-INFINITY), float(-INFINITY))) {}
+    BoundingBox(Vec2 min, Vec2 max) : min(min), max(max) {}
+    BoundingBox(Vec2 position, Vec2 size, Vec2 pivot) : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
+    void add(const BoundingBox &other);
+    bool contains(Vec2 point);
+    float width() { return std::max(max.x - min.x, 0.0f); }
+    float height() { return std::max(max.y - min.y, 0.0f); }
+
+    friend std::ostream &operator<<(std::ostream &os, const BoundingBox &bb);
 };

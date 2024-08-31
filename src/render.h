@@ -8,12 +8,13 @@ namespace gltk {
 class IRenderable {
 public:
     virtual Vec2 getSize(Vec2 LayoutBounds, bool fixedX, bool fixedY) = 0;
-    virtual void render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) = 0;
+    virtual void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) = 0;
 };
 
 struct RenderData {
     Mat3 modelMatrix;
     Vec2 size;
+    BoundingBox clipRegion;
 };
 
 class Renderer {
@@ -24,9 +25,9 @@ public:
 
     bool willRender() { return !renderQueueKeys.empty(); }
 
-    bool render(Mat3 viewMatrix);
+    bool render(Vec2 viewSize);
 
-    void queue(IRenderable* renderable, Mat3 modelMatrix, Vec2 size);
+    void queue(IRenderable* renderable, Mat3 modelMatrix, Vec2 size, BoundingBox clipRegion);
 };
 
 }  // namespace gltk

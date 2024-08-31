@@ -10,12 +10,12 @@ namespace gltk {
 Renderer::Renderer() {
 }
 
-bool Renderer::render(Mat3 viewMatrix) {
+bool Renderer::render(Vec2 viewSize) {
     if (renderQueueKeys.empty()) {
         return false;
     }
     for (int i = 0; i < renderQueueKeys.size(); i++) {
-        renderQueueKeys[i]->render(viewMatrix, renderQueueValues[i].modelMatrix, renderQueueValues[i].size);
+        renderQueueKeys[i]->render(viewSize, renderQueueValues[i].modelMatrix, renderQueueValues[i].size, renderQueueValues[i].clipRegion);
     }
     renderQueueKeys.clear();
     renderQueueValues.clear();
@@ -23,16 +23,17 @@ bool Renderer::render(Mat3 viewMatrix) {
     return true;
 }
 
-void Renderer::queue(IRenderable* renderable, Mat3 modelMatrix, Vec2 size) {
+void Renderer::queue(IRenderable* renderable, Mat3 modelMatrix, Vec2 size, BoundingBox clipRegion) {
     for (int i = 0; i < renderQueueKeys.size(); i++) {
         if (renderQueueKeys[i] == renderable) {
             renderQueueValues[i].modelMatrix = modelMatrix;
             renderQueueValues[i].size = size;
+            renderQueueValues[i].clipRegion = clipRegion;
             return;
         }
     }
     renderQueueKeys.push_back(renderable);
-    renderQueueValues.push_back({modelMatrix, size});
+    renderQueueValues.push_back({modelMatrix, size, clipRegion});
 }
 
 }  // namespace gltk

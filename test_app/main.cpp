@@ -10,28 +10,31 @@ int main () {
     });
 
     auto boxLayout = LayoutBuilder(window.get_layout())
-        //.setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 1.0f, 1.0f), 10.0))
-        .setOffset(MessureVec2(10, 10))
+        .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 1.0f, 1.0f), 10.0))
+        .setOffset(MessureVec2(200, 200))
         .setSize(MessureVec2(.5, .5))
+        .setChildPlacement(ChildPlacement::List)
+        .setOverflow(Overflow::Clip)
         .build();
 
-    auto button = LayoutBuilder(boxLayout.get())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 0.0f, 0.6f), 10.0))
-        .setSize(MessureVec2(300, 100))
-        .setPivot(Anchors::Center)
-        .setAnchor(Anchors::Center)
+    auto child1 = LayoutBuilder(boxLayout.get())
+        .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 0.0f, 0.0f), 10.0))
+        .setSize(MessureVec2(.8, .7))
+        .setAnchor(Anchors::TopCenter)
         .build();
 
-    auto textLayout = LayoutBuilder(button.get())
-        .setRenderable(std::make_unique<gltk::Text>("Click me", 48, "Arial", Vec3(1.0, 1.0, 1.0), HorizontalTextAlign::Left, VerticalTextAlign::Top))
-        .setPivot(Anchors::Center)
-        .setAnchor(Anchors::Center)
-        .setSizing(Sizing::Fit, Sizing::Fit)
+    auto child2 = LayoutBuilder(boxLayout.get())
+        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 1.0f, 0.0f), 10.0))
+        .setAnchor(Anchors::TopCenter)
+        .setSize(MessureVec2(.8, .7))
         .build();
 
-    button->addOnClickCallback([]() {
-        std::cout << "Button clicked" << std::endl;
-    });
+    auto child3 = LayoutBuilder(boxLayout.get())
+        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 0.0f, 1.0f), 10.0))
+        .setAnchor(Anchors::TopCenter)
+        .setSize(MessureVec2(.8, .7))
+        .build();
+
 
     window.run([&](Vec2 viewport) {
     });

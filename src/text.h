@@ -52,7 +52,7 @@ public:
     Text(std::string text, int fontSize, std::string font = "Arial", Vec3 color = Vec3(), HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left, VerticalTextAlign verticalAlign = VerticalTextAlign::Top);
     ~Text();
 
-    void render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) override;
+    void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) override;
     Vec2 getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) override;
 };
 

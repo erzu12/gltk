@@ -34,7 +34,8 @@ Text::Text(std::string text, int fontSize, std::string font, Vec3 color, Horizon
 }
 
 
-void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
+void Text::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
+    Mat3 viewMatrix = Mat3::viewMatrix(viewSize);
     shader.use();
     auto lines = splitTextToLines(text, size.x);
     Vec2 renderdSize = getRenderdSize(lines);
@@ -42,6 +43,8 @@ void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
     Vec2 startPos;
     startPos.y = getVerticalStartPos(inPos.y, size.y, lines);
     shader.UniformVec3("color", color);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(clipRegion.min.x, clipRegion.min.y, clipRegion.width(), clipRegion.height());
     for (std::string line : lines) {
         startPos.x = getHorizontalStartPos(inPos.x, size.x, line);
         for (char c : line) {
@@ -67,6 +70,7 @@ void Text::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
         }
         startPos.y += fontSize * lineHeight;
     }
+    glDisable(GL_SCISSOR_TEST);
 }
 
 Vec2 Text::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {

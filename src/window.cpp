@@ -104,7 +104,7 @@ void Window::run(std::function<void(Vec2)> render_callback) {
         }
 
         Vec2 size = rootLayout.getSize();
-        bool redraw = renderer.render(Mat3::viewMatrix(size));
+        bool redraw = renderer.render(size);
         render_callback(Vec2(width, height));
 
         if (redraw) {

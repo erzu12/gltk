@@ -30,7 +30,8 @@ Box::Box(Vec3 color, float radius) : color(color), radius(radius) {
     glEnableVertexAttribArray(0);
 }
 
-void Box::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
+void Box::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
+    Mat3 viewMatrix = Mat3::viewMatrix(viewSize);
     shader.use();
     shader.UniformVec3("color", color);
     Mat3 transform = viewMatrix * modelMatrix;
@@ -38,8 +39,11 @@ void Box::render(const Mat3 &viewMatrix, Mat3 &modelMatrix, Vec2 size) {
     float clipedRadius = std::min(radius, std::min(size.x, size.y) / 2.0f);
     shader.UniformFloat("radius", clipedRadius);
     shader.UniformVec2("pixelSize", size);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDisable(GL_SCISSOR_TEST);
 }
 
 Box::~Box() {
