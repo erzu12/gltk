@@ -143,6 +143,8 @@ private:
     Sizing horizontalSizing;
     Overflow overflow;
 
+    Vec2 scrolePosition = Vec2(0, 0);
+
     std::optional<Vec2> resolvedPosition;
     std::optional<Vec2> resolvedSize;
     std::optional<Mat3> resolvedTransform;
@@ -163,6 +165,9 @@ private:
     Vec2 getListParentSize(Vec2 childSize);
     IMessure* getListDirectionMessure(MessureVec2 messure);
     float &getListDirectionValue(Vec2 &vec);
+    Sizing getListDirectionSizing(Sizing horizontalSizing, Sizing verticalSizing);
+    Vec2 getChildMinSize(Layout *child);
+    Vec2 getChildMaxSize(Layout *child);
 
     std::vector<std::function<void()>> onClickCallbacks;
 };

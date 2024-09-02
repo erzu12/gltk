@@ -12,6 +12,7 @@ public:
     float y;
 
     Vec2() : x(0), y(0) {}
+    Vec2(float xy) : x(xy), y(xy) {}
     Vec2(float x, float y) : x(x), y(y) {}
 
     void asArray(float *dest);
@@ -129,8 +130,10 @@ public:
     BoundingBox(Vec2 position, Vec2 size, Vec2 pivot) : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
     void add(const BoundingBox &other);
     bool contains(Vec2 point);
+    bool isZero() { return max.x - min.x < 0.00001f && max.y - min.y < 0.00001f; }
     float width() { return std::max(max.x - min.x, 0.0f); }
     float height() { return std::max(max.y - min.y, 0.0f); }
+    Vec2 size() { return Vec2(width(), height()); }
 
     friend std::ostream &operator<<(std::ostream &os, const BoundingBox &bb);
 };
