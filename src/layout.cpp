@@ -39,40 +39,72 @@ Layout::Layout(
     }
 }
 
-void Layout::adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition) {
-    switch (listDirection) {
-        case ListDirection::Down:
-            currentPosition.y += childSize.y;
-            break;
-        case ListDirection::Right:
-            currentPosition.x += childSize.x;
-            break;
-        case ListDirection::Left:
-            currentPosition.x -= childSize.x;
-            break;
-        case ListDirection::Up:
-            currentPosition.y -= childSize.y;
-            break;
+void Layout::registerForRenderRecursive(Renderer &renderer) {
+    if (resolvedTransform.has_value()) {
+        if (renderable.has_value()) {
+            BoundingBox clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000.0f, 1000000.0f));
+            if (parent.has_value() && parent.value()->overflow == Overflow::Clip || parent.value()->overflow == Overflow::Scroll) {
+                clipRegion = parent.value()->bounds;
+            }
+            renderer.queue(renderable.value().get(), resolvedTransform.value(), resolvedSize.value(), clipRegion);
+        }
+        for (Layout* child : children) {
+            child->registerForRenderRecursive(renderer);
+        }
+    }
+    else {
+        throw layout_exception("Cannot render layout without resolved transform");
     }
 }
 
-Vec2 Layout::getListStartPossition() {
-    if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
-        return resolvedPosition.value();
+void Layout::resolveTransform() {
+    if (size.x->isAbsolute() && size.y->isAbsolute()) {
+        resolvedSize = size.resolve(Vec2(0, 0));
+        resolvedTransform = Mat3::scalingMatrix(resolvedSize.value());
+        bounds = BoundingBox(Vec2(0, 0), resolvedSize.value());
     }
     else {
-        Vec2 currentPosition = resolvedPosition.value() + resolvedSize.value();
-        return currentPosition;
+        throw layout_exception("Cannot resolve size");
+    }
+    Vec2 currentPosition = resolvedPosition.value_or(Vec2(0, 0));
+    for (Layout* child : children) {
+        child->resolveTransform(*resolvedSize, currentPosition);
     }
 }
 
-Vec2 Layout::getListParentSize(Vec2 childSize) {
-    if (ListDirection::Down == listDirection || ListDirection::Up == listDirection) {
-        return Vec2(resolvedSize.value().x, childSize.y);
+BoundingBox Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
+    calculateTransform(parentSize, parentPosition, forceSize, parentListDirection);
+    BoundingBox childBounds;
+    if (childPlacement == ChildPlacement::Free) {
+        for (Layout* child : children) {
+            BoundingBox retBound = child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
+            childBounds.add(retBound);
+        }
     }
-    else {
-        return Vec2(childSize.x, resolvedSize.value().y);
+    else if (childPlacement == ChildPlacement::ListStretch) {
+        childBounds = resolveListStretchTransform();
     }
+    else if (childPlacement == ChildPlacement::List) {
+        childBounds = resolveListTransform();
+    }
+
+    if (Sizing::Fit == horizontalSizing) {
+        resolvedSize->x = childBounds.max.x - childBounds.min.x;
+    }
+
+    BoundingBox renderBounds = getRenderableBounds(parentSize, parentPosition);
+
+    if (!renderBounds.isZero()) {
+        childBounds.add(renderBounds);
+    }
+
+    if (!childBounds.isZero()) {
+        recalculateTransformFromBounds(childBounds);
+    }
+
+
+    bounds = BoundingBox(resolvedPosition.value(), resolvedPosition.value() + resolvedSize.value());
+    return bounds;
 }
 
 BoundingBox Layout::resolveListTransform() {
@@ -150,39 +182,41 @@ void Layout::recalculateTransformFromBounds(BoundingBox bounds) {
     resolvedTransform = Mat3::translationMatrix(resolvedPosition.value() + resolvedSize.value() / 2.0f) * Mat3::scalingMatrix(resolvedSize.value());
 }
 
-BoundingBox Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
-    calculateTransform(parentSize, parentPosition, forceSize, parentListDirection);
-    BoundingBox childBounds;
-    if (childPlacement == ChildPlacement::Free) {
-        for (Layout* child : children) {
-            BoundingBox retBound = child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
-            childBounds.add(retBound);
-        }
-    }
-    else if (childPlacement == ChildPlacement::ListStretch) {
-        childBounds = resolveListStretchTransform();
-    }
-    else if (childPlacement == ChildPlacement::List) {
-        childBounds = resolveListTransform();
-    }
 
-    if (Sizing::Fit == horizontalSizing) {
-        resolvedSize->x = childBounds.max.x - childBounds.min.x;
+void Layout::adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition) {
+    switch (listDirection) {
+        case ListDirection::Down:
+            currentPosition.y += childSize.y;
+            break;
+        case ListDirection::Right:
+            currentPosition.x += childSize.x;
+            break;
+        case ListDirection::Left:
+            currentPosition.x -= childSize.x;
+            break;
+        case ListDirection::Up:
+            currentPosition.y -= childSize.y;
+            break;
     }
+}
 
-    BoundingBox renderBounds = getRenderableBounds(parentSize, parentPosition);
-
-    if (!renderBounds.isZero()) {
-        childBounds.add(renderBounds);
+Vec2 Layout::getListStartPossition() {
+    if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
+        return resolvedPosition.value();
     }
-
-    if (!childBounds.isZero()) {
-        recalculateTransformFromBounds(childBounds);
+    else {
+        Vec2 currentPosition = resolvedPosition.value() + resolvedSize.value();
+        return currentPosition;
     }
+}
 
-
-    bounds = BoundingBox(resolvedPosition.value(), resolvedPosition.value() + resolvedSize.value());
-    return bounds;
+Vec2 Layout::getListParentSize(Vec2 childSize) {
+    if (ListDirection::Down == listDirection || ListDirection::Up == listDirection) {
+        return Vec2(resolvedSize.value().x, childSize.y);
+    }
+    else {
+        return Vec2(childSize.x, resolvedSize.value().y);
+    }
 }
 
 BoundingBox Layout::getRenderableBounds(Vec2 parentSize, Vec2 parentPosition) {
@@ -196,18 +230,14 @@ BoundingBox Layout::getRenderableBounds(Vec2 parentSize, Vec2 parentPosition) {
     return BoundingBox(topLeft, topLeft + renderSize);
 }
 
-void Layout::resolveTransform() {
-    if (size.x->isAbsolute() && size.y->isAbsolute()) {
-        resolvedSize = size.resolve(Vec2(0, 0));
-        resolvedTransform = Mat3::scalingMatrix(resolvedSize.value());
-        bounds = BoundingBox(Vec2(0, 0), resolvedSize.value());
-    }
-    else {
-        throw layout_exception("Cannot resolve size");
-    }
-    Vec2 currentPosition = resolvedPosition.value_or(Vec2(0, 0));
-    for (Layout* child : children) {
-        child->resolveTransform(*resolvedSize, currentPosition);
+void Layout::clickEventRecursive(Vec2 clickPosition) {
+    if (bounds.contains(clickPosition)) {
+        for (Layout* child : children) {
+            child->clickEventRecursive(clickPosition);
+        }
+        for (std::function<void()> callback : onClickCallbacks) {
+            callback();
+        }
     }
 }
 
@@ -229,35 +259,6 @@ void Layout::addChild(Layout *child) {
 
 void Layout::addOnClickCallback(std::function<void()> callback) {
     onClickCallbacks.push_back(callback);
-}
-
-void Layout::clickEventRecursive(Vec2 clickPosition) {
-    if (bounds.contains(clickPosition)) {
-        for (Layout* child : children) {
-            child->clickEventRecursive(clickPosition);
-        }
-        for (std::function<void()> callback : onClickCallbacks) {
-            callback();
-        }
-    }
-}
-
-void Layout::registerForRenderRecursive(Renderer &renderer) {
-    if (resolvedTransform.has_value()) {
-        if (renderable.has_value()) {
-            BoundingBox clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000.0f, 1000000.0f));
-            if (parent.has_value() && parent.value()->overflow == Overflow::Clip || parent.value()->overflow == Overflow::Scroll) {
-                clipRegion = parent.value()->bounds;
-            }
-            renderer.queue(renderable.value().get(), resolvedTransform.value(), resolvedSize.value(), clipRegion);
-        }
-        for (Layout* child : children) {
-            child->registerForRenderRecursive(renderer);
-        }
-    }
-    else {
-        throw layout_exception("Cannot render layout without resolved transform");
-    }
 }
 
 }  // namespace gltk
