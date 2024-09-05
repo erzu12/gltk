@@ -59,13 +59,17 @@ public:
     void addChild(Layout *child);
 
     void setSize(MessureVec2 size);
+    void scroll(Vec2 delta);
 
     void resolveTransform();
 
-    void clickEventRecursive(Vec2 clickPosition);
     void registerForRenderRecursive(Renderer &renderer);
 
     void addOnClickCallback(std::function<void()> callback);
+    void clickEventRecursive(Vec2 clickPosition);
+
+    void addOnScroleCallback(std::function<void(Vec2)> callback);
+    bool scrollEventRecursive(Vec2 mousePosition, Vec2 scroleDelta);
 
     Mat3 getTransform();
     Vec2 getSize();
@@ -97,6 +101,8 @@ private:
     BoundingBox resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
     void recalculateTransformFromBounds(BoundingBox bounds);
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
+    void moveChildren(Vec2 delta);
+    void boundScrolePosition(BoundingBox childBounds);
 
     BoundingBox resolveListTransform();
     BoundingBox resolveListStretchTransform();
@@ -108,6 +114,7 @@ private:
     Vec2 getListParentSize(Vec2 childSize);
 
     std::vector<std::function<void()>> onClickCallbacks;
+    std::vector<std::function<void(Vec2)>> onScrollCallbacks;
 };
 
 }

@@ -43,6 +43,15 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
     }
 }
 
+void Window::scrole_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    w->rootLayout.scrollEventRecursive(Vec2(xpos * xscale, ypos * yscale), Vec2(xoffset, yoffset));
+}
+
 Window::Window() {
     // glfw: initialize and configure
     // ------------------------------
@@ -69,6 +78,7 @@ Window::Window() {
     glfwSetWindowUserPointer(window.get(), this);
     glfwSetKeyCallback(window.get(), key_callback);
     glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
+    glfwSetScrollCallback(window.get(), scrole_callback);
 
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (glfwRawMouseMotionSupported()) {

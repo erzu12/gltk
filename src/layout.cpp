@@ -104,6 +104,10 @@ BoundingBox Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool 
 
 
     bounds = BoundingBox(resolvedPosition.value(), resolvedPosition.value() + resolvedSize.value());
+    if (overflow == Overflow::Scroll && scrolePosition != Vec2(0, 0)) {
+        boundScrolePosition(childBounds);
+        moveChildren(scrolePosition);
+    }
     return bounds;
 }
 
@@ -157,6 +161,36 @@ void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool force
     resolvedTransform = Mat3::translationMatrix(centerPosition) * Mat3::scalingMatrix(size);
     resolvedPosition = pivotPosition - size * pivot;
     resolvedSize = size;
+}
+
+void Layout::moveChildren(Vec2 delta) {
+    for (Layout* child : children) {
+        child->resolvedPosition = child->resolvedPosition.value() + delta;
+        Vec2 center = child->resolvedPosition.value() + child->resolvedSize.value() / 2.0f;
+        child->resolvedTransform = Mat3::translationMatrix(center) * Mat3::scalingMatrix(child->resolvedSize.value());
+        child->moveChildren(delta);
+    }
+}
+
+void Layout::boundScrolePosition(BoundingBox childBounds) {
+    if (bounds.min.x < childBounds.min.x + scrolePosition.x) {
+        scrolePosition.x = bounds.min.x - childBounds.min.x;
+    }
+    if (bounds.min.y < childBounds.min.y + scrolePosition.y) {
+        scrolePosition.y = bounds.min.y - childBounds.min.y;
+    }
+    if (bounds.max.x > childBounds.max.x + scrolePosition.x) {
+        scrolePosition.x = bounds.max.x - childBounds.max.x;
+    }
+    if (bounds.max.y > childBounds.max.y + scrolePosition.y) {
+        scrolePosition.y = bounds.max.y - childBounds.max.y;
+    }
+    if (bounds.width() > childBounds.width()) {
+        scrolePosition.x = 0;
+    }
+    if (bounds.height() > childBounds.height()) {
+        scrolePosition.y = 0;
+    }
 }
 
 void Layout::recalculateTransformFromBounds(BoundingBox bounds) {
@@ -230,6 +264,10 @@ BoundingBox Layout::getRenderableBounds(Vec2 parentSize, Vec2 parentPosition) {
     return BoundingBox(topLeft, topLeft + renderSize);
 }
 
+void Layout::addOnClickCallback(std::function<void()> callback) {
+    onClickCallbacks.push_back(callback);
+}
+
 void Layout::clickEventRecursive(Vec2 clickPosition) {
     if (bounds.contains(clickPosition)) {
         for (Layout* child : children) {
@@ -241,8 +279,33 @@ void Layout::clickEventRecursive(Vec2 clickPosition) {
     }
 }
 
+void Layout::addOnScroleCallback(std::function<void(Vec2)> callback) {
+    onScrollCallbacks.push_back(callback);
+}
+
+bool Layout::scrollEventRecursive(Vec2 mousePosition, Vec2 scroleDelta) {
+    if (!bounds.contains(mousePosition)) {
+        return false;
+    }
+    bool handledByChild = false;
+    for (Layout* child : children) {
+        handledByChild |= child->scrollEventRecursive(mousePosition, scroleDelta);
+    }
+    if (!handledByChild) {
+        for (std::function<void(Vec2)> callback : onScrollCallbacks) {
+            callback(scroleDelta);
+            handledByChild = true;
+        }
+    }
+    return handledByChild;
+}
+
 Vec2 Layout::getSize() {
     return resolvedSize.value();
+}
+
+void Layout::scroll(Vec2 delta) {
+    scrolePosition += delta;
 }
 
 Mat3 Layout::getTransform() {
@@ -257,8 +320,5 @@ void Layout::addChild(Layout *child) {
     children.push_back(child);
 }
 
-void Layout::addOnClickCallback(std::function<void()> callback) {
-    onClickCallbacks.push_back(callback);
-}
 
 }  // namespace gltk
