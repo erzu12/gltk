@@ -93,81 +93,20 @@ BoundingBox Layout::resolveListTransform() {
     return childBounds;
 }
 
-BoundingBox Layout::resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition) {
-    Vec2 currentPosition = getListStartPossition();
-    float totalAbsoluteHeight = 0;
-    float totalRelativeHeight = 0;
-    std::vector<Vec2> minChildSizes(children.size());
-    std::vector<bool> childIsAbsolute(children.size());
-    std::vector<Vec2> childSizes(children.size());
-
-    for (int i = 0; i < children.size(); i++) {
-        auto child = children[i];
-        Vec2 childSize = child->size.resolve(resolvedSize.value());
-        Sizing childSizing = getListDirectionSizing(child->horizontalSizing, child->verticalSizing);
-        if (Sizing::Shrink == childSizing) {
-            throw layout_exception("Cannot have a child with Sizing Shrink in a ListStretch layout");
-        }
-        minChildSizes[i] = getChildMinSize(child);
-        childIsAbsolute[i] = getListDirectionMessure(child->size)->isAbsolute();
-        if (Sizing::Fit == childSizing) {
-            childSize = minChildSizes[i];
-            childIsAbsolute[i] = true;
-        }
-        if (childIsAbsolute[i]) {
-            totalAbsoluteHeight += getListDirectionValue(childSize);
-            childSizes[i] = childSize;
-        }
-        else {
-            totalRelativeHeight += getListDirectionValue(childSize);
-        }
+BoundingBox Layout::resolveListStretchTransform() {
+    ListStrechResolver resolver(listDirection, resolvedSize.value(), resolvedPosition.value());
+    std::vector<ChildData> childrenData;
+    for (Layout* child : children) {
+        ChildData data;
+        data.size = &child->size;
+        data.horizontalSizing = child->horizontalSizing;
+        data.verticalSizing = child->verticalSizing;
+        data.resolveTransform = [child](Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
+            return child->resolveTransform(parentSize, parentPosition, forceSize, parentListDirection);
+        };
+        childrenData.push_back(data);
     }
-    
-    float remainingHeight = getListDirectionValue(resolvedSize.value()) - totalAbsoluteHeight;
-
-    int childIndex = 0;
-    while (childIndex < children.size()) {
-        if (childIsAbsolute[childIndex]) {
-            childIndex++;
-            continue;
-        }
-        auto child = children[childIndex];
-        Vec2 childSize = child->size.resolve(resolvedSize.value());
-        Vec2 originalChildSize = childSize;
-        getListDirectionValue(childSize) = remainingHeight * getListDirectionValue(childSize) / totalRelativeHeight;
-        if (getListDirectionValue(childSize) < getListDirectionValue(minChildSizes[childIndex])) {
-            getListDirectionValue(childSize) = getListDirectionValue(minChildSizes[childIndex]);
-            totalRelativeHeight -= getListDirectionValue(originalChildSize);
-            totalAbsoluteHeight += getListDirectionValue(childSize);
-            remainingHeight = getListDirectionValue(resolvedSize.value()) - totalAbsoluteHeight;
-            childIsAbsolute[childIndex] = true;
-            childSizes[childIndex] = childSize;
-            childIndex = 0;
-        }
-        else {
-            childSizes[childIndex] = childSize;
-            childIndex++;
-        }
-    }
-
-    BoundingBox childBounds;
-    for (int i = 0; i < children.size(); i++) {
-        auto child = children[i];
-        Vec2 childPosition = currentPosition;
-        Vec2 childSize = childSizes[i];
-        if (ListDirection::Up == listDirection) {
-            childPosition.x -= resolvedSize.value().x;
-            childPosition.y -= childSize.y;
-        }
-        if (ListDirection::Left == listDirection) {
-            childPosition.y -= resolvedSize.value().y;
-            childPosition.x -= childSize.x;
-        }
-        BoundingBox retBound = child->resolveTransform(getListParentSize(childSize), childPosition, true, listDirection);
-        childBounds.add(retBound);
-        adjustCurrentPosition(childSize, currentPosition);
-    }
-    return childBounds;
+    return resolver.resolve(childrenData, resolvedSize.value());
 }
 
 void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
@@ -221,7 +160,7 @@ BoundingBox Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool 
         }
     }
     else if (childPlacement == ChildPlacement::ListStretch) {
-        childBounds = resolveListStretchTransform(parentSize, parentPosition);
+        childBounds = resolveListStretchTransform();
     }
     else if (childPlacement == ChildPlacement::List) {
         childBounds = resolveListTransform();
@@ -270,47 +209,6 @@ void Layout::resolveTransform() {
     for (Layout* child : children) {
         child->resolveTransform(*resolvedSize, currentPosition);
     }
-}
-
-IMessure *Layout::getListDirectionMessure(MessureVec2 messure) {
-    if (listDirection == ListDirection::Down || listDirection == ListDirection::Up) {
-        return messure.y;
-    }
-    else {
-        return messure.x;
-    }
-}
-
-float &Layout::getListDirectionValue(Vec2 &value) {
-    if (listDirection == ListDirection::Down || listDirection == ListDirection::Up) {
-        return value.y;
-    }
-    else {
-        return value.x;
-    }
-}
-
-Sizing Layout::getListDirectionSizing(Sizing horizontalSizing, Sizing verticalSizing) {
-    if (listDirection == ListDirection::Down || listDirection == ListDirection::Up) {
-        return verticalSizing;
-    }
-    else {
-        return horizontalSizing;
-    }
-}
-
-Vec2 Layout::getChildMinSize(Layout *child) {
-    if (getListDirectionSizing(child->horizontalSizing, child->verticalSizing) == Sizing::Fixed || 
-            getListDirectionSizing(child->horizontalSizing, child->verticalSizing) == Sizing::Shrink) {
-        return Vec2(0, 0);
-    }
-    BoundingBox childBounds;
-    childBounds = child->resolveTransform(getListParentSize(Vec2()), Vec2(0, 0), true);
-    Vec2 resolvedChildSize = childBounds.size();
-    if (getListDirectionValue(resolvedChildSize) < 0.001f) {
-        std::cout << "WARNING: child layout with Sizing: Expand or Fit of ListStretch layout has no size. Make sure at least one child has an absolute size. This can cause overlap of children" << std::endl;
-    }
-    return childBounds.size();
 }
 
 Vec2 Layout::getSize() {

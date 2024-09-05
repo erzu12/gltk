@@ -3,6 +3,7 @@
 #include "vec_math.h"
 #include "render.h"
 #include "messure.h"
+#include "list_resolvers.h"
 #include <functional>
 #include <memory>
 #include <optional>
@@ -11,11 +12,6 @@
 namespace gltk {
 
 class Layout;
-
-class layout_exception : public std::runtime_error {
-public:
-    layout_exception(const std::string &msg) : std::runtime_error(msg) {}
-};
 
 namespace Anchors {
     const Vec2 TopLeft = Vec2(0, 0);
@@ -36,12 +32,6 @@ enum class ChildPlacement {
     ListStretch,
 };
 
-enum class ListDirection {
-    Down,
-    Right,
-    Left,
-    Up,
-};
 
 enum class Overflow {
     None,
@@ -109,18 +99,13 @@ private:
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
 
     BoundingBox resolveListTransform();
-    BoundingBox resolveListStretchTransform(Vec2 parentSize, Vec2 parentPosition);
+    BoundingBox resolveListStretchTransform();
 
     BoundingBox getRenderableBounds(Vec2 parentSize, Vec2 parentPosition);
 
     void adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition);
     Vec2 getListStartPossition();
     Vec2 getListParentSize(Vec2 childSize);
-    IMessure* getListDirectionMessure(MessureVec2 messure);
-    float &getListDirectionValue(Vec2 &vec);
-    Sizing getListDirectionSizing(Sizing horizontalSizing, Sizing verticalSizing);
-    Vec2 getChildMinSize(Layout *child);
-    Vec2 getChildMaxSize(Layout *child);
 
     std::vector<std::function<void()>> onClickCallbacks;
 };
