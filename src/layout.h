@@ -63,7 +63,7 @@ public:
 
     void resolveTransform();
 
-    void registerForRenderRecursive(Renderer &renderer);
+    void registerForRenderRecursive();
 
     void addOnClickCallback(std::function<void()> callback);
     void clickEventRecursive(Vec2 clickPosition);
@@ -86,10 +86,10 @@ private:
     Vec2 pivot = Anchors::TopLeft;
     MessureVec2 size;
 
-    ChildPlacement childPlacement;
-    ListDirection listDirection;
-    Sizing verticalSizing;
-    Sizing horizontalSizing;
+    ChildPlacement childPlacement = ChildPlacement::Free;
+    ListDirection listDirection = ListDirection::Down;
+    Sizing verticalSizing = Sizing::Fixed;
+    Sizing horizontalSizing = Sizing::Fixed;
     Overflow overflow;
 
     Vec2 scrolePosition = Vec2(0, 0);
@@ -101,6 +101,7 @@ private:
     BoundingBox bounds;
 
     BoundingBox resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize = false, ListDirection parentListDirection = ListDirection::Down);
+    BoundingBox resolveChildTransforms(Vec2 parentSize, Vec2 parentPosition, ListDirection parentListDirection);
     void recalculateTransformFromBounds(BoundingBox bounds);
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
     void moveChildren(Vec2 delta);

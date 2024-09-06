@@ -14,7 +14,7 @@ void Window::framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int he
     window->height = height;
     window->rootLayout.setSize(MessureVec2(width, height));
     window->rootLayout.resolveTransform();
-    window->rootLayout.registerForRenderRecursive(window->renderer);
+    window->rootLayout.registerForRenderRecursive();
 }
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

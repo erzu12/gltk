@@ -39,8 +39,6 @@ int main () {
 
     boxLayout->addOnScroleCallback([&](Vec2 scrole) {
         boxLayout->scroll(scrole * Vec2(30.0));
-        window.get_layout()->resolveTransform();
-        boxLayout->registerForRenderRecursive(window.get_renderer());
     });
 
 

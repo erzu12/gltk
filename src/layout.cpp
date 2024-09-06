@@ -40,17 +40,17 @@ Layout::Layout(
     }
 }
 
-void Layout::registerForRenderRecursive(Renderer &renderer) {
+void Layout::registerForRenderRecursive() {
     if (resolvedTransform.has_value()) {
         if (renderable.has_value()) {
             BoundingBox clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000.0f, 1000000.0f));
             if (parent.has_value() && parent.value()->overflow == Overflow::Clip || parent.value()->overflow == Overflow::Scroll) {
                 clipRegion = parent.value()->bounds;
             }
-            renderer.queue(renderable.value().get(), resolvedTransform.value(), resolvedSize.value(), clipRegion);
+            renderer->queue(renderable.value().get(), resolvedTransform.value(), resolvedSize.value(), clipRegion);
         }
         for (Layout* child : children) {
-            child->registerForRenderRecursive(renderer);
+            child->registerForRenderRecursive();
         }
     }
     else {
@@ -59,22 +59,31 @@ void Layout::registerForRenderRecursive(Renderer &renderer) {
 }
 
 void Layout::resolveTransform() {
-    if (size.x->isAbsolute() && size.y->isAbsolute()) {
-        resolvedSize = size.resolve(Vec2(0, 0));
-        resolvedTransform = Mat3::scalingMatrix(resolvedSize.value());
-        bounds = BoundingBox(Vec2(0, 0), resolvedSize.value());
+    if (!parent.has_value()) {
+        if (size.x->isAbsolute() && size.y->isAbsolute()) {
+            resolvedSize = size.resolve(Vec2(0, 0));
+            resolvedTransform = Mat3::scalingMatrix(resolvedSize.value());
+            resolvedPosition = Vec2(0, 0);
+            bounds = BoundingBox(Vec2(0, 0), resolvedSize.value());
+        }
+        else {
+            throw layout_exception("Cannot resolve size");
+        }
+    }
+    if (resolvedSize.has_value() && resolvedPosition.has_value()) {
+        resolveChildTransforms(resolvedSize.value(), resolvedPosition.value(), ListDirection::Down);
     }
     else {
-        throw layout_exception("Cannot resolve size");
-    }
-    Vec2 currentPosition = resolvedPosition.value_or(Vec2(0, 0));
-    for (Layout* child : children) {
-        child->resolveTransform(*resolvedSize, currentPosition);
+        throw layout_exception("resolveTransform called on unresolved non root layout");
     }
 }
 
 BoundingBox Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
     calculateTransform(parentSize, parentPosition, forceSize, parentListDirection);
+    return resolveChildTransforms(parentSize, parentPosition, parentListDirection);
+}
+
+BoundingBox Layout::resolveChildTransforms(Vec2 parentSize, Vec2 parentPosition, ListDirection parentListDirection) {
     BoundingBox childBounds;
     if (childPlacement == ChildPlacement::Free) {
         for (Layout* child : children) {
@@ -307,6 +316,8 @@ Vec2 Layout::getSize() {
 
 void Layout::scroll(Vec2 delta) {
     scrolePosition += delta;
+    resolveTransform();
+    registerForRenderRecursive();
 }
 
 Mat3 Layout::getTransform() {
