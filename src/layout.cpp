@@ -274,17 +274,32 @@ BoundingBox Layout::getRenderableBounds(Vec2 parentSize, Vec2 parentPosition) {
     return BoundingBox(topLeft, topLeft + renderSize);
 }
 
-void Layout::addOnClickCallback(std::function<void()> callback) {
-    onClickCallbacks.push_back(callback);
+void Layout::addOnMouseKeyDownCallback(std::function<void(MouseButton, KeyModifierFlags)> callback) {
+    onMouseKeyDownCallbacks.push_back(callback);
 }
 
-void Layout::clickEventRecursive(Vec2 clickPosition) {
+void Layout::mouseKeyDownEventRecursive(Vec2 clickPosition, MouseButton button, KeyModifierFlags mods) {
     if (bounds.contains(clickPosition)) {
         for (Layout* child : children) {
-            child->clickEventRecursive(clickPosition);
+            child->mouseKeyDownEventRecursive(clickPosition, button, mods);
         }
-        for (std::function<void()> callback : onClickCallbacks) {
-            callback();
+        for (auto callback : onMouseKeyDownCallbacks) {
+            callback(button, mods);
+        }
+    }
+}
+
+void Layout::addOnMouseKeyUpCallback(std::function<void(MouseButton, KeyModifierFlags)> callback) {
+    onMouseKeyUpCallbacks.push_back(callback);
+}
+
+void Layout::mouseKeyUpEventRecursive(Vec2 clickPosition, MouseButton button, KeyModifierFlags mods) {
+    if (bounds.contains(clickPosition)) {
+        for (Layout* child : children) {
+            child->mouseKeyUpEventRecursive(clickPosition, button, mods);
+        }
+        for (auto callback : onMouseKeyUpCallbacks) {
+            callback(button, mods);
         }
     }
 }

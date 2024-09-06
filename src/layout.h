@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <bitset>
 
 namespace gltk {
 
@@ -39,6 +40,36 @@ enum class Overflow {
     Scroll,
 };
 
+enum class MouseButton {
+    MOUSE_BUTTON_LEFT   = 0,
+    MOUSE_BUTTON_RIGHT  = 1,
+    MOUSE_BUTTON_MIDDLE = 2,
+    MOUSE_BUTTON_4      = 3,
+    MOUSE_BUTTON_5      = 4,
+    MOUSE_BUTTON_6      = 5,
+    MOUSE_BUTTON_7      = 6,
+    MOUSE_BUTTON_8      = 7
+};
+
+enum class KeyModifiers {
+    MOD_SHIFT   = 0x0001,
+    MOD_CONTROL = 0x0002,
+    MOD_ALT     = 0x0004,
+    MOD_SUPER   = 0x0008,
+    CAPS_LOCK   = 0x0010,
+    NUM_LOCK    = 0x0020
+};
+
+class KeyModifierFlags {
+    private:
+        std::bitset<8> flags;
+    public:
+        KeyModifierFlags(int mods) : flags(mods) {}
+        bool test(KeyModifiers modifier) const {
+            return flags.test(static_cast<size_t>(modifier));
+        }
+};
+
 
 class Layout {
 public:
@@ -65,8 +96,11 @@ public:
 
     void registerForRenderRecursive();
 
-    void addOnClickCallback(std::function<void()> callback);
-    void clickEventRecursive(Vec2 clickPosition);
+    void addOnMouseKeyDownCallback(std::function<void(MouseButton, KeyModifierFlags)> callback);
+    void mouseKeyDownEventRecursive(Vec2 clickPosition, MouseButton button, KeyModifierFlags mods);
+
+    void addOnMouseKeyUpCallback(std::function<void(MouseButton, KeyModifierFlags)> callback);
+    void mouseKeyUpEventRecursive(Vec2 clickPosition, MouseButton button, KeyModifierFlags mods);
 
     void addOnScroleCallback(std::function<void(Vec2)> callback);
     bool scrollEventRecursive(Vec2 mousePosition, Vec2 scroleDelta);
@@ -116,7 +150,8 @@ private:
     Vec2 getListStartPossition();
     Vec2 getListParentSize(Vec2 childSize);
 
-    std::vector<std::function<void()>> onClickCallbacks;
+    std::vector<std::function<void(MouseButton, KeyModifierFlags)>> onMouseKeyDownCallbacks;
+    std::vector<std::function<void(MouseButton, KeyModifierFlags)>> onMouseKeyUpCallbacks;
     std::vector<std::function<void(Vec2)>> onScrollCallbacks;
 };
 

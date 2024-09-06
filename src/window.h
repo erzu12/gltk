@@ -27,7 +27,11 @@ public:
     ~Window();
     void add_key_down_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
     void add_key_up_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
+    void add_mouse_move_callback(std::function<void(Vec2)> callback);
+    void add_mouse_down_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback);
+    void add_mouse_up_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback);
     void run(std::function<void(Vec2)> render_callback);
+    Vec2 get_mouse_pos();
     Layout *get_layout() { return &rootLayout; }
     Renderer &get_renderer() { return renderer; }
 
@@ -37,35 +41,23 @@ private:
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
     static void scrole_callback(GLFWwindow *window, double xoffset, double yoffset);
     static void debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
+    static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
     std::vector<KeyModifiers> get_modifiers(int mods);
 
     std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window = {nullptr, glfwDestroyWindow};
     std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_down_callbacks;
     std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_up_callbacks;
+    std::vector<std::function<void(MouseButton button, KeyModifierFlags mods)>> mouse_down_callbacks;
+    std::vector<std::function<void(MouseButton button, KeyModifierFlags mods)>> mouse_up_callbacks;
+    std::vector<std::function<void(Vec2)>> mouse_move_callbacks;
 
     int width, height;
+    Vec2 lastMousePos;
     Renderer renderer = Renderer();
     Layout rootLayout = Layout(MessureVec2(600, 800), &renderer);
 };
 
-enum class KeyModifiers {
-    MOD_SHIFT   = 0x0001,
-    MOD_CONTROL = 0x0002,
-    MOD_ALT     = 0x0004,
-    MOD_SUPER   = 0x0008,
-    CAPS_LOCK   = 0x0010,
-    NUM_LOCK    = 0x0020
-};
 
-class KeyModifierFlags {
-private:
-    std::bitset<8> flags;
-public:
-    KeyModifierFlags(int mods) : flags(mods) {}
-    bool test(KeyModifiers modifier) const {
-        return flags.test(static_cast<size_t>(modifier));
-    }
-};
 
 enum class Key {
     KEY_SPACE            = 32,

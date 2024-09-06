@@ -36,6 +36,24 @@ int main () {
         .setSize(MessureVec2(.8, .5))
         .build();
 
+    bool mouseDown = false;
+    Vec2 lastMousePos;
+    boxLayout->addOnMouseKeyDownCallback([&](MouseButton button, KeyModifierFlags mods) {
+        mouseDown = true;
+        lastMousePos = window.get_mouse_pos();
+    });
+    window.add_mouse_up_callback([&](MouseButton button, KeyModifierFlags mods) {
+        mouseDown = false;
+    });
+    window.add_mouse_move_callback([&](Vec2 mousePos) {
+        std::cout << "Mouse move: " << mousePos.x << ", " << mousePos.y << std::endl;
+        if (mouseDown) {
+            Vec2 offset = (mousePos - lastMousePos);
+            boxLayout->scroll(offset);
+        }
+        lastMousePos = mousePos;
+    });
+
 
     boxLayout->addOnScroleCallback([&](Vec2 scrole) {
         boxLayout->scroll(scrole * Vec2(30.0));

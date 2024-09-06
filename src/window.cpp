@@ -33,13 +33,23 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 }
 
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    KeyModifierFlags key_mods(mods);
     if (action == GLFW_PRESS) {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        float xscale, yscale;
-        glfwGetWindowContentScale(window, &xscale, &yscale);
-        Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
-        w->rootLayout.clickEventRecursive(Vec2(xpos * xscale, ypos * yscale));
+        w->rootLayout.mouseKeyDownEventRecursive(Vec2(xpos * xscale, ypos * yscale), static_cast<MouseButton>(button), key_mods);
+        for(auto &callback : w->mouse_down_callbacks) {
+            callback(static_cast<MouseButton>(button), key_mods);
+        }
+    }
+    else if (action == GLFW_RELEASE) {
+        w->rootLayout.mouseKeyUpEventRecursive(Vec2(xpos * xscale, ypos * yscale), static_cast<MouseButton>(button), key_mods);
+        for(auto &callback : w->mouse_up_callbacks) {
+            callback(static_cast<MouseButton>(button), key_mods);
+        }
     }
 }
 
@@ -50,6 +60,17 @@ void Window::scrole_callback(GLFWwindow* window, double xoffset, double yoffset)
     glfwGetWindowContentScale(window, &xscale, &yscale);
     Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
     w->rootLayout.scrollEventRecursive(Vec2(xpos * xscale, ypos * yscale), Vec2(xoffset, yoffset));
+}
+
+void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    Vec2 mousePos(xpos * xscale, ypos * yscale);
+    w->lastMousePos = mousePos;
+    for(auto &callback : w->mouse_move_callbacks) {
+        callback(mousePos);
+    }
 }
 
 Window::Window() {
@@ -79,6 +100,7 @@ Window::Window() {
     glfwSetKeyCallback(window.get(), key_callback);
     glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
     glfwSetScrollCallback(window.get(), scrole_callback);
+    glfwSetCursorPosCallback(window.get(), cursor_position_callback);
 
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (glfwRawMouseMotionSupported()) {
@@ -125,12 +147,28 @@ void Window::run(std::function<void(Vec2)> render_callback) {
     }
 }
 
+Vec2 Window::get_mouse_pos() {
+    return lastMousePos;
+}
+
 void Window::add_key_up_callback(std::function<void(Key key, KeyModifierFlags mods)> callback) {
     key_up_callbacks.push_back(callback);
 }
 
 void Window::add_key_down_callback(std::function<void(Key key, KeyModifierFlags mods)> callback) {
     key_down_callbacks.push_back(callback);
+}
+
+void Window::add_mouse_move_callback(std::function<void(Vec2)> callback) {
+    mouse_move_callbacks.push_back(callback);
+}
+
+void Window::add_mouse_down_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback) {
+    mouse_down_callbacks.push_back(callback);
+}
+
+void Window::add_mouse_up_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback) {
+    mouse_up_callbacks.push_back(callback);
 }
 
 void Window::debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
