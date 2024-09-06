@@ -9,6 +9,7 @@
 #include <optional>
 #include <vector>
 #include <bitset>
+#include <iostream>
 
 namespace gltk {
 
@@ -62,11 +63,12 @@ enum class KeyModifiers {
 
 class KeyModifierFlags {
     private:
-        std::bitset<8> flags;
     public:
+        std::bitset<8> flags;
         KeyModifierFlags(int mods) : flags(mods) {}
-        bool test(KeyModifiers modifier) const {
-            return flags.test(static_cast<size_t>(modifier));
+        bool isModSet(KeyModifiers modifier) const {
+            int bit = log2(static_cast<int>(modifier));
+            return flags.test(bit);
         }
 };
 
