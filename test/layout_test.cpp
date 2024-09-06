@@ -5,7 +5,7 @@ namespace gltk {
 
 
 TEST(LayoutTest, layoutTopLeftSquareAbsolute) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -17,7 +17,7 @@ TEST(LayoutTest, layoutTopLeftSquareAbsolute) {
 }
 
 TEST(LayoutTest, layoutTopLeftRectangleAbsolute) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 200));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -29,7 +29,7 @@ TEST(LayoutTest, layoutTopLeftRectangleAbsolute) {
 }
 
 TEST(LayoutTest, layoutTopLeftSquareRelative) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 0.5));
     rootLayout.addChild(&layout);
     rootLayout.resolveTransform();
@@ -42,7 +42,7 @@ TEST(LayoutTest, layoutTopLeftSquareRelative) {
 }
 
 TEST(LayoutTest, layoutTopLeftRectangleRelative) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -54,7 +54,7 @@ TEST(LayoutTest, layoutTopLeftRectangleRelative) {
 }
 
 TEST(LayoutTest, layoutTopLeftSquareMixed) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, .5));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -66,7 +66,7 @@ TEST(LayoutTest, layoutTopLeftSquareMixed) {
 }
 
 TEST(LayoutTest, layoutCenterAbsolute) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::Center, MessureVec2(0, 0), Anchors::Center, MessureVec2(50, 100));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -78,7 +78,7 @@ TEST(LayoutTest, layoutCenterAbsolute) {
 }
 
 TEST(LayoutTest, layoutCenterRelative) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::Center, MessureVec2(0, 0), Anchors::Center, MessureVec2(0.25, 0.5));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -90,7 +90,7 @@ TEST(LayoutTest, layoutCenterRelative) {
 }
 
 TEST(LayoutTest, layoutCenterPivotCenterRight) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::Center, MessureVec2(0, 0), Anchors::CenterRight, MessureVec2(100, 50));
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -102,7 +102,7 @@ TEST(LayoutTest, layoutCenterPivotCenterRight) {
 }
 
 TEST(LayoutTest, layoutInheritPositionAndSize) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::BottomRight, MessureVec2(0, 0), Anchors::BottomRight, MessureVec2(.5, .5));
     Layout childLayout(&layout, Anchors::BottomRight, MessureVec2(-10, -20), Anchors::BottomRight, MessureVec2(.5, .5));
     rootLayout.resolveTransform();
@@ -118,13 +118,13 @@ TEST(LayoutTest, layoutInheritPositionAndSize) {
 }
 
 TEST(LayoutTest, unresolvedLayoutTrowsOnGetTransform) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout layout(&rootLayout, Anchors::BottomRight, MessureVec2(0, 0), Anchors::BottomRight, MessureVec2(.5, .5));
     ASSERT_THROW(layout.getTransform(), std::bad_optional_access);
 }
 
 TEST(LayoutTest, layoutListStretchEvenSplit) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
@@ -144,7 +144,7 @@ TEST(LayoutTest, layoutListStretchEvenSplit) {
 }
 
 TEST(LayoutTest, layoutListStretch3UnevenSplit) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.25, 1.0));
@@ -170,7 +170,7 @@ TEST(LayoutTest, layoutListStretch3UnevenSplit) {
 }
 
 TEST(LayoutTest, layoutListStretchAbsoluteAndRelative) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(40, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, 1.0));
@@ -187,7 +187,7 @@ TEST(LayoutTest, layoutListStretchAbsoluteAndRelative) {
 }
 
 TEST(LayoutTest, layoutListStretchRelativeAndAbsolute) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(40, 1.0));
@@ -207,7 +207,7 @@ TEST(LayoutTest, layoutListStretchRelativeAndAbsolute) {
 }
 
 TEST(LayoutTest, layoutListStretchMultiAbsolutAndRelative) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(20, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.8, 1.0));
@@ -234,7 +234,7 @@ TEST(LayoutTest, layoutListStretchMultiAbsolutAndRelative) {
 }
 
 TEST(LayoutTest, layoutListStretchDown) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Down);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
@@ -254,7 +254,7 @@ TEST(LayoutTest, layoutListStretchDown) {
 }
 
 TEST(LayoutTest, layoutListStretchUp) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Up);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
@@ -274,7 +274,7 @@ TEST(LayoutTest, layoutListStretchUp) {
 }
 
 TEST(LayoutTest, layoutListStretchLeft) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Left);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
@@ -294,7 +294,7 @@ TEST(LayoutTest, layoutListStretchLeft) {
 }
 
 TEST(LayoutTest, layoutList2Children) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
@@ -314,7 +314,7 @@ TEST(LayoutTest, layoutList2Children) {
 }
 
 TEST(LayoutTest, layoutList3Children) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, .3));
@@ -340,7 +340,7 @@ TEST(LayoutTest, layoutList3Children) {
 }
 
 TEST(LayoutTest, layoutListRight) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Right);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
@@ -360,7 +360,7 @@ TEST(LayoutTest, layoutListRight) {
 }
 
 TEST(LayoutTest, layoutListLeft) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Left);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
@@ -380,7 +380,7 @@ TEST(LayoutTest, layoutListLeft) {
 }
 
 TEST(LayoutTest, layoutListUp) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Up);
     Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
     Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
@@ -400,7 +400,7 @@ TEST(LayoutTest, layoutListUp) {
 }
 
 TEST(LayoutTest, layoutSizingFit) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fit);
     Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
     rootLayout.resolveTransform();
@@ -414,7 +414,7 @@ TEST(LayoutTest, layoutSizingFit) {
 }
 
 TEST(LayoutTest, layoutSizingFitWidth) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fixed);
     Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(25, 25), Anchors::TopLeft, MessureVec2(50, 50));
     rootLayout.resolveTransform();
@@ -428,7 +428,7 @@ TEST(LayoutTest, layoutSizingFitWidth) {
 }
 
 TEST(LayoutTest, layoutSizingFitHeight) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fixed, Sizing::Fit);
     Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(25, 25), Anchors::TopLeft, MessureVec2(50, 50));
     rootLayout.resolveTransform();
@@ -442,7 +442,7 @@ TEST(LayoutTest, layoutSizingFitHeight) {
 }
 
 TEST(LayoutTest, layoutSizingFitMultipleChildren) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fit);
     Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
     Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(100, 100), Anchors::TopLeft, MessureVec2(50, 50));
@@ -456,7 +456,7 @@ TEST(LayoutTest, layoutSizingFitMultipleChildren) {
 }
 
 TEST(LayoutTest, layoutSizingFitChildList) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::List, ListDirection::Down, Sizing::Fit, Sizing::Fit);
     Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, .25));
     Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, .25));
@@ -470,7 +470,7 @@ TEST(LayoutTest, layoutSizingFitChildList) {
 }
 
 TEST(LayoutTest, layoutSizingFitChildListStretch) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::ListStretch, ListDirection::Down, Sizing::Fit, Sizing::Fit);
     Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, 25));
     Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, 25));
@@ -484,7 +484,7 @@ TEST(LayoutTest, layoutSizingFitChildListStretch) {
 }
 
 TEST(LayoutTest, layoutSizingExpandSmalerThanParent) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Expand, Sizing::Expand);
     Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
     rootLayout.resolveTransform();
@@ -498,7 +498,7 @@ TEST(LayoutTest, layoutSizingExpandSmalerThanParent) {
 }
 
 TEST(LayoutTest, layoutSizingExpandLargerThanParent) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50), ChildPlacement::Free, ListDirection::Right, Sizing::Expand, Sizing::Expand);
     Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
     rootLayout.resolveTransform();
@@ -512,7 +512,7 @@ TEST(LayoutTest, layoutSizingExpandLargerThanParent) {
 }
 
 TEST(LayoutTest, layoutSizingShrinkLargerThanParent) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50), ChildPlacement::Free, ListDirection::Right, Sizing::Shrink, Sizing::Shrink);
     Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
     rootLayout.resolveTransform();
@@ -526,7 +526,7 @@ TEST(LayoutTest, layoutSizingShrinkLargerThanParent) {
 }
 
 TEST(LayoutTest, layoutSizingShrinkSmalerThanParent) {
-    Layout rootLayout(MessureVec2(200, 200));
+    Layout rootLayout(MessureVec2(200, 200), nullptr);
     Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Shrink, Sizing::Shrink);
     Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
     rootLayout.resolveTransform();

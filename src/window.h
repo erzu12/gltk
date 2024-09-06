@@ -44,8 +44,8 @@ private:
     std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_up_callbacks;
 
     int width, height;
-    Layout rootLayout = Layout(MessureVec2(600, 800));
     Renderer renderer = Renderer();
+    Layout rootLayout = Layout(MessureVec2(600, 800), &renderer);
 };
 
 enum class KeyModifiers {

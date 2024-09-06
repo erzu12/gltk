@@ -5,7 +5,7 @@
 namespace gltk {
 
 
-Layout::Layout(MessureVec2 size) : size(size), offset(0, 0) {}
+Layout::Layout(MessureVec2 size, Renderer *renderer) : size(size), renderer(renderer), offset(0, 0) {}
 
 Layout::Layout(
         Layout* parent,
@@ -33,6 +33,7 @@ Layout::Layout(
     if (parent) {
         parent->addChild(this);
         this->parent = parent;
+        this->renderer = parent->renderer;
     }
     if (renderable) {
         this->renderable = std::move(renderable);

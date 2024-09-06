@@ -42,7 +42,7 @@ enum class Overflow {
 
 class Layout {
 public:
-    Layout(MessureVec2 viewportSize); // root layout defined by the window
+    Layout(MessureVec2 viewportSize, Renderer *renderer); // root layout defined by the window
     Layout(Layout *parent,
            Vec2 anchor,
            MessureVec2 offset,
@@ -78,6 +78,8 @@ private:
     std::optional<std::unique_ptr<IRenderable>> renderable;
     std::vector<Layout*> children;
     std::optional<Layout*> parent;
+
+    Renderer *renderer;
 
     Vec2 anchor = Anchors::TopLeft;
     MessureVec2 offset;
