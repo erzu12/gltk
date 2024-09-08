@@ -11,17 +11,20 @@ Renderer::Renderer() {
 }
 
 bool Renderer::render(Vec2 viewSize) {
-    if (renderQueueKeys.empty()) {
+    if (!needsRender) {
         return false;
     }
+    std::cout << "Rendering" << std::endl;
     for (int i = 0; i < renderQueueKeys.size(); i++) {
         renderQueueKeys[i]->render(viewSize, renderQueueValues[i].modelMatrix, renderQueueValues[i].size, renderQueueValues[i].clipRegion);
     }
+    needsRender = false;
 
     return true;
 }
 
 void Renderer::queue(IRenderable* renderable, Mat3 modelMatrix, Vec2 size, BoundingBox clipRegion) {
+    needsRender = true;
     for (int i = 0; i < renderQueueKeys.size(); i++) {
         if (renderQueueKeys[i] == renderable) {
             renderQueueValues[i].modelMatrix = modelMatrix;

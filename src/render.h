@@ -20,6 +20,7 @@ struct RenderData {
 class Renderer {
     std::vector<IRenderable*> renderQueueKeys;
     std::vector<RenderData> renderQueueValues;
+    bool needsRender = false;
 public:
     Renderer();
 
