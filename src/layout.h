@@ -96,7 +96,7 @@ public:
 
     void resolveTransform();
 
-    void registerForRenderRecursive();
+    void registerForRenderRecursive(BoundingBox clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000, 1000000)));
 
     void addOnMouseKeyDownCallback(std::function<void(MouseButton, KeyModifierFlags)> callback);
     void mouseKeyDownEventRecursive(Vec2 clickPosition, MouseButton button, KeyModifierFlags mods);

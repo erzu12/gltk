@@ -33,7 +33,7 @@ class LayoutBuilder {
         ListDirection listDirection = ListDirection::Down;
         Sizing horizontalSizing = Sizing::Fixed;
         Sizing verticalSizing = Sizing::Fixed;
-        Overflow overflow = Overflow::None;
+        Overflow overflow = Overflow::Scroll;
 };
 
 } // namespace gltk

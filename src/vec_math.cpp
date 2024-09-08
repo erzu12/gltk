@@ -367,6 +367,13 @@ bool BoundingBox::contains(Vec2 point) {
     return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y;
 }
 
+BoundingBox BoundingBox::intersect(const BoundingBox &other) {
+    BoundingBox bb;
+    bb.max = Vec2(std::min(max.x, other.max.x), std::min(max.y, other.max.y));
+    bb.min = Vec2(std::max(min.x, other.min.x), std::max(min.y, other.min.y));
+    return bb;
+}
+
 std::ostream &operator<<(std::ostream &os, const BoundingBox &bb) {
     os << "{" << bb.min << ", " << bb.max << "}";
     return os;

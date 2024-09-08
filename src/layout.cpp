@@ -40,17 +40,17 @@ Layout::Layout(
     }
 }
 
-void Layout::registerForRenderRecursive() {
+void Layout::registerForRenderRecursive(BoundingBox clipRegion) {
     if (resolvedTransform.has_value()) {
         if (renderable.has_value()) {
-            BoundingBox clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000.0f, 1000000.0f));
-            if (parent.has_value() && parent.value()->overflow == Overflow::Clip || parent.value()->overflow == Overflow::Scroll) {
-                clipRegion = parent.value()->bounds;
+            if (overflow == Overflow::None) {
+                clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000, 1000000));
             }
             renderer->queue(renderable.value().get(), resolvedTransform.value(), resolvedSize.value(), clipRegion);
         }
         for (Layout* child : children) {
-            child->registerForRenderRecursive();
+            clipRegion = clipRegion.intersect(bounds);
+            child->registerForRenderRecursive(clipRegion);
         }
     }
     else {

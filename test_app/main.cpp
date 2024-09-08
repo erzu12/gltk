@@ -20,18 +20,18 @@ int main () {
         .setSize(MessureVec2(.5, .5))
         .setChildPlacement(ChildPlacement::List)
         .setListDirection(ListDirection::Down)
-        .setOverflow(Overflow::Scroll)
         .build();
     
     auto child1 = LayoutBuilder(boxLayout.get())
         .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 0.0f, 0.0f), 10.0))
         .setAnchor(Anchors::TopLeft)
+        .setPivot(Anchors::CenterLeft)
         .setSize(MessureVec2(.8, 0.5))
         .build();
 
     auto child1child = LayoutBuilder(child1.get())
         .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 1.0f, 0.0f), 10.0))
-        .setAnchor(Anchors::TopCenter)
+        .setAnchor(Anchors::Center)
         .setPivot(Anchors::Center)
         .setSize(MessureVec2(200, 200))
         .build();

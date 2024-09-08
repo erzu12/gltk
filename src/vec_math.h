@@ -134,6 +134,8 @@ public:
     float width() { return std::max(max.x - min.x, 0.0f); }
     float height() { return std::max(max.y - min.y, 0.0f); }
     Vec2 size() { return Vec2(width(), height()); }
+    BoundingBox intersect(const BoundingBox &other);
+
 
     friend std::ostream &operator<<(std::ostream &os, const BoundingBox &bb);
 };
