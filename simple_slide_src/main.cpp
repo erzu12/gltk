@@ -23,6 +23,7 @@ int main () {
         .build();
 
     auto slideBG = LayoutBuilder(workspace.get())
+        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.1f, 0.1f, 0.1f), 0.0))
         .setSize(MessureVec2(3., 3.))
         .setAnchor(Anchors::Center)
         .build();

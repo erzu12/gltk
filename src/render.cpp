@@ -17,8 +17,6 @@ bool Renderer::render(Vec2 viewSize) {
     for (int i = 0; i < renderQueueKeys.size(); i++) {
         renderQueueKeys[i]->render(viewSize, renderQueueValues[i].modelMatrix, renderQueueValues[i].size, renderQueueValues[i].clipRegion);
     }
-    renderQueueKeys.clear();
-    renderQueueValues.clear();
 
     return true;
 }

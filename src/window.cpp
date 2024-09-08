@@ -119,7 +119,6 @@ Window::Window() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 }
 
 void Window::run(std::function<void(Vec2)> render_callback) {
@@ -130,11 +129,6 @@ void Window::run(std::function<void(Vec2)> render_callback) {
     rootLayout.resolveTransform();
     while (!glfwWindowShouldClose(window.get()))
     {
-        if (renderer.willRender()) {
-            glClearColor(.1f, .1f, .1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-
         Vec2 size = rootLayout.getSize();
         bool redraw = renderer.render(size);
         render_callback(Vec2(width, height));

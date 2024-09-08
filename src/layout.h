@@ -107,6 +107,8 @@ public:
     void addOnScroleCallback(std::function<void(Vec2)> callback);
     bool scrollEventRecursive(Vec2 mousePosition, Vec2 scroleDelta);
 
+    void setRenderable(std::unique_ptr<IRenderable> renderable);
+
     Mat3 getTransform();
     Vec2 getSize();
 

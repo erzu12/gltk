@@ -347,5 +347,9 @@ void Layout::addChild(Layout *child) {
     children.push_back(child);
 }
 
+void Layout::setRenderable(std::unique_ptr<IRenderable> renderable) {
+    this->renderable = std::move(renderable);
+}
+
 
 }  // namespace gltk
