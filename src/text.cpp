@@ -44,7 +44,7 @@ void Text::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipR
     startPos.y = getVerticalStartPos(inPos.y, size.y, lines);
     shader.UniformVec3("color", color);
     glEnable(GL_SCISSOR_TEST);
-    glScissor(clipRegion.min.x, clipRegion.min.y, clipRegion.width(), clipRegion.height());
+    glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     for (std::string line : lines) {
         startPos.x = getHorizontalStartPos(inPos.x, size.x, line);
         for (char c : line) {
@@ -88,7 +88,7 @@ void Text::loadCharacters(std::string font, int fontSize) {
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, ("/usr/share/fonts/TTF/" + font + ".TTF").c_str(), 0, &face)) {
+    if (FT_New_Face(ft, ("/usr/share/fonts/TTF/" + font + ".ttf").c_str(), 0, &face)) {
         std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }
 
