@@ -5,31 +5,20 @@
 namespace gltk {
 
 
-Layout::Layout(MessureVec2 size, Renderer *renderer) : size(size), renderer(renderer), offset(0, 0) {}
+Layout::Layout(MessureVec2 size, Renderer *renderer) : renderer(renderer) {
+    positioning.size = size;
+}
 
 Layout::Layout(
         Layout* parent,
-        Vec2 anchor, 
-        MessureVec2 offset, 
-        Vec2 pivot, 
-        MessureVec2 size,
-        ChildPlacement childPlacement,
-        ListDirection listDirection,
-        Sizing horizontalSizing,
-        Sizing verticalSizing,
-        std::unique_ptr<IRenderable> renderable,
-        Overflow overflow
+        Positioning positioning,
+        std::unique_ptr<IRenderable> renderable
 ) : 
-    anchor(anchor), 
-    offset(offset), 
-    pivot(pivot), 
-    size(size),
-    childPlacement(childPlacement),
-    listDirection(listDirection),
-    horizontalSizing(horizontalSizing),
-    verticalSizing(verticalSizing),
-    overflow(overflow)
+    positioning(positioning)
 {
+    if(positioning.pivot.x < 0.0f && positioning.pivot.y < 0.0f) {
+        this->positioning.pivot = positioning.anchor;
+    }
     if (parent) {
         parent->addChild(this);
         this->parent = parent;
@@ -43,14 +32,14 @@ Layout::Layout(
 void Layout::registerForRenderRecursive(BoundingBox clipRegion) {
     if (resolvedTransform.has_value()) {
         if (renderable.has_value()) {
-            if (overflow == Overflow::None) {
+            if (positioning.overflow == Overflow::None) {
                 clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000, 1000000));
             }
             renderer->queue(renderable.value().get(), resolvedTransform.value(), resolvedSize.value(), clipRegion);
         }
         for (Layout* child : children) {
             clipRegion = clipRegion.intersect(bounds);
-            if (overflow == Overflow::None) {
+            if (positioning.overflow == Overflow::None) {
                 clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000, 1000000));
             }
             child->registerForRenderRecursive(clipRegion);
@@ -63,8 +52,8 @@ void Layout::registerForRenderRecursive(BoundingBox clipRegion) {
 
 void Layout::resolveTransform() {
     if (!parent.has_value()) {
-        if (size.x->isAbsolute() && size.y->isAbsolute()) {
-            resolvedSize = size.resolve(Vec2(0, 0));
+        if (positioning.size.x->isAbsolute() && positioning.size.y->isAbsolute()) {
+            resolvedSize = positioning.size.resolve(Vec2(0, 0));
             resolvedTransform = Mat3::scalingMatrix(resolvedSize.value());
             resolvedPosition = Vec2(0, 0);
             bounds = BoundingBox(Vec2(0, 0), resolvedSize.value());
@@ -88,20 +77,20 @@ BoundingBox Layout::resolveTransform(Vec2 parentSize, Vec2 parentPosition, bool 
 
 BoundingBox Layout::resolveChildTransforms(Vec2 parentSize, Vec2 parentPosition, ListDirection parentListDirection) {
     BoundingBox childBounds;
-    if (childPlacement == ChildPlacement::Free) {
+    if (positioning.childPlacement == ChildPlacement::Free) {
         for (Layout* child : children) {
             BoundingBox retBound = child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
             childBounds.add(retBound);
         }
     }
-    else if (childPlacement == ChildPlacement::ListStretch) {
+    else if (positioning.childPlacement == ChildPlacement::ListStretch) {
         childBounds = resolveListStretchTransform();
     }
-    else if (childPlacement == ChildPlacement::List) {
+    else if (positioning.childPlacement == ChildPlacement::List) {
         childBounds = resolveListTransform();
     }
 
-    if (Sizing::Fit == horizontalSizing) {
+    if (Sizing::Fit == positioning.horizontalSizing) {
         resolvedSize->x = childBounds.max.x - childBounds.min.x;
     }
 
@@ -117,7 +106,7 @@ BoundingBox Layout::resolveChildTransforms(Vec2 parentSize, Vec2 parentPosition,
 
 
     bounds = BoundingBox(resolvedPosition.value(), resolvedPosition.value() + resolvedSize.value());
-    if (overflow == Overflow::Scroll && scrolePosition != Vec2(0, 0)) {
+    if (positioning.overflow == Overflow::Scroll && scrolePosition != Vec2(0, 0)) {
         boundScrolePosition(childBounds);
         moveChildren(scrolePosition);
     }
@@ -128,9 +117,9 @@ BoundingBox Layout::resolveListTransform() {
     Vec2 currentPosition = getListStartPossition();
     BoundingBox childBounds;
     for (Layout* child : children) {
-        Vec2 childSize = child->size.resolve(resolvedSize.value());
+        Vec2 childSize = child->positioning.size.resolve(resolvedSize.value());
         BoundingBox retBound;
-        if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
+        if (ListDirection::Down == positioning.listDirection || ListDirection::Right == positioning.listDirection) {
             retBound = child->resolveTransform(getListParentSize(childSize), currentPosition, true);
         }
         else {
@@ -143,13 +132,13 @@ BoundingBox Layout::resolveListTransform() {
 }
 
 BoundingBox Layout::resolveListStretchTransform() {
-    ListStrechResolver resolver(listDirection, resolvedSize.value(), resolvedPosition.value());
+    ListStrechResolver resolver(positioning.listDirection, resolvedSize.value(), resolvedPosition.value());
     std::vector<ChildData> childrenData;
     for (Layout* child : children) {
         ChildData data;
-        data.size = &child->size;
-        data.horizontalSizing = child->horizontalSizing;
-        data.verticalSizing = child->verticalSizing;
+        data.size = &child->positioning.size;
+        data.horizontalSizing = child->positioning.horizontalSizing;
+        data.verticalSizing = child->positioning.verticalSizing;
         data.resolveTransform = [child](Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
             return child->resolveTransform(parentSize, parentPosition, forceSize, parentListDirection);
         };
@@ -159,8 +148,8 @@ BoundingBox Layout::resolveListStretchTransform() {
 }
 
 void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
-    Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
-    Vec2 size = this->size.resolve(parentSize);
+    Vec2 pivotPosition = positioning.offset.resolve(parentSize) + positioning.anchor * parentSize + parentPosition;
+    Vec2 size = this->positioning.size.resolve(parentSize);
     if (forceSize) {
         if (parentListDirection == ListDirection::Down || parentListDirection == ListDirection::Up) {
             size.y = parentSize.y;
@@ -169,10 +158,10 @@ void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool force
             size.x = parentSize.x;
         }
     }
-    Vec2 pivotOffsetFromCenter = size / 2.0f - pivot * size;
+    Vec2 pivotOffsetFromCenter = size / 2.0f - positioning.pivot * size;
     Vec2 centerPosition = pivotPosition + pivotOffsetFromCenter;
     resolvedTransform = Mat3::translationMatrix(centerPosition) * Mat3::scalingMatrix(size);
-    resolvedPosition = pivotPosition - size * pivot;
+    resolvedPosition = pivotPosition - size * positioning.pivot;
     resolvedSize = size;
 }
 
@@ -207,19 +196,19 @@ void Layout::boundScrolePosition(BoundingBox childBounds) {
 }
 
 void Layout::recalculateTransformFromBounds(BoundingBox bounds) {
-    if (Sizing::Fit == horizontalSizing || Sizing::Expand == horizontalSizing) {
+    if (Sizing::Fit == positioning.horizontalSizing || Sizing::Expand == positioning.horizontalSizing) {
         resolvedSize.value().x = std::max(bounds.max.x - bounds.min.x, resolvedSize.value().x);
         resolvedPosition.value().x = std::min(bounds.min.x, resolvedPosition.value().x);
     }
-    if (Sizing::Fit == verticalSizing || Sizing::Expand == verticalSizing) {
+    if (Sizing::Fit == positioning.verticalSizing || Sizing::Expand == positioning.verticalSizing) {
         resolvedSize.value().y = std::max(bounds.max.y - bounds.min.y, resolvedSize.value().y);
         resolvedPosition.value().y = std::min(bounds.min.y, resolvedPosition.value().y);
     }
-    if (Sizing::Fit == horizontalSizing || Sizing::Shrink == horizontalSizing) {
+    if (Sizing::Fit == positioning.horizontalSizing || Sizing::Shrink == positioning.horizontalSizing) {
         resolvedSize.value().x = std::min(bounds.max.x - bounds.min.x, resolvedSize.value().x);
         resolvedPosition.value().x = std::max(bounds.min.x, resolvedPosition.value().x);
     }
-    if (Sizing::Fit == verticalSizing || Sizing::Shrink == verticalSizing) {
+    if (Sizing::Fit == positioning.verticalSizing || Sizing::Shrink == positioning.verticalSizing) {
         resolvedSize.value().y = std::min(bounds.max.y - bounds.min.y, resolvedSize.value().y);
         resolvedPosition.value().y = std::max(bounds.min.y, resolvedPosition.value().y);
     }
@@ -231,7 +220,7 @@ void Layout::recalculateTransformFromBounds(BoundingBox bounds) {
 
 
 void Layout::adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition) {
-    switch (listDirection) {
+    switch (positioning.listDirection) {
         case ListDirection::Down:
             currentPosition.y += childSize.y;
             break;
@@ -248,7 +237,7 @@ void Layout::adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition) {
 }
 
 Vec2 Layout::getListStartPossition() {
-    if (ListDirection::Down == listDirection || ListDirection::Right == listDirection) {
+    if (ListDirection::Down == positioning.listDirection || ListDirection::Right == positioning.listDirection) {
         return resolvedPosition.value();
     }
     else {
@@ -258,7 +247,7 @@ Vec2 Layout::getListStartPossition() {
 }
 
 Vec2 Layout::getListParentSize(Vec2 childSize) {
-    if (ListDirection::Down == listDirection || ListDirection::Up == listDirection) {
+    if (ListDirection::Down == positioning.listDirection || ListDirection::Up == positioning.listDirection) {
         return Vec2(resolvedSize.value().x, childSize.y);
     }
     else {
@@ -267,13 +256,13 @@ Vec2 Layout::getListParentSize(Vec2 childSize) {
 }
 
 BoundingBox Layout::getRenderableBounds(Vec2 parentSize, Vec2 parentPosition) {
-    bool fixedX = Sizing::Fixed == horizontalSizing || Sizing::Shrink == horizontalSizing;
-    bool fixedY = Sizing::Fixed == verticalSizing || Sizing::Shrink == verticalSizing;
+    bool fixedX = Sizing::Fixed == positioning.horizontalSizing || Sizing::Shrink == positioning.horizontalSizing;
+    bool fixedY = Sizing::Fixed == positioning.verticalSizing || Sizing::Shrink == positioning.verticalSizing;
     Vec2 renderSize = renderable.has_value() ? renderable.value()->getSize(resolvedSize.value(), fixedX, fixedY) : Vec2(0, 0);
-    Vec2 pivotPosition = offset.resolve(parentSize) + anchor * parentSize + parentPosition;
-    Vec2 pivotOffsetFromCenter = renderSize / 2.0f - pivot * renderSize;
+    Vec2 pivotPosition = positioning.offset.resolve(parentSize) + positioning.anchor * parentSize + parentPosition;
+    Vec2 pivotOffsetFromCenter = renderSize / 2.0f - positioning.pivot * renderSize;
     Vec2 centerPosition = pivotPosition + pivotOffsetFromCenter;
-    Vec2 topLeft = pivotPosition - renderSize * pivot;
+    Vec2 topLeft = pivotPosition - renderSize * positioning.pivot;
     return BoundingBox(topLeft, topLeft + renderSize);
 }
 
@@ -343,7 +332,7 @@ Mat3 Layout::getTransform() {
 }
 
 void Layout::setSize(MessureVec2 size) {
-    this->size = size;
+    this->positioning.size = size;
 }
 
 void Layout::addChild(Layout *child) {

@@ -21,13 +21,10 @@ class LayoutBuilder {
 
     private:
         Layout *parent;
-
-        bool pivotSet = false;
-
         std::unique_ptr<IRenderable> renderable = nullptr;
         Vec2 anchor = Anchors::TopLeft;
         MessureVec2 offset = MessureVec2(0, 0);
-        Vec2 pivot = Anchors::TopLeft;
+        Vec2 pivot = Vec2(-1.0f);
         MessureVec2 size = MessureVec2(0, 0);
         ChildPlacement childPlacement = ChildPlacement::Free;
         ListDirection listDirection = ListDirection::Down;

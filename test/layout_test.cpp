@@ -6,7 +6,7 @@ namespace gltk {
 
 TEST(LayoutTest, layoutTopLeftSquareAbsolute) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(100, 100)});
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -18,7 +18,7 @@ TEST(LayoutTest, layoutTopLeftSquareAbsolute) {
 
 TEST(LayoutTest, layoutTopLeftRectangleAbsolute) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 200));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(100, 200)});
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -30,7 +30,7 @@ TEST(LayoutTest, layoutTopLeftRectangleAbsolute) {
 
 TEST(LayoutTest, layoutTopLeftSquareRelative) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 0.5));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(0.5, 0.5)});
     rootLayout.addChild(&layout);
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
@@ -43,7 +43,7 @@ TEST(LayoutTest, layoutTopLeftSquareRelative) {
 
 TEST(LayoutTest, layoutTopLeftRectangleRelative) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -55,7 +55,7 @@ TEST(LayoutTest, layoutTopLeftRectangleRelative) {
 
 TEST(LayoutTest, layoutTopLeftSquareMixed) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, .5));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(100, .5)});
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -67,7 +67,7 @@ TEST(LayoutTest, layoutTopLeftSquareMixed) {
 
 TEST(LayoutTest, layoutCenterAbsolute) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::Center, MessureVec2(0, 0), Anchors::Center, MessureVec2(50, 100));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(50, 100), .anchor = Anchors::Center});
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -79,7 +79,7 @@ TEST(LayoutTest, layoutCenterAbsolute) {
 
 TEST(LayoutTest, layoutCenterRelative) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::Center, MessureVec2(0, 0), Anchors::Center, MessureVec2(0.25, 0.5));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(0.25, 0.5), .anchor = Anchors::Center});
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -91,7 +91,7 @@ TEST(LayoutTest, layoutCenterRelative) {
 
 TEST(LayoutTest, layoutCenterPivotCenterRight) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::Center, MessureVec2(0, 0), Anchors::CenterRight, MessureVec2(100, 50));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(100, 50), .anchor = Anchors::Center, .pivot = Anchors::CenterRight});
     rootLayout.resolveTransform();
     Mat3 transform = layout.getTransform();
     std::cout << transform << std::endl;
@@ -103,8 +103,8 @@ TEST(LayoutTest, layoutCenterPivotCenterRight) {
 
 TEST(LayoutTest, layoutInheritPositionAndSize) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::BottomRight, MessureVec2(0, 0), Anchors::BottomRight, MessureVec2(.5, .5));
-    Layout childLayout(&layout, Anchors::BottomRight, MessureVec2(-10, -20), Anchors::BottomRight, MessureVec2(.5, .5));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .anchor = Anchors::BottomRight});
+    Layout childLayout(&layout, Positioning{.size = MessureVec2(.5, .5), .offset = MessureVec2(-10, -20), .anchor = Anchors::BottomRight});
     rootLayout.resolveTransform();
     Mat3 transform = childLayout.getTransform();
     Mat3 parentTransform = layout.getTransform();
@@ -119,15 +119,15 @@ TEST(LayoutTest, layoutInheritPositionAndSize) {
 
 TEST(LayoutTest, unresolvedLayoutTrowsOnGetTransform) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout layout(&rootLayout, Anchors::BottomRight, MessureVec2(0, 0), Anchors::BottomRight, MessureVec2(.5, .5));
+    Layout layout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .anchor = Anchors::BottomRight});
     ASSERT_THROW(layout.getTransform(), std::bad_optional_access);
 }
 
 TEST(LayoutTest, layoutListStretchEvenSplit) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Right});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -145,10 +145,10 @@ TEST(LayoutTest, layoutListStretchEvenSplit) {
 
 TEST(LayoutTest, layoutListStretch3UnevenSplit) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.25, 1.0));
-    Layout child3(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.25, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Right});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(0.25, 1.0)});
+    Layout child3(&listLayout, Positioning{.size = MessureVec2(0.25, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -171,9 +171,9 @@ TEST(LayoutTest, layoutListStretch3UnevenSplit) {
 
 TEST(LayoutTest, layoutListStretchAbsoluteAndRelative) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(40, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Right});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(40, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(.5, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -188,9 +188,9 @@ TEST(LayoutTest, layoutListStretchAbsoluteAndRelative) {
 
 TEST(LayoutTest, layoutListStretchRelativeAndAbsolute) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(40, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Right});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(.5, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(40, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -208,11 +208,11 @@ TEST(LayoutTest, layoutListStretchRelativeAndAbsolute) {
 
 TEST(LayoutTest, layoutListStretchMultiAbsolutAndRelative) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Right);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(20, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.8, 1.0));
-    Layout child3(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(30, 1.0));
-    Layout child4(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.2, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Right});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(20, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(.8, 1.0)});
+    Layout child3(&listLayout, Positioning{.size = MessureVec2(30, 1.0)});
+    Layout child4(&listLayout, Positioning{.size = MessureVec2(1.2, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -235,9 +235,9 @@ TEST(LayoutTest, layoutListStretchMultiAbsolutAndRelative) {
 
 TEST(LayoutTest, layoutListStretchDown) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Down);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Down});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -255,9 +255,9 @@ TEST(LayoutTest, layoutListStretchDown) {
 
 TEST(LayoutTest, layoutListStretchUp) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Up);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Up});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -275,9 +275,9 @@ TEST(LayoutTest, layoutListStretchUp) {
 
 TEST(LayoutTest, layoutListStretchLeft) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::ListStretch, ListDirection::Left);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(0.5, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::ListStretch, .listDirection = ListDirection::Left});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(0.5, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -295,9 +295,9 @@ TEST(LayoutTest, layoutListStretchLeft) {
 
 TEST(LayoutTest, layoutList2Children) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::List});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(1.0, 50)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(1.0, 50)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -315,10 +315,10 @@ TEST(LayoutTest, layoutList2Children) {
 
 TEST(LayoutTest, layoutList3Children) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, .3));
-    Layout child3(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 20));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::List});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(1.0, 50)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(1.0, .3)});
+    Layout child3(&listLayout, Positioning{.size = MessureVec2(1.0, 20)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -341,9 +341,9 @@ TEST(LayoutTest, layoutList3Children) {
 
 TEST(LayoutTest, layoutListRight) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Right);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::List, .listDirection = ListDirection::Right});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(50, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(50, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -361,9 +361,9 @@ TEST(LayoutTest, layoutListRight) {
 
 TEST(LayoutTest, layoutListLeft) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Left);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 1.0));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::List, .listDirection = ListDirection::Left});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(50, 1.0)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(50, 1.0)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -381,9 +381,9 @@ TEST(LayoutTest, layoutListLeft) {
 
 TEST(LayoutTest, layoutListUp) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout listLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(.5, .5), ChildPlacement::List, ListDirection::Up);
-    Layout child1(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
-    Layout child2(&listLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(1.0, 50));
+    Layout listLayout(&rootLayout, Positioning{.size = MessureVec2(.5, .5), .childPlacement = ChildPlacement::List, .listDirection = ListDirection::Up});
+    Layout child1(&listLayout, Positioning{.size = MessureVec2(1.0, 50)});
+    Layout child2(&listLayout, Positioning{.size = MessureVec2(1.0, 50)});
     rootLayout.resolveTransform();
     Mat3 transform1 = child1.getTransform();
     Mat3 transform2 = child2.getTransform();
@@ -401,8 +401,8 @@ TEST(LayoutTest, layoutListUp) {
 
 TEST(LayoutTest, layoutSizingFit) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fit);
-    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(100, 100), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Fit, .horizontalSizing = Sizing::Fit});
+    Layout child(&parentLayout, Positioning{.size = MessureVec2(50, 50)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -415,8 +415,8 @@ TEST(LayoutTest, layoutSizingFit) {
 
 TEST(LayoutTest, layoutSizingFitWidth) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fixed);
-    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(25, 25), Anchors::TopLeft, MessureVec2(50, 50));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(100, 100), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Fixed, .horizontalSizing = Sizing::Fit});
+    Layout child(&parentLayout, Positioning{.size = MessureVec2(50, 50), .offset = MessureVec2(25, 25)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -429,8 +429,8 @@ TEST(LayoutTest, layoutSizingFitWidth) {
 
 TEST(LayoutTest, layoutSizingFitHeight) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fixed, Sizing::Fit);
-    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(25, 25), Anchors::TopLeft, MessureVec2(50, 50));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(100, 100), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Fit, .horizontalSizing = Sizing::Fixed});
+    Layout child(&parentLayout, Positioning{.size = MessureVec2(50, 50), .offset = MessureVec2(25, 25)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -443,9 +443,9 @@ TEST(LayoutTest, layoutSizingFitHeight) {
 
 TEST(LayoutTest, layoutSizingFitMultipleChildren) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Fit, Sizing::Fit);
-    Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
-    Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(100, 100), Anchors::TopLeft, MessureVec2(50, 50));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(100, 100), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Fit, .horizontalSizing = Sizing::Fit});
+    Layout child1(&parentLayout, Positioning{.size = MessureVec2(50, 50)});
+    Layout child2(&parentLayout, Positioning{.size = MessureVec2(50, 50), .offset = MessureVec2(100, 100)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -457,9 +457,9 @@ TEST(LayoutTest, layoutSizingFitMultipleChildren) {
 
 TEST(LayoutTest, layoutSizingFitChildList) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::List, ListDirection::Down, Sizing::Fit, Sizing::Fit);
-    Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, .25));
-    Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, .25));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(100, 100), .childPlacement = ChildPlacement::List, .listDirection = ListDirection::Down, .verticalSizing = Sizing::Fit, .horizontalSizing = Sizing::Fit});
+    Layout child1(&parentLayout, Positioning{.size = MessureVec2(60, .25)});
+    Layout child2(&parentLayout, Positioning{.size = MessureVec2(60, .25)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -471,9 +471,14 @@ TEST(LayoutTest, layoutSizingFitChildList) {
 
 TEST(LayoutTest, layoutSizingFitChildListStretch) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::ListStretch, ListDirection::Down, Sizing::Fit, Sizing::Fit);
-    Layout child1(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, 25));
-    Layout child2(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(60, 25));
+    Layout parentLayout(&rootLayout, Positioning{
+            .size = MessureVec2(100, 100), 
+            .childPlacement = ChildPlacement::ListStretch, 
+            .listDirection = ListDirection::Down, 
+            .verticalSizing = Sizing::Fit, 
+            .horizontalSizing = Sizing::Fit});
+    Layout child1(&parentLayout, Positioning{.size = MessureVec2(60, 25)});
+    Layout child2(&parentLayout, Positioning{.size = MessureVec2(60, 25)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -485,8 +490,8 @@ TEST(LayoutTest, layoutSizingFitChildListStretch) {
 
 TEST(LayoutTest, layoutSizingExpandSmalerThanParent) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Expand, Sizing::Expand);
-    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(100, 100), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Expand, .horizontalSizing = Sizing::Expand});
+    Layout child(&parentLayout, Positioning{.size = MessureVec2(50, 50)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -499,8 +504,8 @@ TEST(LayoutTest, layoutSizingExpandSmalerThanParent) {
 
 TEST(LayoutTest, layoutSizingExpandLargerThanParent) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50), ChildPlacement::Free, ListDirection::Right, Sizing::Expand, Sizing::Expand);
-    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(50, 50), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Expand, .horizontalSizing = Sizing::Expand});
+    Layout child(&parentLayout, Positioning{.size = MessureVec2(100, 100)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -513,8 +518,8 @@ TEST(LayoutTest, layoutSizingExpandLargerThanParent) {
 
 TEST(LayoutTest, layoutSizingShrinkLargerThanParent) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50), ChildPlacement::Free, ListDirection::Right, Sizing::Shrink, Sizing::Shrink);
-    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(50, 50), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Shrink, .horizontalSizing = Sizing::Shrink});
+    Layout child(&parentLayout, Positioning{.size = MessureVec2(100, 100)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 
@@ -527,8 +532,8 @@ TEST(LayoutTest, layoutSizingShrinkLargerThanParent) {
 
 TEST(LayoutTest, layoutSizingShrinkSmalerThanParent) {
     Layout rootLayout(MessureVec2(200, 200), nullptr);
-    Layout parentLayout(&rootLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(100, 100), ChildPlacement::Free, ListDirection::Right, Sizing::Shrink, Sizing::Shrink);
-    Layout child(&parentLayout, Anchors::TopLeft, MessureVec2(0, 0), Anchors::TopLeft, MessureVec2(50, 50));
+    Layout parentLayout(&rootLayout, Positioning{.size = MessureVec2(100, 100), .listDirection = ListDirection::Right, .verticalSizing = Sizing::Shrink, .horizontalSizing = Sizing::Shrink});
+    Layout child(&parentLayout, Positioning{.size = MessureVec2(50, 50)});
     rootLayout.resolveTransform();
     Mat3 transform = parentLayout.getTransform();
 

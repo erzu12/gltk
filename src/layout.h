@@ -72,21 +72,25 @@ class KeyModifierFlags {
         }
 };
 
+struct Positioning {
+    MessureVec2 size = MessureVec2(0, 0);
+    MessureVec2 offset = MessureVec2(0, 0);
+    Vec2 anchor = Anchors::TopLeft;
+    Vec2 pivot = Vec2(-1.0f);
+    ChildPlacement childPlacement = ChildPlacement::Free;
+    ListDirection listDirection = ListDirection::Down;
+    Sizing verticalSizing = Sizing::Fixed;
+    Sizing horizontalSizing = Sizing::Fixed;
+    Overflow overflow = Overflow::None;
+};
+
 
 class Layout {
 public:
     Layout(MessureVec2 viewportSize, Renderer *renderer); // root layout defined by the window
     Layout(Layout *parent,
-           Vec2 anchor,
-           MessureVec2 offset,
-           Vec2 pivot,
-           MessureVec2 size,
-           ChildPlacement childPlacement = ChildPlacement::Free,
-           ListDirection listDirection = ListDirection::Down,
-           Sizing horizontalSizing = Sizing::Fixed,
-           Sizing verticalSizing = Sizing::Fixed,
-           std::unique_ptr<IRenderable> renderable = nullptr,
-           Overflow overflow = Overflow::None
+            Positioning positioning,
+            std::unique_ptr<IRenderable> renderable = nullptr
     );
 
     void addChild(Layout *child);
@@ -119,16 +123,7 @@ private:
 
     Renderer *renderer;
 
-    Vec2 anchor = Anchors::TopLeft;
-    MessureVec2 offset;
-    Vec2 pivot = Anchors::TopLeft;
-    MessureVec2 size;
-
-    ChildPlacement childPlacement = ChildPlacement::Free;
-    ListDirection listDirection = ListDirection::Down;
-    Sizing verticalSizing = Sizing::Fixed;
-    Sizing horizontalSizing = Sizing::Fixed;
-    Overflow overflow;
+    Positioning positioning;
 
     Vec2 scrolePosition = Vec2(0, 0);
 

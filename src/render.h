@@ -5,6 +5,16 @@
 
 namespace gltk {
 
+struct Style {
+    Vec3 color = Vec3(1.0f);
+    std::string font = "Arial";
+    int fontSize = 16;
+    float radius = 0.0f;
+    float borderWidth = 0.0f;
+    Vec3 borderColor = Vec3(0.0f);
+    float rotation = 0.0f;
+};
+
 class IRenderable {
 public:
     virtual Vec2 getSize(Vec2 LayoutBounds, bool fixedX, bool fixedY) = 0;

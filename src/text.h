@@ -29,11 +29,10 @@ enum class VerticalTextAlign {
 };
 
 class Text : public IRenderable {
-    Vec3 color;
+    Style style;
     std::string text;
     HorizontalTextAlign horizontalAlign;
     VerticalTextAlign verticalAlign;
-    int fontSize;
     int verticalBearing = 0;
     float lineHeight = 1.0f;
 
@@ -49,7 +48,7 @@ class Text : public IRenderable {
     float getHorizontalStartPos(float inPos, float boxSize, std::string line);
     std::vector<std::string> splitTextToLines(std::string text, float boxWidth);
 public:
-    Text(std::string text, int fontSize, std::string font = "Arial", Vec3 color = Vec3(), HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left, VerticalTextAlign verticalAlign = VerticalTextAlign::Top);
+    Text(std::string text, Style Style, HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left, VerticalTextAlign verticalAlign = VerticalTextAlign::Top);
     ~Text();
 
     void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) override;

@@ -6,15 +6,11 @@ LayoutBuilder::LayoutBuilder(Layout* parent) : parent(parent) {}
 
 LayoutBuilder& LayoutBuilder::setAnchor(Vec2 anchor) {
     this->anchor = anchor;
-    if (pivotSet == false) {
-        pivot = anchor;
-    }
     return *this;
 }
 
 LayoutBuilder& LayoutBuilder::setPivot(Vec2 pivot) {
     this->pivot = pivot;
-    pivotSet = true;
     return *this;
 }
 
@@ -55,7 +51,18 @@ LayoutBuilder& LayoutBuilder::setOverflow(Overflow overflow) {
 }
 
 std::unique_ptr<Layout> LayoutBuilder::build() {
-    return std::make_unique<Layout>(parent, anchor, offset, pivot, size, childPlacement, listDirection, horizontalSizing, verticalSizing, std::move(renderable), overflow);
+    Positioning positioning {
+        .size = size,
+        .offset = offset,
+        .anchor = anchor,
+        .pivot = pivot,
+        .childPlacement = childPlacement,
+        .listDirection = listDirection,
+        .verticalSizing = verticalSizing,
+        .horizontalSizing = horizontalSizing,
+        .overflow = overflow
+    };
+    return std::make_unique<Layout>(parent, positioning, std::move(renderable));
 }
 
 } // namespace gltk

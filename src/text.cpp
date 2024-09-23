@@ -5,8 +5,8 @@
 namespace gltk {
 
 
-Text::Text(std::string text, int fontSize, std::string font, Vec3 color, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign) : 
-    text(text), fontSize(fontSize), color(color), horizontalAlign(horizontalAlign), verticalAlign(verticalAlign) {
+Text::Text(std::string text, Style style, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign) : 
+    text(text), style(style), horizontalAlign(horizontalAlign), verticalAlign(verticalAlign) {
     float vertices[] = {
         0.0f, 0.0f,
         0.0f, 1.0f,
@@ -16,7 +16,7 @@ Text::Text(std::string text, int fontSize, std::string font, Vec3 color, Horizon
         1.0f, 1.0f
     };
 
-    loadCharacters(font, fontSize);
+    loadCharacters(style.font, style.fontSize);
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -42,7 +42,7 @@ void Text::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipR
     Vec2 inPos = Vec2(modelMatrix[0][2], modelMatrix[1][2]);
     Vec2 startPos;
     startPos.y = getVerticalStartPos(inPos.y, size.y, lines);
-    shader.UniformVec3("color", color);
+    shader.UniformVec3("color", style.color);
     glEnable(GL_SCISSOR_TEST);
     glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     for (std::string line : lines) {
@@ -68,14 +68,14 @@ void Text::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipR
 
             startPos.x += (ch.advance >> 6);
         }
-        startPos.y += fontSize * lineHeight;
+        startPos.y += style.fontSize * lineHeight;
     }
     glDisable(GL_SCISSOR_TEST);
 }
 
 Vec2 Text::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
     if (!fixedX) {
-        return Vec2(getRenderdLineWidht(text), fontSize * lineHeight);
+        return Vec2(getRenderdLineWidht(text), style.fontSize * lineHeight);
     }
     auto lines = splitTextToLines(text, LayoutSize.x);
     return getRenderdSize(lines);
@@ -187,7 +187,7 @@ Vec2 Text::getRenderdSize(std::vector<std::string> lines) {
     float y = 0;
     for (std::string line : lines) {
         x = std::max(x, (float)getRenderdLineWidht(line));
-        y += fontSize * lineHeight;
+        y += style.fontSize * lineHeight;
     }
     return Vec2(x, y);
 }

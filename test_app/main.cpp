@@ -10,32 +10,24 @@ int main () {
     });
 
     auto bg = LayoutBuilder(window.get_layout())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.1f, 0.1f, 0.1f), 0.0))
+        .setRenderable(std::make_unique<gltk::Box>(Style{Vec3(0.1f, 0.1f, 0.1f)}))
         .setSize(MessureVec2(1., 1.))
         .build();
 
     auto boxLayout = LayoutBuilder(window.get_layout())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 1.0f, 1.0f), 50.0))
-        .setOffset(MessureVec2(200, 200))
-        .setSize(MessureVec2(.5, .5))
-        .setChildPlacement(ChildPlacement::List)
-        .setListDirection(ListDirection::Down)
+        .setRenderable(std::make_unique<gltk::Box>(Style{.color = Vec3(1.0f, 1.0f, 1.0f), .radius = 50.0}))
+        .setOffset(MessureVec2(200, 400))
+        .setSize(MessureVec2(.6, .3))
+        .setOverflow(Overflow::None)
+        .setSizing(Sizing::Expand, Sizing::Expand)
         .build();
     
-    auto child1 = LayoutBuilder(boxLayout.get())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(1.0f, 0.0f, 0.0f), 10.0))
-        .setAnchor(Anchors::TopLeft)
-        .setPivot(Anchors::CenterLeft)
-        .setSize(MessureVec2(.8, 0.5))
-        .build();
-
-    auto child1child = LayoutBuilder(child1.get())
-        .setRenderable(std::make_unique<gltk::Box>(Vec3(0.0f, 1.0f, 0.0f), 10.0))
-        .setAnchor(Anchors::Center)
-        .setPivot(Anchors::Center)
-        .setSize(MessureVec2(200, 200))
-        .build();
-    
+    auto child1 = std::make_unique<Layout>(boxLayout.get(), Positioning {
+        .size = MessureVec2(1., 0.8),
+        .anchor = Anchors::Center,
+        .verticalSizing = Sizing::Expand,
+        .horizontalSizing = Sizing::Expand}
+        ,std::make_unique<gltk::Box>(Style{.color = Vec3(1.0f, 0.0f, 0.0f), .radius = 50.0, .rotation = 1.0}));
 
 
 
