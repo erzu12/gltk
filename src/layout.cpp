@@ -50,6 +50,9 @@ void Layout::registerForRenderRecursive(BoundingBox clipRegion) {
         }
         for (Layout* child : children) {
             clipRegion = clipRegion.intersect(bounds);
+            if (overflow == Overflow::None) {
+                clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000, 1000000));
+            }
             child->registerForRenderRecursive(clipRegion);
         }
     }

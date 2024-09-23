@@ -8,7 +8,7 @@ Vec2 Box::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
     return Vec2();
 }
 
-Box::Box(Vec3 color, float radius) : color(color), radius(radius) {
+Box::Box(Vec3 color, float radius, float rotation) : color(color), radius(radius), rotation(rotation) {
     float vertices[] = {
         -0.5f, -0.5f,
         -0.5f, 0.5f,
@@ -34,6 +34,11 @@ void Box::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRe
     Mat3 viewMatrix = Mat3::viewMatrix(viewSize);
     shader.use();
     shader.UniformVec3("color", color);
+    
+    modelMatrix = Mat3::translationMatrix(Vec2(modelMatrix[0][2], modelMatrix[1][2]));
+    modelMatrix.rotateMatrix(rotation);
+    modelMatrix.scaleMatrix(size);
+
     Mat3 transform = viewMatrix * modelMatrix;
     shader.UniformMat3("transform", transform);
     float clipedRadius = std::min(radius, std::min(size.x, size.y) / 2.0f);
