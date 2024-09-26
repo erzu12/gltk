@@ -119,6 +119,7 @@ Window::Window() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);
 }
 
 void Window::run(std::function<void(Vec2)> render_callback) {

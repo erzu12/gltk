@@ -331,6 +331,10 @@ Mat3 Layout::getTransform() {
     return resolvedTransform.value();
 }
 
+IRenderable* Layout::getRenderable() {
+    return renderable.value().get();
+}
+
 void Layout::setSize(MessureVec2 size) {
     this->positioning.size = size;
 }

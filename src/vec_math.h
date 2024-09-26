@@ -3,6 +3,7 @@
 #include <math.h>
 #include <array>
 #include <ostream>
+#include <vector>
 
 #define PI 3.14159265359f
 
@@ -22,6 +23,8 @@ public:
 
     Vec2 operator-(const Vec2 b) const;
     Vec2 operator-=(const Vec2 b);
+
+    Vec2 operator-() const;
 
     float Magnitude() const;
 
@@ -136,6 +139,7 @@ public:
     float height() { return std::max(max.y - min.y, 0.0f); }
     Vec2 size() { return Vec2(width(), height()); }
     BoundingBox intersect(const BoundingBox &other);
+    static BoundingBox fromPoints(std::vector<Vec2> points);
 
 
     friend std::ostream &operator<<(std::ostream &os, const BoundingBox &bb);

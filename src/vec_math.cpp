@@ -32,6 +32,13 @@ Vec2 Vec2::operator-=(const Vec2 b) {
     return *this;
 }
 
+Vec2 Vec2::operator-() const {
+    Vec2 c;
+    c.x = -this->x;
+    c.y = -this->y;
+    return c;
+}
+
 float Vec2::Magnitude() const {
     return sqrt(this->x*this->x + this->y*this->y);
 }
@@ -371,6 +378,15 @@ BoundingBox BoundingBox::intersect(const BoundingBox &other) {
     BoundingBox bb;
     bb.max = Vec2(std::min(max.x, other.max.x), std::min(max.y, other.max.y));
     bb.min = Vec2(std::max(min.x, other.min.x), std::max(min.y, other.min.y));
+    return bb;
+}
+
+BoundingBox BoundingBox::fromPoints(std::vector<Vec2> points) {
+    BoundingBox bb;
+    for (auto &point : points) {
+        bb.max.max(point);
+        bb.min.min(point);
+    }
     return bb;
 }
 
