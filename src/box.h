@@ -10,6 +10,7 @@ class Box : public IRenderable {
     Style style;
     const Shader shader = Shader("assets/box.vert", "assets/box.frag");
     unsigned int VAO, VBO;
+    Vec2 solveTriangle(float angle, float hypotenuse);
 public:
     Box(Style style);
     ~Box();

@@ -1,20 +1,17 @@
-#include "box.h"
-#include <glad/glad.h>
-#include <iostream>
+#include "canvas.h"
 
 namespace gltk {
 
-Vec2 Box::solveTriangle(float angle, float hypotenuse) {
-    float x = cos(angle) * hypotenuse;
-    float y = sin(angle) * hypotenuse;
-    return Vec2(std::abs(x), std::abs(y));
+
+void Canvas::addObject(std::unique_ptr<CanvasObject> &object) {
+    objects.push_back(std::move(object));
 }
 
-Vec2 Box::getSize(Vec2 layoutSize, bool fixedX, bool fixedY) {
-    return Vec2();
+Vec2 Canvas::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
+    return size;
 }
 
-Box::Box(Style style) : style(style) {
+Canvas::Canvas(Style style, Vec2 size) : style(style), size(size) {
     float vertices[] = {
         -0.5f, -0.5f,
         -0.5f, 0.5f,
@@ -36,11 +33,11 @@ Box::Box(Style style) : style(style) {
     glEnableVertexAttribArray(0);
 }
 
-void Box::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
+void Canvas::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
     Mat3 viewMatrix = Mat3::viewMatrix(viewSize);
     shader.use();
     shader.UniformVec3("color", style.color);
-    
+
     modelMatrix = Mat3::translationMatrix(Vec2(modelMatrix[0][2], modelMatrix[1][2]));
     modelMatrix.rotateMatrix(style.rotation);
     modelMatrix.scaleMatrix(size);
@@ -54,10 +51,11 @@ void Box::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRe
     glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
     glDisable(GL_SCISSOR_TEST);
 }
 
-Box::~Box() {
+Canvas::~Canvas() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }

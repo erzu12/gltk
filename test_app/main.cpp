@@ -19,7 +19,7 @@ int main () {
         .setOffset(MessureVec2(200, 400))
         .setSize(MessureVec2(.6, .3))
         .setOverflow(Overflow::None)
-        .setSizing(Sizing::Expand, Sizing::Expand)
+        .setSizing(Sizing::Fixed, Sizing::Fixed)
         .build();
     
     auto child1 = std::make_unique<Layout>(boxLayout.get(), Positioning {
@@ -27,7 +27,7 @@ int main () {
         .anchor = Anchors::Center,
         .verticalSizing = Sizing::Expand,
         .horizontalSizing = Sizing::Expand}
-        ,std::make_unique<gltk::Box>(Style{.color = Vec3(1.0f, 0.0f, 0.0f), .radius = 50.0, .rotation = 1.0}));
+        ,std::make_unique<gltk::Box>(Style{.color = Vec3(1.0f, 0.0f, 0.0f), .radius = 1.0, .rotation = PI / 4.0}));
 
 
 

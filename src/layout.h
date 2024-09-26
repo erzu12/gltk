@@ -81,7 +81,7 @@ struct Positioning {
     ListDirection listDirection = ListDirection::Down;
     Sizing verticalSizing = Sizing::Fixed;
     Sizing horizontalSizing = Sizing::Fixed;
-    Overflow overflow = Overflow::None;
+    Overflow overflow = Overflow::Scroll;
 };
 
 

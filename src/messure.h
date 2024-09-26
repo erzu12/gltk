@@ -17,6 +17,8 @@ enum class Sizing {
     Fit,
 };
 
+std::ostream& operator<<(std::ostream& os, const Sizing& sizing);
+
 class IMessure {
     public:
         virtual int resolve(int parrentSize) = 0;

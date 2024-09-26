@@ -27,6 +27,6 @@ FetchContent_MakeAvailable(googletest)
 
 add_subdirectory(extern/glad)
 add_subdirectory(src)
-# add_subdirectory(test_app)
-add_subdirectory(simple_slide_src)
+add_subdirectory(test_app)
+# add_subdirectory(simple_slide_src)
 add_subdirectory(test)
