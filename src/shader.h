@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vec_math.h"
+#include "color.h"
 #include <functional>
 #include <glad/glad.h>
 
@@ -39,6 +40,7 @@ public:
     void UniformFloat(std::string name, float value) const;
     void UniformVec2(std::string name, Vec2 vec) const;
     void UniformVec3(std::string name, Vec3 vec) const;
+    void UniformColor(std::string name, Color color) const;
     void UniformMat3(std::string name, Mat3 mat) const;
 private:
     static std::unique_ptr<GlResource> CompileShader(std::string path, GLenum shaderType);

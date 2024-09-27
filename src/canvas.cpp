@@ -120,7 +120,7 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
 void PathObject::render(Mat3 &viewMatrix) {
     std::cout << "rendering path" << std::endl;
     shader.use();
-    shader.UniformVec3("color", style.color);
+    shader.UniformColor("color", style.color);
     shader.UniformMat3("transform", viewMatrix);
 
     //Using a triangle fan to triangulate the polygon causes points outside the polygon to be covered 
@@ -150,7 +150,7 @@ void PathObject::render(Mat3 &viewMatrix) {
     glDrawElements(GL_TRIANGLES, borderIndCount, GL_UNSIGNED_INT, 0);
 
     // draw border
-    shader.UniformVec3("color", style.borderColor);
+    shader.UniformColor("color", style.borderColor);
     glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
     glStencilFunc( GL_EQUAL, 0x1, 0x1 );
     glBindVertexArray(quadVAO);
@@ -197,7 +197,7 @@ Canvas::Canvas(Style style, Vec2 size) : style(style), size(size) {
 void Canvas::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
     Mat3 viewMatrix = Mat3::viewMatrix(viewSize);
     shader.use();
-    shader.UniformVec3("color", style.color);
+    shader.UniformColor("color", style.color);
 
     modelMatrix = Mat3::translationMatrix(Vec2(modelMatrix[0][2], modelMatrix[1][2]));
     modelMatrix.rotateMatrix(style.rotation);

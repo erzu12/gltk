@@ -39,7 +39,7 @@ Box::Box(Style style) : style(style) {
 void Box::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
     Mat3 viewMatrix = Mat3::viewMatrix(viewSize);
     shader.use();
-    shader.UniformVec3("color", style.color);
+    shader.UniformColor("color", style.color);
     
     modelMatrix = Mat3::translationMatrix(Vec2(modelMatrix[0][2], modelMatrix[1][2]));
     modelMatrix.rotateMatrix(style.rotation);

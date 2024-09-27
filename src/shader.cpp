@@ -83,6 +83,10 @@ void Shader::UniformVec3(std::string name, Vec3 vec) const {
     glUniform3f(glGetUniformLocation(*shaderProgram.get(), name.c_str()), vec.x, vec.y, vec.z);
 }
 
+void Shader::UniformColor(std::string name, Color color) const {
+    glUniform4f(glGetUniformLocation(*shaderProgram.get(), name.c_str()), color.r, color.g, color.b, color.a);
+}
+
 void Shader::UniformMat3(std::string name, Mat3 mat) const {
     glUniformMatrix3fv(glGetUniformLocation(*shaderProgram.get(), name.c_str()), 1, GL_TRUE, mat.data());
 }

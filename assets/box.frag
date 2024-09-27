@@ -1,7 +1,7 @@
 # version 460 core
 out vec4 FragColor;
 
-uniform vec3 color;
+uniform vec4 color;
 uniform float radius;
 uniform vec2 pixelSize;
 
@@ -20,5 +20,5 @@ void main() {
         discard;
     }
 
-	FragColor = vec4(color, 1.0);
+	FragColor = vec4(color);
 }

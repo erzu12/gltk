@@ -2,16 +2,17 @@
 #include <vector>
 
 #include "vec_math.h"
+#include "color.h"
 
 namespace gltk {
 
 struct Style {
-    Vec3 color = Vec3(1.0f);
+    Color color = Color(1.0);
     std::string font = "Arial";
     int fontSize = 16;
     float radius = 0.0f;
     float borderWidth = 0.0f;
-    Vec3 borderColor = Vec3(0.0f);
+    Color borderColor = Color();
     float rotation = 0.0f;
 };
 

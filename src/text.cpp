@@ -42,7 +42,7 @@ void Text::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipR
     Vec2 inPos = Vec2(modelMatrix[0][2], modelMatrix[1][2]);
     Vec2 startPos;
     startPos.y = getVerticalStartPos(inPos.y, size.y, lines);
-    shader.UniformVec3("color", style.color);
+    shader.UniformColor("color", style.color);
     glEnable(GL_SCISSOR_TEST);
     glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     for (std::string line : lines) {
