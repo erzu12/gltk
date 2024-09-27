@@ -16,7 +16,7 @@ int main () {
 
     auto canvas = std::make_unique<Canvas>(Style{.color = Color(0.9f, 0.9f, 0.9f)}, Vec2(500, 500));
     auto path = std::make_unique<PathObject>(std::vector<Vec2>{Vec2(100, 100), Vec2(300, 100), Vec2(150, 250), Vec2(150, 150), Vec2(300, 300), Vec2(100, 300)}, 
-            Style{.color = Color::fromHSV(170, 0.8, 0.8), .borderWidth = 10, .borderColor = Color(0.0f, 0.0f, 1.0f)}, true);
+            Style{.color = Color::transparent(), .borderWidth = 10, .borderColor = Color(0.0f, 0.0f, 1.0f)}, true);
 
     canvas->addObject(std::move(path));
 
