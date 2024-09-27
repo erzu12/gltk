@@ -105,7 +105,7 @@ Vec2 Vec2::min(const Vec2 b) {
     return *this;
 }
 
-Vec2 Vec2::Lerp(Vec2 b, float t) const {
+Vec2 Vec2::lerp(Vec2 b, float t) const {
     Vec2 c;
     c.x = this->x + t * (b.x - this->x);
     c.y = this->y + t * (b.y - this->y);

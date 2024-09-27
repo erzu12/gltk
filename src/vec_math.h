@@ -45,7 +45,7 @@ public:
     Vec2 max(const Vec2 b);
     Vec2 min(const Vec2 b);
 
-    Vec2 Lerp(Vec2 b, float t) const;
+    Vec2 lerp(Vec2 b, float t) const;
 
     bool operator==(const Vec2 &b) const;
 

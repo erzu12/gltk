@@ -27,12 +27,13 @@ class PathObject : public CanvasObject {
     bool closed = false;
     Style style;
 public:
-    PathObject(std::vector<Vec2> points, Style style, bool closed = false);
+    PathObject(std::vector<Vec2> points, Style style, bool interpolate, bool closed = false);
     ~PathObject();
 
     void render(Mat3 &viewMatrix) override;
 private:
     BoundingBox generateBorder(std::vector<Vec2> points, float width, bool closed);
+    std::vector<Vec2> bezierInterpolation(std::vector<Vec2> points);
 };
 
 class Canvas : public IRenderable {

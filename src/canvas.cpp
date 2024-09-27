@@ -1,9 +1,14 @@
 #include "canvas.h"
 #include <iostream>
+#include <cassert>
 
 namespace gltk {
 
-PathObject::PathObject(std::vector<Vec2> points, Style style, bool closed) : points(points), style(style), closed(closed) {
+PathObject::PathObject(std::vector<Vec2> points, Style style, bool interpolate, bool closed) : points(points), style(style), closed(closed) {
+    if (interpolate) {
+        this->points = bezierInterpolation(points);
+        points = this->points;
+    }
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
@@ -37,7 +42,33 @@ PathObject::PathObject(std::vector<Vec2> points, Style style, bool closed) : poi
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+}
 
+std::vector<Vec2> PathObject::bezierInterpolation(std::vector<Vec2> points) {
+    assert(points.size() % 4 == 0);
+    std::vector<Vec2> interpolated;
+    int resolution = 100;
+
+    for (int i = 0; i < points.size(); i += 4) {
+        Vec2 start = points[i];
+        Vec2 control1 = points[i + 1];
+        Vec2 control2 = points[i + 2];
+        Vec2 end = points[i + 3];
+
+        int steps = resolution;
+        if (i == points.size() - 4) {
+            steps = resolution + 1;
+        }
+        for (int j = 0; j < steps; j++) {
+            float t = (float)j / resolution;
+            Vec2 a = start.lerp(control1, t);
+            Vec2 b = control1.lerp(control2, t);
+            Vec2 c = control2.lerp(end, t);
+            Vec2 point = a.lerp(b, t).lerp(b.lerp(c, t), t);
+            interpolated.push_back(point);
+        }
+    }
+    return interpolated;
 }
 
 BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bool closed) {
@@ -51,6 +82,9 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
     Vec2 current;
     if (closed) {
         current = (points[0] - points.back()).Normalize();
+        if (current == Vec2(0, 0)) {
+            current = (points[0] - points[points.size() - 2]).Normalize();
+        }
     }
     else {
         current = (points[1] - points[0]).Normalize();
@@ -118,7 +152,6 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
 }
 
 void PathObject::render(Mat3 &viewMatrix) {
-    std::cout << "rendering path" << std::endl;
     shader.use();
     shader.UniformColor("color", style.color);
     shader.UniformMat3("transform", viewMatrix);

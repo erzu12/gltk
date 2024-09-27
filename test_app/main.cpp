@@ -15,8 +15,34 @@ int main () {
         .build();
 
     auto canvas = std::make_unique<Canvas>(Style{.color = Color(0.9f, 0.9f, 0.9f)}, Vec2(500, 500));
-    auto path = std::make_unique<PathObject>(std::vector<Vec2>{Vec2(100, 100), Vec2(300, 100), Vec2(150, 250), Vec2(150, 150), Vec2(300, 300), Vec2(100, 300)}, 
-            Style{.color = Color::transparent(), .borderWidth = 10, .borderColor = Color(0.0f, 0.0f, 1.0f)}, true);
+    
+    std::vector<Vec2> points = {
+        Vec2(200, 100),
+        Vec2(250, 100),
+        Vec2(300, 150),
+        Vec2(300, 200),
+
+        Vec2(300, 200),
+        Vec2(300, 250),
+        Vec2(250, 300),
+        Vec2(200, 300),
+
+        Vec2(200, 300),
+        Vec2(150, 300),
+        Vec2(100, 250),
+        Vec2(100, 200),
+
+        Vec2(100, 200),
+        Vec2(100, 150),
+        Vec2(150, 100),
+        Vec2(200, 100)
+    };
+
+    auto path = std::make_unique<PathObject>(points, Style{
+            .color = Color::turquoise(), 
+            .borderWidth = 40,
+            .borderColor = Color(0.0f, 0.0f, 1.0f)
+        }, true, true);
 
     canvas->addObject(std::move(path));
 
