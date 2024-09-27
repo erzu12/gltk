@@ -41,7 +41,7 @@ int main () {
     auto path = std::make_unique<PathObject>(points, Style{
             .color = Color::turquoise(), 
             .borderWidth = 40,
-            .borderColor = Color(0.0f, 0.0f, 1.0f)
+            .borderColor = Color::blue(),
         }, true, true);
 
     canvas->addObject(std::move(path));

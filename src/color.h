@@ -33,7 +33,16 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Color &f2);
 
 
-
+    static constexpr Color aliceblue()               { return Color(0.9411764, 0.9725490, 1        ); }
+    static constexpr Color antiquewhite()            { return Color(0.9803921, 0.9215686, 0.8431372); }
+    static constexpr Color aqua()                    { return Color(0        , 1        , 1        ); }
+    static constexpr Color aquamarine()              { return Color(0.4980392, 1        , 0.8313725); }
+    static constexpr Color azure()                   { return Color(0.9411764, 1        , 1        ); }
+    static constexpr Color beige()                   { return Color(0.9607843, 0.9607843, 0.8627450); }
+    static constexpr Color bisque()                  { return Color(1        , 0.8941176, 0.7686274); }
+    static constexpr Color black()                   { return Color(0        , 0        , 0        ); }
+    static constexpr Color blanchedalmond()          { return Color(1        , 0.9215686, 0.8039215); }
+    static constexpr Color blue()                    { return Color(0        , 0        , 1        ); }
     static constexpr Color blueviolet()              { return Color(0.5411764, 0.1686274, 0.8862745); }
     static constexpr Color brown()                   { return Color(0.6470588, 0.1647058, 0.1647058); }
     static constexpr Color burlywood()               { return Color(0.8705882, 0.7215686, 0.5294117); }
