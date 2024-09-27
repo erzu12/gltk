@@ -22,6 +22,8 @@ class PathObject : public CanvasObject {
     const Shader shader = Shader("assets/color.vert", "assets/color.frag");
     unsigned int VAO, VBO;
     unsigned int quadVAO, quadVBO;
+    unsigned int borderVAO, borderVBO, borderEBO;
+    unsigned int borderIndCount;
     bool closed = false;
     Style style;
 public:
@@ -29,6 +31,8 @@ public:
     ~PathObject();
 
     void render(Mat3 &viewMatrix) override;
+private:
+    BoundingBox generateBorder(std::vector<Vec2> points, float width, bool closed);
 };
 
 class Canvas : public IRenderable {

@@ -43,7 +43,7 @@ float Vec2::Magnitude() const {
     return sqrt(this->x*this->x + this->y*this->y);
 }
 
-Vec2 Vec2::Noramlize() {
+Vec2 Vec2::Normalize() {
     float mag = Magnitude();
     if(mag == 0) return *this;
     this->x /= mag;

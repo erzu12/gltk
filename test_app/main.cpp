@@ -14,8 +14,10 @@ int main () {
         .setSize(MessureVec2(1., 1.))
         .build();
 
-    auto canvas = std::make_unique<Canvas>(Style{Vec3(0.9f, 0.9f, 0.9f)}, Vec2(500, 500));
-    auto path = std::make_unique<PathObject>(std::vector<Vec2>{Vec2(100, 100), Vec2(300, 100), Vec2(150, 250), Vec2(150, 150), Vec2(300, 300), Vec2(100, 300)}, Style{Vec3(1.0f, 0.0f, 0.0f)});
+    auto canvas = std::make_unique<Canvas>(Style{.color = Vec3(0.9f, 0.9f, 0.9f)}, Vec2(500, 500));
+    auto path = std::make_unique<PathObject>(std::vector<Vec2>{Vec2(100, 100), Vec2(300, 100), Vec2(150, 250), Vec2(150, 150), Vec2(300, 300), Vec2(100, 300)}, 
+            Style{.color = Vec3(1.0f, 0.0f, 0.0f), .borderWidth = 10, .borderColor = Vec3(0.0f, 0.0f, 1.0f)}, true);
+
     canvas->addObject(std::move(path));
 
     auto canvasLayout = LayoutBuilder(window.get_layout())

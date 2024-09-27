@@ -28,7 +28,7 @@ public:
 
     float Magnitude() const;
 
-    Vec2 Noramlize();
+    Vec2 Normalize();
 
     Vec2 operator*(const float b) const;
     Vec2 operator*=(const float b);
