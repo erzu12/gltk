@@ -43,6 +43,12 @@ public:
     Rectangle(Vec2 pos, Vec2 size, Style style);
 };
 
+class Oval : public PathObject {
+    static std::array<Vec2, 16> ovalPoints();
+public:
+    Oval(Vec2 pos, Vec2 size, Style style);
+};
+
 class Canvas : public IRenderable {
     Style style;
     const Shader shader = Shader("assets/box.vert", "assets/box.frag");

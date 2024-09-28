@@ -202,11 +202,42 @@ void Canvas::addObject(std::unique_ptr<CanvasObject> object) {
 }
 
 Rectangle::Rectangle(Vec2 pos, Vec2 size, Style style) : PathObject({
-    pos,
-    pos + Vec2(size.x, 0),
-    pos + size,
-    pos + Vec2(0, size.y)
+    pos - size / 2.0f,
+    pos + Vec2(size.x, -size.y) / 2.0f,
+    pos + size / 2.0f,
+    pos + Vec2(-size.x, size.y) / 2.0f
 }, style, false, true) {}
+
+Oval::Oval(Vec2 pos, Vec2 size, Style style) : PathObject([&] {
+    float a = 1.00005519;
+    float b = 0.55342686;
+    float c = 0.99873585;
+
+    std::vector<Vec2> newPints {
+        Vec2(0, a),
+        Vec2(b, c),
+        Vec2(c, b),
+        Vec2(a, 0),
+        Vec2(a, 0),
+        Vec2(c, -b),
+        Vec2(b, -c),
+        Vec2(0, -a),
+        Vec2(0, -a),
+        Vec2(-b, -c),
+        Vec2(-c, -b),
+        Vec2(-a, 0),
+        Vec2(-a, 0),
+        Vec2(-c, b),
+        Vec2(-b, c),
+        Vec2(0, a)
+    };
+
+    for (auto &point : newPints) {
+        point = point * size / 2.0f + pos;
+    }
+
+    return newPints;
+}(), style, true, true) {}
 
 Vec2 Canvas::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
     return size;

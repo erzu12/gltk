@@ -14,11 +14,13 @@ int main () {
         .setSize(MessureVec2(1., 1.))
         .build();
 
-    auto canvas = std::make_unique<Canvas>(Style{.color = Color(0.9f, 0.9f, 0.9f)}, Vec2(500, 500));
-    auto rect = std::make_unique<Rectangle>(Vec2(100, 200), Vec2(100, 200), Style{.color = Color::red()});
+    auto canvas = std::make_unique<Canvas>(Style{.color = Color::snow()}, Vec2(500, 500));
+    auto circle = std::make_unique<Oval>(Vec2(200, 200), Vec2(200, 200), Style{.color = Color::crimson()});
+    auto rect = std::make_unique<Rectangle>(Vec2(400, 400), Vec2(100, 100), Style{.color = Color::green()});
     
 
 
+    canvas->addObject(std::move(circle));
     canvas->addObject(std::move(rect));
 
     auto canvasLayout = LayoutBuilder(window.get_layout())
