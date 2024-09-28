@@ -88,7 +88,7 @@ void Text::loadCharacters(std::string font, int fontSize) {
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, ("/usr/share/fonts/TTF/" + font + ".ttf").c_str(), 0, &face)) {
+    if (FT_New_Face(ft, ("/usr/share/fonts/TTF/" + font + ".TTF").c_str(), 0, &face)) {
         std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }
 

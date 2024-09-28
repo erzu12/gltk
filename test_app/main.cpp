@@ -34,6 +34,18 @@ int main () {
         .setOffset(MessureVec2(100, 100))
         .build();
 
+    auto box = LayoutBuilder(window.get_layout())
+        .setRenderable(std::make_unique<Box>(Style{.color = Color::white(), .radius = 20}))
+        .setSize(MessureVec2(600, 200))
+        .setOffset(MessureVec2(100, 700))
+        .build();
+
+    auto text = LayoutBuilder(box.get())
+        .setRenderable(std::make_unique<Text>("Hello World", Style{.color = Color::black(), .fontSize = 100}))
+        .setSizing(Sizing::Fit, Sizing::Fit)
+        .setAnchor(Anchors::Center)
+        .build();
+
 
 
     window.run([&](Vec2 viewport) {
