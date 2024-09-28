@@ -4,24 +4,50 @@
 
 namespace gltk {
 
-PathObject::PathObject(std::vector<Vec2> points, Style style, bool interpolate, bool closed) : points(points), style(style), closed(closed) {
+PathObject::PathObject(std::vector<Vec2> points, Vec2 pos, Style style, bool interpolate, bool closed) : points(points), pos(pos), interpolate(interpolate), style(style), closed(closed) {
     if (interpolate) {
         this->points = bezierInterpolation(points);
-        points = this->points;
     }
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vec2) * points.size(), points.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    auto bounds = generateBorder(points, style.borderWidth, closed);
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glGenVertexArrays(1, &borderVAO);
+    glGenBuffers(1, &borderVBO);
+    glGenBuffers(1, &borderEBO);
+    
+    glBindVertexArray(borderVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, borderVBO);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+}
+
+void PathObject::regenerateGeometry() {
+    std::vector<Vec2> absolutePoints;
+    absolutePoints.reserve(points.size());
+    for (auto &point : points) {
+        absolutePoints.push_back(point + pos);
+    }
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vec2) * absolutePoints.size(), absolutePoints.data(), GL_DYNAMIC_DRAW);
+    auto bounds = generateBorder(absolutePoints, style.borderWidth, closed);
 
     float vertices[] = {
         bounds.min.x, bounds.min.y,
@@ -32,16 +58,10 @@ PathObject::PathObject(std::vector<Vec2> points, Style style, bool interpolate, 
         bounds.max.x, bounds.max.y
     };
 
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-
     glBindVertexArray(quadVAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    dirty = false;
 }
 
 std::vector<Vec2> PathObject::bezierInterpolation(std::vector<Vec2> points) {
@@ -133,9 +153,6 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
     }
 
 
-    glGenVertexArrays(1, &borderVAO);
-    glGenBuffers(1, &borderVBO);
-    glGenBuffers(1, &borderEBO);
     glBindVertexArray(borderVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, borderVBO);
@@ -144,14 +161,13 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, borderEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, borderIndCount * sizeof(unsigned int), inds.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     return BoundingBox::fromPoints(verts);
 }
 
 void PathObject::render(Mat3 &viewMatrix) {
+    if (dirty) {
+        regenerateGeometry();
+    }
     shader.use();
     shader.UniformColor("color", style.color);
     shader.UniformMat3("transform", viewMatrix);
@@ -192,6 +208,26 @@ void PathObject::render(Mat3 &viewMatrix) {
     glDisable(GL_STENCIL_TEST);
 }
 
+void PathObject::rotate(float angle) {
+    for (auto &point : points) {
+        point = point.Rot(angle);
+    }
+    dirty = true;
+}
+
+void PathObject::translate(Vec2 pos) {
+    this->pos += pos;
+    dirty = true;
+}
+
+void PathObject::scale(Vec2 scale) {
+    for (auto &point : points) {
+        point = point * scale;
+    }
+    dirty = true;
+}
+
+
 PathObject::~PathObject() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -202,13 +238,15 @@ void Canvas::addObject(std::unique_ptr<CanvasObject> object) {
 }
 
 Rectangle::Rectangle(Vec2 pos, Vec2 size, Style style) : PathObject({
-    pos - size / 2.0f,
-    pos + Vec2(size.x, -size.y) / 2.0f,
-    pos + size / 2.0f,
-    pos + Vec2(-size.x, size.y) / 2.0f
-}, style, false, true) {}
+    -size / 2.0f,
+    Vec2(size.x, -size.y) / 2.0f,
+    size / 2.0f,
+    Vec2(-size.x, size.y) / 2.0f
+}, pos, style, false, true) {}
 
 Oval::Oval(Vec2 pos, Vec2 size, Style style) : PathObject([&] {
+    // bezier curves cant be used to draw a perfect circle but a very close approximation is possible
+    // see https://spencermortensen.com/articles/bezier-circle/ for more information
     float a = 1.00005519;
     float b = 0.55342686;
     float c = 0.99873585;
@@ -233,11 +271,11 @@ Oval::Oval(Vec2 pos, Vec2 size, Style style) : PathObject([&] {
     };
 
     for (auto &point : newPints) {
-        point = point * size / 2.0f + pos;
+        point = point * size / 2.0f;
     }
 
     return newPints;
-}(), style, true, true) {}
+}(), pos, style, true, true) {}
 
 Vec2 Canvas::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
     return size;

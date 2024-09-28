@@ -18,7 +18,6 @@ public:
 };
 
 
-
 class PathObject : public CanvasObject {
     std::vector<Vec2> points;
     const Shader shader = Shader("assets/color.vert", "assets/color.frag");
@@ -27,27 +26,39 @@ class PathObject : public CanvasObject {
     unsigned int borderVAO, borderVBO, borderEBO;
     unsigned int borderIndCount;
     bool closed = false;
+    bool interpolate = false;
     Style style;
+
+    Vec2 pos = Vec2(0, 0);
+    bool dirty = true;
 public:
-    PathObject(std::vector<Vec2> points, Style style, bool interpolate, bool closed = false);
+    PathObject(std::vector<Vec2> points, Vec2 pos, Style style, bool interpolate, bool closed = false);
     ~PathObject();
+
+    void rotate(float angle);
+    void translate(Vec2 pos);
+    void scale(Vec2 scale);
 
     void render(Mat3 &viewMatrix) override;
 private:
+    void regenerateGeometry();
     BoundingBox generateBorder(std::vector<Vec2> points, float width, bool closed);
     std::vector<Vec2> bezierInterpolation(std::vector<Vec2> points);
 };
+
 
 class Rectangle : public PathObject {
 public:
     Rectangle(Vec2 pos, Vec2 size, Style style);
 };
 
+
 class Oval : public PathObject {
     static std::array<Vec2, 16> ovalPoints();
 public:
     Oval(Vec2 pos, Vec2 size, Style style);
 };
+
 
 class Canvas : public IRenderable {
     Style style;

@@ -15,8 +15,13 @@ int main () {
         .build();
 
     auto canvas = std::make_unique<Canvas>(Style{.color = Color::snow()}, Vec2(500, 500));
-    auto circle = std::make_unique<Oval>(Vec2(200, 200), Vec2(200, 200), Style{.color = Color::crimson()});
+    auto circle = std::make_unique<Oval>(Vec2(150, 150), Vec2(200, 100), Style{.color = Color::crimson()});
+    circle->rotate(PI / 4);
+    circle->translate(Vec2(100, 100));
+    circle->scale(Vec2(3));
+    circle->rotate(PI / 2);
     auto rect = std::make_unique<Rectangle>(Vec2(400, 400), Vec2(100, 100), Style{.color = Color::green()});
+    rect->rotate(PI / 4);
     
 
 
