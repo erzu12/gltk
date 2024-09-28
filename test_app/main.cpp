@@ -15,36 +15,11 @@ int main () {
         .build();
 
     auto canvas = std::make_unique<Canvas>(Style{.color = Color(0.9f, 0.9f, 0.9f)}, Vec2(500, 500));
+    auto rect = std::make_unique<Rectangle>(Vec2(100, 200), Vec2(100, 200), Style{.color = Color::red()});
     
-    std::vector<Vec2> points = {
-        Vec2(200, 100),
-        Vec2(250, 100),
-        Vec2(300, 150),
-        Vec2(300, 200),
 
-        Vec2(300, 200),
-        Vec2(300, 250),
-        Vec2(250, 300),
-        Vec2(200, 300),
 
-        Vec2(200, 300),
-        Vec2(150, 300),
-        Vec2(100, 250),
-        Vec2(100, 200),
-
-        Vec2(100, 200),
-        Vec2(100, 150),
-        Vec2(150, 100),
-        Vec2(200, 100)
-    };
-
-    auto path = std::make_unique<PathObject>(points, Style{
-            .color = Color::turquoise(), 
-            .borderWidth = 40,
-            .borderColor = Color::blue(),
-        }, true, true);
-
-    canvas->addObject(std::move(path));
+    canvas->addObject(std::move(rect));
 
     auto canvasLayout = LayoutBuilder(window.get_layout())
         .setRenderable(std::move(canvas))

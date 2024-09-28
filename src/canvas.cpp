@@ -201,6 +201,13 @@ void Canvas::addObject(std::unique_ptr<CanvasObject> object) {
     objects.push_back(std::move(object));
 }
 
+Rectangle::Rectangle(Vec2 pos, Vec2 size, Style style) : PathObject({
+    pos,
+    pos + Vec2(size.x, 0),
+    pos + size,
+    pos + Vec2(0, size.y)
+}, style, false, true) {}
+
 Vec2 Canvas::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
     return size;
 }

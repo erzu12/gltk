@@ -17,6 +17,8 @@ public:
     virtual void render(Mat3 &viewMatrix) = 0;
 };
 
+
+
 class PathObject : public CanvasObject {
     std::vector<Vec2> points;
     const Shader shader = Shader("assets/color.vert", "assets/color.frag");
@@ -34,6 +36,11 @@ public:
 private:
     BoundingBox generateBorder(std::vector<Vec2> points, float width, bool closed);
     std::vector<Vec2> bezierInterpolation(std::vector<Vec2> points);
+};
+
+class Rectangle : public PathObject {
+public:
+    Rectangle(Vec2 pos, Vec2 size, Style style);
 };
 
 class Canvas : public IRenderable {
