@@ -389,10 +389,9 @@ bool BoundingBox::contains(Vec2 point) {
 }
 
 BoundingBox BoundingBox::intersect(const BoundingBox &other) {
-    BoundingBox bb;
-    bb.max = Vec2(std::min(max.x, other.max.x), std::min(max.y, other.max.y));
-    bb.min = Vec2(std::max(min.x, other.min.x), std::max(min.y, other.min.y));
-    return bb;
+    max = Vec2(std::min(max.x, other.max.x), std::min(max.y, other.max.y));
+    min = Vec2(std::max(min.x, other.min.x), std::max(min.y, other.min.y));
+    return *this;
 }
 
 BoundingBox BoundingBox::fromPoints(std::vector<Vec2> points) {

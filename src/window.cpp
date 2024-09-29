@@ -179,6 +179,9 @@ void Window::add_mouse_up_callback(std::function<void(MouseButtonEvent)> callbac
 }
 
 void Window::debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        return;
+    }
     std::string full_message = "OpenGL message: ";
     switch (type) {
     case GL_DEBUG_TYPE_ERROR:

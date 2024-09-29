@@ -350,7 +350,9 @@ void Canvas::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox cli
     shader.use();
     shader.UniformColor("color", style.color);
 
-    modelMatrix = Mat3::translationMatrix(Vec2(modelMatrix[0][2], modelMatrix[1][2]));
+    Vec2 pos = Vec2(modelMatrix[0][2], modelMatrix[1][2]);
+
+    modelMatrix = Mat3::translationMatrix(pos);
     modelMatrix.rotateMatrix(style.rotation);
     modelMatrix.scaleMatrix(size);
 
@@ -366,6 +368,11 @@ void Canvas::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox cli
     viewMatrix.translateMatrix(Vec2(modelMatrix[0][2], modelMatrix[1][2]));
     viewMatrix.rotateMatrix(style.rotation);
     viewMatrix.translateMatrix(-size / 2.0f);
+
+    BoundingBox canvasBounds(pos - size / 2.f, pos + size / 2.f);
+    clipRegion.intersect(canvasBounds);
+    glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
+
     for (auto &object : objects) {
         object->render(viewMatrix);
     }
