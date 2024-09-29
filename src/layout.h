@@ -84,6 +84,19 @@ struct Positioning {
     Overflow overflow = Overflow::Scroll;
 };
 
+struct MouseMoveEvent {
+    Vec2 delta;
+    Vec2 pos;
+    Vec2 loaclPos;
+};
+
+struct MouseButtonEvent {
+    MouseButton button;
+    KeyModifierFlags mods;
+    Vec2 pos;
+    Vec2 localPos;
+};
+
 
 class Layout {
 public:
@@ -102,10 +115,10 @@ public:
 
     void registerForRenderRecursive(BoundingBox clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000, 1000000)));
 
-    void addOnMouseKeyDownCallback(std::function<void(MouseButton, KeyModifierFlags)> callback);
+    void addOnMouseKeyDownCallback(std::function<void(MouseButtonEvent)> callback);
     void mouseKeyDownEventRecursive(Vec2 clickPosition, MouseButton button, KeyModifierFlags mods);
 
-    void addOnMouseKeyUpCallback(std::function<void(MouseButton, KeyModifierFlags)> callback);
+    void addOnMouseKeyUpCallback(std::function<void(MouseButtonEvent)> callback);
     void mouseKeyUpEventRecursive(Vec2 clickPosition, MouseButton button, KeyModifierFlags mods);
 
     void addOnScroleCallback(std::function<void(Vec2)> callback);
@@ -151,8 +164,8 @@ private:
     Vec2 getListStartPossition();
     Vec2 getListParentSize(Vec2 childSize);
 
-    std::vector<std::function<void(MouseButton, KeyModifierFlags)>> onMouseKeyDownCallbacks;
-    std::vector<std::function<void(MouseButton, KeyModifierFlags)>> onMouseKeyUpCallbacks;
+    std::vector<std::function<void(MouseButtonEvent)>> onMouseKeyDownCallbacks;
+    std::vector<std::function<void(MouseButtonEvent)>> onMouseKeyUpCallbacks;
     std::vector<std::function<void(Vec2)>> onScrollCallbacks;
 };
 

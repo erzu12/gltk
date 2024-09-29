@@ -21,15 +21,20 @@ enum class Key;
 enum class KeyModifiers;
 class KeyModifierFlags;
 
+struct KeyEvent {
+    Key key;
+    KeyModifierFlags mods;
+};
+
 class Window {
 public:
     Window();
     ~Window();
-    void add_key_down_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
-    void add_key_up_callback(std::function<void(Key key, KeyModifierFlags mods)> callback);
-    void add_mouse_move_callback(std::function<void(Vec2)> callback);
-    void add_mouse_down_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback);
-    void add_mouse_up_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback);
+    void add_key_down_callback(std::function<void(KeyEvent)> callback);
+    void add_key_up_callback(std::function<void(KeyEvent)> callback);
+    void add_mouse_move_callback(std::function<void(MouseMoveEvent)> callback);
+    void add_mouse_down_callback(std::function<void(MouseButtonEvent)> callback);
+    void add_mouse_up_callback(std::function<void(MouseButtonEvent)> callback);
     void run(std::function<void(Vec2)> render_callback);
     Vec2 get_mouse_pos();
     Layout *get_layout() { return &rootLayout; }
@@ -45,11 +50,11 @@ private:
     std::vector<KeyModifiers> get_modifiers(int mods);
 
     std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window = {nullptr, glfwDestroyWindow};
-    std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_down_callbacks;
-    std::vector<std::function<void(Key key, KeyModifierFlags mods)>> key_up_callbacks;
-    std::vector<std::function<void(MouseButton button, KeyModifierFlags mods)>> mouse_down_callbacks;
-    std::vector<std::function<void(MouseButton button, KeyModifierFlags mods)>> mouse_up_callbacks;
-    std::vector<std::function<void(Vec2)>> mouse_move_callbacks;
+    std::vector<std::function<void(KeyEvent)>> key_down_callbacks;
+    std::vector<std::function<void(KeyEvent)>> key_up_callbacks;
+    std::vector<std::function<void(MouseButtonEvent)>> mouse_down_callbacks;
+    std::vector<std::function<void(MouseButtonEvent)>> mouse_up_callbacks;
+    std::vector<std::function<void(MouseMoveEvent)>> mouse_move_callbacks;
 
     int width, height;
     Vec2 lastMousePos;

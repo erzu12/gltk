@@ -21,13 +21,14 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 {
     Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
     KeyModifierFlags key_mods(mods);
+    KeyEvent event{static_cast<Key>(key), key_mods};
     if (action == GLFW_PRESS) {
         for(auto &callback : w->key_down_callbacks) {
-            callback(static_cast<Key>(key), key_mods);
+            callback(event);
         }
     } else if (action == GLFW_RELEASE) {
         for(auto &callback : w->key_up_callbacks) {
-            callback(static_cast<Key>(key), key_mods);
+            callback(event);
         }
     }
 }
@@ -39,16 +40,22 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
     glfwGetWindowContentScale(window, &xscale, &yscale);
     Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
     KeyModifierFlags key_mods(mods);
+    MouseButtonEvent event{
+        static_cast<MouseButton>(button),
+        key_mods,
+        Vec2(xpos * xscale, ypos * yscale),
+        Vec2(xpos * xscale, ypos * yscale),
+    };
     if (action == GLFW_PRESS) {
         w->rootLayout.mouseKeyDownEventRecursive(Vec2(xpos * xscale, ypos * yscale), static_cast<MouseButton>(button), key_mods);
         for(auto &callback : w->mouse_down_callbacks) {
-            callback(static_cast<MouseButton>(button), key_mods);
+            callback(event);
         }
     }
     else if (action == GLFW_RELEASE) {
         w->rootLayout.mouseKeyUpEventRecursive(Vec2(xpos * xscale, ypos * yscale), static_cast<MouseButton>(button), key_mods);
         for(auto &callback : w->mouse_up_callbacks) {
-            callback(static_cast<MouseButton>(button), key_mods);
+            callback(event);
         }
     }
 }
@@ -67,9 +74,11 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
     glfwGetWindowContentScale(window, &xscale, &yscale);
     Window* w = static_cast<Window*>(glfwGetWindowUserPointer(window));
     Vec2 mousePos(xpos * xscale, ypos * yscale);
+    Vec2 delta = mousePos - w->lastMousePos;
     w->lastMousePos = mousePos;
     for(auto &callback : w->mouse_move_callbacks) {
-        callback(mousePos);
+        MouseMoveEvent event = {delta, mousePos, mousePos};
+        callback(event);
     }
 }
 
@@ -149,23 +158,23 @@ Vec2 Window::get_mouse_pos() {
     return lastMousePos;
 }
 
-void Window::add_key_up_callback(std::function<void(Key key, KeyModifierFlags mods)> callback) {
+void Window::add_key_up_callback(std::function<void(KeyEvent)> callback) {
     key_up_callbacks.push_back(callback);
 }
 
-void Window::add_key_down_callback(std::function<void(Key key, KeyModifierFlags mods)> callback) {
+void Window::add_key_down_callback(std::function<void(KeyEvent)> callback) {
     key_down_callbacks.push_back(callback);
 }
 
-void Window::add_mouse_move_callback(std::function<void(Vec2)> callback) {
+void Window::add_mouse_move_callback(std::function<void(MouseMoveEvent)> callback) {
     mouse_move_callbacks.push_back(callback);
 }
 
-void Window::add_mouse_down_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback) {
+void Window::add_mouse_down_callback(std::function<void(MouseButtonEvent)> callback) {
     mouse_down_callbacks.push_back(callback);
 }
 
-void Window::add_mouse_up_callback(std::function<void(MouseButton button, KeyModifierFlags mods)> callback) {
+void Window::add_mouse_up_callback(std::function<void(MouseButtonEvent)> callback) {
     mouse_up_callbacks.push_back(callback);
 }
 

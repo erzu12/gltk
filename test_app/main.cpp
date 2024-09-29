@@ -5,8 +5,8 @@ using namespace gltk;
 
 int main () {
     gltk::Window window;
-    window.add_key_down_callback([](Key key, KeyModifierFlags mods) {
-        std::cout << "Key down: " << static_cast<int>(key) << std::endl;
+    window.add_key_down_callback([](auto e) {
+        std::cout << "Key down: " << static_cast<int>(e.key) << std::endl;
     });
 
     auto bg = LayoutBuilder(window.get_layout())
@@ -45,11 +45,21 @@ int main () {
         .setAnchor(Anchors::Center)
         .build();
 
-    canvasLayout->addOnMouseKeyDownCallback([&](MouseButton, KeyModifierFlags mods) {
+    bool dragging = false;
+    canvasLayout->addOnMouseKeyDownCallback([&](auto e) {
         Vec2 pos = window.get_mouse_pos();
-        std::cout << "Mouse down: " << pos << std::endl;
-        if (circleRef->pointInObject(pos - canvasLayout->getPosition())) {
+        if (circleRef->pointInObject(e.localPos)) {
             std::cout << "Circle clicked" << std::endl;
+            circleRef->rotate(PI / 16);
+            canvasLayout->registerForRenderRecursive();
+        }
+    });
+
+    window.add_mouse_move_callback([&](auto e) {
+        Vec2 pos = window.get_mouse_pos();
+        if (dragging) {
+            circleRef->translate(e.delta);
+            canvasLayout->registerForRenderRecursive();
         }
     });
 
