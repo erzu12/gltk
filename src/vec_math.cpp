@@ -112,6 +112,20 @@ Vec2 Vec2::lerp(Vec2 b, float t) const {
     return c;
 }
 
+bool Vec2::isInsideTriangle(Vec2 a, Vec2 b, Vec2 c) {
+    Vec2 v0 = b - a, v1 = c - a, v2 = *this - a;
+    float d00 = v0.Dot(v0);
+    float d01 = v0.Dot(v1);
+    float d11 = v1.Dot(v1);
+    float d20 = v2.Dot(v0);
+    float d21 = v2.Dot(v1);
+    float denom = d00 * d11 - d01 * d01;
+    float u = (d11 * d20 - d01 * d21) / denom;
+    float v = (d00 * d21 - d01 * d20) / denom;
+
+    return (u >= 0) && (v >= 0) && (u + v < 1);
+}
+
 bool Vec2::operator==(const Vec2 &b) const {
     return this->x == b.x && this->y == b.y;
 }

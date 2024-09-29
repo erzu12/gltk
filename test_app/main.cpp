@@ -22,9 +22,8 @@ int main () {
     circle->rotate(PI / 2);
     auto rect = std::make_unique<Rectangle>(Vec2(400, 400), Vec2(100, 100), Style{.color = Color::green()});
     rect->rotate(PI / 4);
-    
 
-
+    auto circleRef = circle.get();
     canvas->addObject(std::move(circle));
     canvas->addObject(std::move(rect));
 
@@ -45,6 +44,14 @@ int main () {
         .setSizing(Sizing::Fit, Sizing::Fit)
         .setAnchor(Anchors::Center)
         .build();
+
+    canvasLayout->addOnMouseKeyDownCallback([&](MouseButton, KeyModifierFlags mods) {
+        Vec2 pos = window.get_mouse_pos();
+        std::cout << "Mouse down: " << pos << std::endl;
+        if (circleRef->pointInObject(pos - canvasLayout->getPosition())) {
+            std::cout << "Circle clicked" << std::endl;
+        }
+    });
 
 
 

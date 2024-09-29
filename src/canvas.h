@@ -15,11 +15,13 @@ class CanvasObject {
     
 public:
     virtual void render(Mat3 &viewMatrix) = 0;
+    virtual bool pointInObject(Vec2 point) = 0;
 };
 
 
 class PathObject : public CanvasObject {
     std::vector<Vec2> points;
+    std::vector<Vec2> borderTriangles;
     const Shader shader = Shader("assets/color.vert", "assets/color.frag");
     unsigned int VAO, VBO;
     unsigned int quadVAO, quadVBO;
@@ -29,6 +31,7 @@ class PathObject : public CanvasObject {
     bool interpolate = false;
     Style style;
 
+    BoundingBox boundingBox;
     Vec2 pos = Vec2(0, 0);
     bool dirty = true;
 public:
@@ -40,6 +43,8 @@ public:
     void scale(Vec2 scale);
 
     void render(Mat3 &viewMatrix) override;
+
+    bool pointInObject(Vec2 point) override;
 private:
     void regenerateGeometry();
     BoundingBox generateBorder(std::vector<Vec2> points, float width, bool closed);

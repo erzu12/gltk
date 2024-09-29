@@ -321,6 +321,10 @@ Vec2 Layout::getSize() {
     return resolvedSize.value();
 }
 
+Vec2 Layout::getPosition() {
+    return resolvedPosition.value();
+}
+
 void Layout::scroll(Vec2 delta) {
     scrolePosition += delta;
     resolveTransform();

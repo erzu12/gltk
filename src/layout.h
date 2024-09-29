@@ -116,6 +116,7 @@ public:
     Mat3 getTransform();
     IRenderable* getRenderable();
     Vec2 getSize();
+    Vec2 getPosition();
 
 private:
     std::optional<std::unique_ptr<IRenderable>> renderable;

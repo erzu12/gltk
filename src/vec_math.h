@@ -46,6 +46,7 @@ public:
     Vec2 min(const Vec2 b);
 
     Vec2 lerp(Vec2 b, float t) const;
+    bool isInsideTriangle(Vec2 a, Vec2 b, Vec2 c);
 
     bool operator==(const Vec2 &b) const;
 
@@ -144,3 +145,4 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const BoundingBox &bb);
 };
+

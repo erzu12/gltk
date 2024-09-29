@@ -47,15 +47,15 @@ void PathObject::regenerateGeometry() {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vec2) * absolutePoints.size(), absolutePoints.data(), GL_DYNAMIC_DRAW);
-    auto bounds = generateBorder(absolutePoints, style.borderWidth, closed);
+    boundingBox = generateBorder(absolutePoints, style.borderWidth, closed);
 
     float vertices[] = {
-        bounds.min.x, bounds.min.y,
-        bounds.min.x, bounds.max.y,
-        bounds.max.x, bounds.min.y,
-        bounds.max.x, bounds.min.y,
-        bounds.min.x, bounds.max.y,
-        bounds.max.x, bounds.max.y
+        boundingBox.min.x, boundingBox.min.y,
+        boundingBox.min.x, boundingBox.max.y,
+        boundingBox.max.x, boundingBox.min.y,
+        boundingBox.max.x, boundingBox.min.y,
+        boundingBox.min.x, boundingBox.max.y,
+        boundingBox.max.x, boundingBox.max.y
     };
 
     glBindVertexArray(quadVAO);
@@ -206,6 +206,48 @@ void PathObject::render(Mat3 &viewMatrix) {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glDisable(GL_STENCIL_TEST);
+}
+
+bool PathObject::pointInObject(Vec2 point) {
+    if (dirty) {
+        regenerateGeometry();
+    }
+    if (!boundingBox.contains(point)) {
+        return false;
+    }
+    int intersectCount = 0;
+    if (style.color.a > 0.000001) {
+        for(int i = 2; i < points.size(); i++) {
+            Vec2 a = points[0] + pos;
+            Vec2 b = points[i - 1] + pos;
+            Vec2 c = points[i] + pos;
+
+            if (point.isInsideTriangle(a, b, c)) {
+                intersectCount++;
+            }
+        }
+    }
+    if (intersectCount % 2 == 1) {
+        return true;
+    }
+    if (style.borderWidth > 0.000001 && style.borderColor.a > 0.000001) {
+        for(int i = 1; i < points.size(); i++) {
+            Vec2 tri1a = borderTriangles[i * 2 - 2];
+            Vec2 tri1b = borderTriangles[i * 2 - 1];
+            Vec2 tri1c = borderTriangles[i * 2];
+            Vec2 tri2a = borderTriangles[i * 2 - 1];
+            Vec2 tri2b = borderTriangles[i * 2 + 1];
+            Vec2 tri2c = borderTriangles[i * 2];
+
+            bool res1 = point.isInsideTriangle(tri1a, tri1b, tri1c);
+            bool res2 = point.isInsideTriangle(tri2a, tri2b, tri2c);
+
+            if (res1 || res2) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void PathObject::rotate(float angle) {
