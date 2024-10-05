@@ -68,6 +68,20 @@ Mat3 Layout::transformWithMargin() {
     return Mat3::translationMatrix(marginCenter) * Mat3::scalingMatrix(marginSize);
 }
 
+Vec2 Layout::paddedSize() {
+    return sizeWithMargin() - Vec2(
+        positioning.padding.left + positioning.padding.right,
+        positioning.padding.top + positioning.padding.bottom
+    );
+}
+
+Vec2 Layout::paddedPosition() {
+    return resolvedPosition.value() + Vec2(
+        positioning.padding.left,
+        positioning.padding.top
+    );
+}
+
 void Layout::resolveTransform() {
     if (!parent.has_value()) {
         if (positioning.size.x->isAbsolute() && positioning.size.y->isAbsolute()) {
@@ -97,7 +111,7 @@ BoundingBox Layout::resolveChildTransforms(Vec2 parentSize, Vec2 parentPosition,
     BoundingBox childBounds;
     if (positioning.childPlacement == ChildPlacement::Free) {
         for (Layout* child : children) {
-            BoundingBox retBound = child->resolveTransform(resolvedSize.value(), resolvedPosition.value());
+            BoundingBox retBound = child->resolveTransform(paddedSize(), paddedPosition());
             childBounds.add(retBound);
         }
     }
@@ -131,7 +145,7 @@ BoundingBox Layout::resolveListTransform() {
     Vec2 currentPosition = getListStartPosition();
     BoundingBox childBounds;
     for (Layout* child : children) {
-        Vec2 childSize = child->positioning.size.resolve(resolvedSize.value());
+        Vec2 childSize = child->positioning.size.resolve(paddedSize());
         BoundingBox retBound;
         if (ListDirection::Down == positioning.listDirection || ListDirection::Right == positioning.listDirection) {
             retBound = child->resolveTransform(getListParentSize(childSize), currentPosition, true);
@@ -146,7 +160,7 @@ BoundingBox Layout::resolveListTransform() {
 }
 
 BoundingBox Layout::resolveListStretchTransform() {
-    ListStrechResolver resolver(positioning.listDirection, resolvedSize.value(), resolvedPosition.value());
+    ListStrechResolver resolver(positioning.listDirection, paddedSize(), paddedPosition());
     std::vector<ChildData> childrenData;
     for (Layout* child : children) {
         ChildData data;
@@ -158,7 +172,7 @@ BoundingBox Layout::resolveListStretchTransform() {
         };
         childrenData.push_back(data);
     }
-    return resolver.resolve(childrenData, resolvedSize.value());
+    return resolver.resolve(childrenData, paddedSize());
 }
 
 void Layout::calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection) {
@@ -252,20 +266,20 @@ void Layout::adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition) {
 
 Vec2 Layout::getListStartPosition() {
     if (ListDirection::Down == positioning.listDirection || ListDirection::Right == positioning.listDirection) {
-        return resolvedPosition.value();
+        return paddedPosition();
     }
     else {
-        Vec2 currentPosition = resolvedPosition.value() + resolvedSize.value();
+        Vec2 currentPosition = paddedPosition() + paddedSize();
         return currentPosition;
     }
 }
 
 Vec2 Layout::getListParentSize(Vec2 childSize) {
     if (ListDirection::Down == positioning.listDirection || ListDirection::Up == positioning.listDirection) {
-        return Vec2(resolvedSize.value().x, childSize.y);
+        return Vec2(paddedSize().x, childSize.y);
     }
     else {
-        return Vec2(childSize.x, resolvedSize.value().y);
+        return Vec2(childSize.x, paddedSize().y);
     }
 }
 

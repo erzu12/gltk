@@ -16,9 +16,10 @@ int main () {
 
     auto box = LayoutBuilder(window.get_layout())
         .setRenderable(std::make_unique<Box>(Style{.color = Color::white(), .radius = 0}))
-        .setSize(MessureVec2(500, 500))
+        .setSize(MessureVec2(.5f, .5f))
         .setOffset(MessureVec2(100, 100))
-        .setChildPlacement(ChildPlacement::List)
+        .setChildPlacement(ChildPlacement::ListStretch)
+        .setPadding({50, 50, 00, 00})
         .build();
 
     auto child1 = LayoutBuilder(box.get())
@@ -37,7 +38,7 @@ int main () {
 
     auto child3 = LayoutBuilder(box.get())
         .setRenderable(std::make_unique<Box>(Style{.color = Color::blue(), .radius = 0}))
-        .setSize(MessureVec2(1.f, 100))
+        .setSize(MessureVec2(1.f, 1.f))
         .setAnchor(Anchors::Center)
         .setMargin(Margin{10, 10, 10, 10})
         .build();

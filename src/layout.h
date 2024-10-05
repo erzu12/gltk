@@ -165,8 +165,12 @@ private:
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
     void moveChildren(Vec2 delta);
     void boundScrolePosition(BoundingBox childBounds);
+
     Mat3 transformWithMargin();
     Vec2 sizeWithMargin();
+
+    Vec2 paddedSize();
+    Vec2 paddedPosition();
 
     BoundingBox resolveListTransform();
     BoundingBox resolveListStretchTransform();
