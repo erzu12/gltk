@@ -38,8 +38,14 @@ void Layout::registerForRenderRecursive(BoundingBox clipRegion) {
 
             renderer->queue(renderable.value().get(), transformWithMargin(), sizeWithMargin(), clipRegion);
         }
+        clipRegion = clipRegion.intersect(bounds);
+        clipRegion.addPadding(
+            - positioning.margin.top,
+            - positioning.margin.right,
+            - positioning.margin.bottom,
+            - positioning.margin.left
+        );
         for (Layout* child : children) {
-            clipRegion = clipRegion.intersect(bounds);
             if (positioning.overflow == Overflow::None) {
                 clipRegion = BoundingBox(Vec2(0, 0), Vec2(1000000, 1000000));
             }

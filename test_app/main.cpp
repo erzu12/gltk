@@ -22,17 +22,16 @@ int main () {
 
     auto child1 = LayoutBuilder(box.get())
         .setRenderable(std::make_unique<Box>(Style{.color = Color::red(), .radius = 0}))
-        .setSize(MessureVec2(200, 200))
+        .setSize(MessureVec2(300, 300))
         .setAnchor(Anchors::Center)
-        .setSizing(Sizing::Expand, Sizing::Expand)
         .setMargin({50, 50, 50, 50})
-        .setPadding({100, 0, 0, 100})
         .build();
 
     auto child2 = LayoutBuilder(child1.get())
         .setRenderable(std::make_unique<Box>(Style{.color = Color(.0f, 1.f, .0f, .5f), .radius = 0}))
         .setSize(MessureVec2(200, 200))
-        .setAnchor(Anchors::Center)
+        .setAnchor(Anchors::TopLeft)
+        .setPivot(Anchors::Center)
         .build();
 
 

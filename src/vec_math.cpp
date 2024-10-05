@@ -389,6 +389,12 @@ void BoundingBox::addPadding(float top, float right, float bottom, float left) {
     min.y -= top;
     min.x -= left;
     max.y += bottom;
+    if (min.x > max.x) {
+        min.x = max.x = (min.x + max.x) / 2;
+    }
+    if (max.y < min.y) {
+        min.y = max.y = (min.y + max.y) / 2;
+    }
 }
 
 bool BoundingBox::contains(Vec2 point) {
