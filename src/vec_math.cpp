@@ -384,6 +384,13 @@ void BoundingBox::add(const BoundingBox &other) {
     min = Vec2(std::min(min.x, other.min.x), std::min(min.y, other.min.y));
 }
 
+void BoundingBox::addPadding(float top, float right, float bottom, float left) {
+    max.x += right;
+    min.y -= top;
+    min.x -= left;
+    max.y += bottom;
+}
+
 bool BoundingBox::contains(Vec2 point) {
     return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y;
 }

@@ -77,8 +77,8 @@ Vec2 Layout::paddedSize() {
 
 Vec2 Layout::paddedPosition() {
     return resolvedPosition.value() + Vec2(
-        positioning.padding.left,
-        positioning.padding.top
+        positioning.margin.left + positioning.padding.left,
+        positioning.margin.top + positioning.padding.top
     );
 }
 
@@ -129,6 +129,12 @@ BoundingBox Layout::resolveChildTransforms(Vec2 parentSize, Vec2 parentPosition,
     }
 
     if (!childBounds.isZero()) {
+        childBounds.addPadding(
+            positioning.padding.top + positioning.margin.top,
+            positioning.padding.right + positioning.margin.right,
+            positioning.padding.bottom + positioning.margin.bottom,
+            positioning.padding.left + positioning.margin.left
+        );
         recalculateTransformFromBounds(childBounds);
     }
 
