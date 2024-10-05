@@ -14,54 +14,34 @@ int main () {
         .setSize(MessureVec2(1., 1.))
         .build();
 
-    auto canvas = std::make_unique<Canvas>(Style{.color = Color::snow()}, Vec2(500, 500));
-    auto circle = std::make_unique<Oval>(Vec2(150, 150), Vec2(200, 100), Style{.color = Color::crimson()});
-    circle->rotate(PI / 4);
-    circle->translate(Vec2(100, 100));
-    circle->scale(Vec2(3));
-    circle->rotate(PI / 2);
-    auto rect = std::make_unique<Rectangle>(Vec2(400, 400), Vec2(100, 100), Style{.color = Color::green()});
-    rect->rotate(PI / 4);
-
-    auto circleRef = circle.get();
-    canvas->addObject(std::move(circle));
-    canvas->addObject(std::move(rect));
-
-    auto canvasLayout = LayoutBuilder(window.get_layout())
-        .setRenderable(std::move(canvas))
+    auto box = LayoutBuilder(window.get_layout())
+        .setRenderable(std::make_unique<Box>(Style{.color = Color::white(), .radius = 0}))
         .setSize(MessureVec2(500, 500))
         .setOffset(MessureVec2(100, 100))
+        .setChildPlacement(ChildPlacement::List)
         .build();
 
-    auto box = LayoutBuilder(window.get_layout())
-        .setRenderable(std::make_unique<Box>(Style{.color = Color::white(), .radius = 20}))
-        .setSize(MessureVec2(600, 200))
-        .setOffset(MessureVec2(100, 700))
-        .build();
-
-    auto text = LayoutBuilder(box.get())
-        .setRenderable(std::make_unique<Text>("Hello World", Style{.color = Color::black(), .fontSize = 100}))
-        .setSizing(Sizing::Fit, Sizing::Fit)
+    auto child1 = LayoutBuilder(box.get())
+        .setRenderable(std::make_unique<Box>(Style{.color = Color::red(), .radius = 0}))
+        .setSize(MessureVec2(1.f, 100))
         .setAnchor(Anchors::Center)
+        .setMargin(Margin{10, 10, 10, 10})
         .build();
 
-    bool dragging = false;
-    canvasLayout->addOnMouseKeyDownCallback([&](auto e) {
-        Vec2 pos = window.get_mouse_pos();
-        if (circleRef->pointInObject(e.localPos)) {
-            std::cout << "Circle clicked" << std::endl;
-            circleRef->rotate(PI / 16);
-            canvasLayout->registerForRenderRecursive();
-        }
-    });
+    auto child2 = LayoutBuilder(box.get())
+        .setRenderable(std::make_unique<Box>(Style{.color = Color::green(), .radius = 0}))
+        .setSize(MessureVec2(1.f, 100))
+        .setAnchor(Anchors::Center)
+        .setMargin(Margin{10, 10, 10, 10})
+        .build();
 
-    window.add_mouse_move_callback([&](auto e) {
-        Vec2 pos = window.get_mouse_pos();
-        if (dragging) {
-            circleRef->translate(e.delta);
-            canvasLayout->registerForRenderRecursive();
-        }
-    });
+    auto child3 = LayoutBuilder(box.get())
+        .setRenderable(std::make_unique<Box>(Style{.color = Color::blue(), .radius = 0}))
+        .setSize(MessureVec2(1.f, 100))
+        .setAnchor(Anchors::Center)
+        .setMargin(Margin{10, 10, 10, 10})
+        .build();
+
 
 
 

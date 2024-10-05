@@ -72,11 +72,22 @@ class KeyModifierFlags {
         }
 };
 
+struct Margin {
+    float top;
+    float right;
+    float bottom;
+    float left;
+};
+
+typedef Margin Padding;
+
 struct Positioning {
     MessureVec2 size = MessureVec2(0, 0);
     MessureVec2 offset = MessureVec2(0, 0);
     Vec2 anchor = Anchors::TopLeft;
     Vec2 pivot = Vec2(-1.0f);
+    Margin margin = {0, 0, 0, 0};
+    Padding padding = {0, 0, 0, 0};
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
     Sizing verticalSizing = Sizing::Fixed;
@@ -154,6 +165,8 @@ private:
     void calculateTransform(Vec2 parentSize, Vec2 parentPosition, bool forceSize, ListDirection parentListDirection);
     void moveChildren(Vec2 delta);
     void boundScrolePosition(BoundingBox childBounds);
+    Mat3 transformWithMargin();
+    Vec2 sizeWithMargin();
 
     BoundingBox resolveListTransform();
     BoundingBox resolveListStretchTransform();
@@ -161,7 +174,7 @@ private:
     BoundingBox getRenderableBounds(Vec2 parentSize, Vec2 parentPosition);
 
     void adjustCurrentPosition(Vec2 childSize, Vec2 &currentPosition);
-    Vec2 getListStartPossition();
+    Vec2 getListStartPosition();
     Vec2 getListParentSize(Vec2 childSize);
 
     std::vector<std::function<void(MouseButtonEvent)>> onMouseKeyDownCallbacks;

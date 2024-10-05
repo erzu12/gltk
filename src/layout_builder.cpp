@@ -14,6 +14,16 @@ LayoutBuilder& LayoutBuilder::setPivot(Vec2 pivot) {
     return *this;
 }
 
+LayoutBuilder& LayoutBuilder::setMargin(Margin margin) {
+    this->margin = margin;
+    return *this;
+}
+
+LayoutBuilder& LayoutBuilder::setPadding(Padding padding) {
+    this->padding = padding;
+    return *this;
+}
+
 LayoutBuilder& LayoutBuilder::setRenderable(std::unique_ptr<IRenderable> renderable) {
     this->renderable = std::move(renderable);
     return *this;
@@ -56,6 +66,8 @@ std::unique_ptr<Layout> LayoutBuilder::build() {
         .offset = offset,
         .anchor = anchor,
         .pivot = pivot,
+        .margin = margin,
+        .padding = padding,
         .childPlacement = childPlacement,
         .listDirection = listDirection,
         .verticalSizing = verticalSizing,

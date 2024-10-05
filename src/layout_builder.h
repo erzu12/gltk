@@ -13,6 +13,8 @@ class LayoutBuilder {
         LayoutBuilder& setOffset(MessureVec2 offset);
         LayoutBuilder& setAnchor(Vec2 anchor);
         LayoutBuilder& setPivot(Vec2 pivot);
+        LayoutBuilder& setMargin(Margin margin);
+        LayoutBuilder& setPadding(Padding padding);
         LayoutBuilder& setChildPlacement(ChildPlacement childPlacement);
         LayoutBuilder& setListDirection(ListDirection listDirection);
         LayoutBuilder& setSizing(Sizing horizontalSizing, Sizing verticalSizing);
@@ -25,6 +27,8 @@ class LayoutBuilder {
         Vec2 anchor = Anchors::TopLeft;
         MessureVec2 offset = MessureVec2(0, 0);
         Vec2 pivot = Vec2(-1.0f);
+        Margin margin = {0, 0, 0, 0};
+        Padding padding = {0, 0, 0, 0};
         MessureVec2 size = MessureVec2(0, 0);
         ChildPlacement childPlacement = ChildPlacement::Free;
         ListDirection listDirection = ListDirection::Down;
