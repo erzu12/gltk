@@ -2,15 +2,14 @@
 
 #include "shader.h"
 #include "render.h"
+#include "render_objects.h"
 
 namespace gltk {
 
 
 class Box : public IRenderable {
     Style style;
-    const Shader shader = Shader("assets/box.vert", "assets/box.frag");
-    unsigned int VAO, VBO;
-    Vec2 solveTriangle(float angle, float hypotenuse);
+    BoxRenderer boxRenderer;
 public:
     Box(Style style);
     ~Box();

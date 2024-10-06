@@ -2,6 +2,7 @@
 
 #include "shader.h"
 #include "render.h"
+#include "render_objects.h"
 
 namespace gltk {
 
@@ -67,13 +68,11 @@ public:
 
 class Canvas : public IRenderable {
     Style style;
-    const Shader shader = Shader("assets/box.vert", "assets/box.frag");
-    unsigned int VAO, VBO;
     std::vector<std::unique_ptr<CanvasObject>> objects;
+    BoxRenderer boxRenderer;
     Vec2 size;
 public:
     Canvas(Style style, Vec2 size);
-    ~Canvas();
 
     void addObject(std::unique_ptr<CanvasObject> object);
 
