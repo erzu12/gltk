@@ -14,28 +14,12 @@ int main () {
         .setSize(MessureVec2(1., 1.))
         .build();
 
-    auto box = LayoutBuilder(window.get_layout())
-        .setRenderable(std::make_unique<Box>(Style{.color = Color::white(), .radius = 0}))
-        .setSize(MessureVec2(400, 400))
+    auto image = LayoutBuilder(window.get_layout())
+        .setRenderable(std::make_unique<Image>("assets/image.png", Style{}))
+        .setSize(MessureVec2(0.5, 0.5))
         .setOffset(MessureVec2(100, 100))
+        .setSizing(Sizing::Fixed, Sizing::Fit)
         .build();
-
-    auto child1 = LayoutBuilder(box.get())
-        .setRenderable(std::make_unique<Box>(Style{.color = Color::red(), .radius = 0}))
-        .setSize(MessureVec2(300, 300))
-        .setAnchor(Anchors::Center)
-        .setMargin({50, 50, 50, 50})
-        .build();
-
-    auto child2 = LayoutBuilder(child1.get())
-        .setRenderable(std::make_unique<Box>(Style{.color = Color(.0f, 1.f, .0f, .5f), .radius = 0}))
-        .setSize(MessureVec2(200, 200))
-        .setAnchor(Anchors::TopLeft)
-        .setPivot(Anchors::Center)
-        .build();
-
-
-
 
 
     window.run([&](Vec2 viewport) {

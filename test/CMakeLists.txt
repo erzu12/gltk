@@ -23,10 +23,12 @@ foreach(FILE ${TEST_FILES})
         ${FREETYPE_LIBRARIES}
         glfw
         glad
+        stb
         GTest::gtest_main
     )
     target_include_directories(${FILE_NAME} PRIVATE
         ${CMAKE_SOURCE_DIR}/extern/glad/include
+        ${CMAKE_SOURCE_DIR}/extern/stb
         PUBLIC ${FREETYPE_INCLUDE_DIRS}
     )
     gtest_discover_tests(${FILE_NAME})
