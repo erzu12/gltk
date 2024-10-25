@@ -16,7 +16,7 @@ Text::Text(std::string text, Style style, HorizontalTextAlign horizontalAlign, V
         1.0f, 1.0f
     };
 
-    loadCharacters(style.font, style.fontSize);
+    loadCharacters();
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -81,18 +81,21 @@ Vec2 Text::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
     return getRenderdSize(lines);
 }
 
-void Text::loadCharacters(std::string font, int fontSize) {
+void Text::loadCharacters() {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
     }
 
+    FontLoader fontLoader;
+    std::string fontPath = fontLoader.getFontPath(style.font, style.slant, style.weight);
+
     FT_Face face;
-    if (FT_New_Face(ft, ("/usr/share/fonts/TTF/" + font + ".TTF").c_str(), 0, &face)) {
+    if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
         std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }
 
-    FT_Set_Pixel_Sizes(face, 0, fontSize);
+    FT_Set_Pixel_Sizes(face, 0, style.fontSize);
 
     
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction

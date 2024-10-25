@@ -14,6 +14,15 @@ else()
     message(FATAL_ERROR "Freetype not found")
 endif()
 
+# find fontconfig
+find_package(Fontconfig REQUIRED)
+
+if (FONTCONFIG_FOUND)
+    message(STATUS "Fontconfig found")
+else()
+    message(FATAL_ERROR "Fontconfig not found")
+endif()
+
 
 include(FetchContent)
 FetchContent_Declare(
@@ -24,9 +33,18 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+#FetchContent_Declare(
+    #lunasvg
+    #GIT_REPOSITORY  https://github.com/sammycage/lunasvg.git
+    #GIT_TAG         master 
+#)
+#FetchContent_MakeAvailable(lunasvg)
 
+
+add_subdirectory(../lunasvg lunasvg)
 add_subdirectory(extern/glad)
+add_subdirectory(extern/stb)
 add_subdirectory(src)
-add_subdirectory(test_app)
-# add_subdirectory(simple_slide_src)
+# add_subdirectory(test_app)
+add_subdirectory(simple_slide_src)
 add_subdirectory(test)

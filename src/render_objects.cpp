@@ -1,5 +1,6 @@
 #include "render_objects.h"
 #include <stb_image.h>
+#include <iostream>
 
 namespace gltk {
 
@@ -48,23 +49,8 @@ void renderQuad(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipReg
     glDisable(GL_SCISSOR_TEST);
 }
 
-unsigned int loadImage(std::string path, int &width, int &height)
-{
-    unsigned int image;
-    int nrChannels;
-    unsigned char *data;
+void setImageData(unsigned int texture, int width, int height, int nrChannels, uint8_t *data) {
     int glFormat = GL_RGBA;
-
-    glGenTextures(1, &image);
-    glBindTexture(GL_TEXTURE_2D, image);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
-
     switch (nrChannels) {
         case 1:
             glFormat = GL_RED;
@@ -76,22 +62,42 @@ unsigned int loadImage(std::string path, int &width, int &height)
             glFormat = GL_RGBA;
             break;
         default:
-            throw std::runtime_error("Unsupported number of color channels: " + std::to_string(nrChannels) + " in image: " + path);
+            throw std::runtime_error("Unsupported number of color channels: " + std::to_string(nrChannels));
     }
 
+    glTexImage2D(GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+unsigned int loadImage(std::string path, int *width, int *height)
+{
+    unsigned int image;
+    int nrChannels;
+    unsigned char *data;
+
+    glGenTextures(1, &image);
+    glBindTexture(GL_TEXTURE_2D, image);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load(path.c_str(), width, height, &nrChannels, 0);
+
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
+        setImageData(image, *width, *height, nrChannels, data);
     }
     else {
         throw std::runtime_error("Failed to load image: " + path);
     }
+    stbi_image_free(data);
 
     return image;
 }
 
-}
+} // namespace
+
 
 BoxRenderer::BoxRenderer() {
     createQuad(VAO, VBO);
@@ -108,13 +114,40 @@ BoxRenderer::~BoxRenderer() {
 
 ImageRenderer::ImageRenderer(std::string path) {
     createQuad(VAO, VBO);
-    loadImage(path, width, height);
+    texture = loadImage(path, &width, &height);
+    shader.use();
+    shader.UniformInt("image", 0);
+}
+
+ImageRenderer::ImageRenderer() {
+    createQuad(VAO, VBO);
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     shader.use();
     shader.UniformInt("image", 0);
 }
 
 void ImageRenderer::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion, Style style) {
-    renderQuad(viewSize, modelMatrix, size, clipRegion, style, VAO, shader);
+    if (width >= 0 || height >= 0) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        renderQuad(viewSize, modelMatrix, size, clipRegion, style, VAO, shader);
+    }
+    else {
+        std::cout << "Image not loaded" << std::endl;
+    }
+}
+
+void ImageRenderer::updateImage(uint8_t *data, int width, int height, int nrChannels) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    setImageData(texture, width, height, nrChannels, data);
+    this->width = width;
+    this->height = height;
 }
 
 ImageRenderer::~ImageRenderer() {

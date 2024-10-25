@@ -14,11 +14,14 @@ target_link_libraries("${PROJECT_NAME}"
     glad
     glfw
     stb
+    lunasvg
+    fontconfig
     ${FREETYPE_LIBRARIES}
 )
 
 target_include_directories("${PROJECT_NAME}"
     PUBLIC ${CMAKE_SOURCE_DIR}/extern/glad/include
+    PUBLIC ${CMAKE_SOURCE_DIR}/../lunasvg/include
     PUBLIC ${CMAKE_SOURCE_DIR}/extern/stb
     PUBLIC ${FREETYPE_INCLUDE_DIRS}
 )

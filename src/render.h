@@ -3,12 +3,15 @@
 
 #include "vec_math.h"
 #include "color.h"
+#include "fontloader.h"
 
 namespace gltk {
 
 struct Style {
     Color color = Color(1.0);
     std::string font = "Arial";
+    FontSlant slant = FontSlant::Roman;
+    FontWeight weight = FontWeight::Normal;
     int fontSize = 16;
     float radius = 0.0f;
     float borderWidth = 0.0f;

@@ -21,9 +21,12 @@ class ImageRenderer {
     unsigned int VAO, VBO;
     unsigned int texture;
 public:
-    int width, height;
+    int width, height = 0;
     ImageRenderer(std::string path);
+    ImageRenderer();
     ~ImageRenderer();
+
+    void updateImage(uint8_t *data, int width, int height, int nrChannels);
 
     void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRergion, Style style);
 };

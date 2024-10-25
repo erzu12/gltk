@@ -20,16 +20,17 @@ int main () {
         .setOffset(MessureVec2(100, 100))
         .build();
 
-    auto canvas = LayoutBuilder(window.get_layout())
-        .setRenderable(std::make_unique<Canvas>(Style{}, Vec2(300, 300)))
-        .setSize(MessureVec2(300, 300))
-        .setOffset(MessureVec2(100, 450))
+    auto svg = LayoutBuilder(window.get_layout())
+        .setRenderable(std::make_unique<SVGImage>("assets/fleet.svg", Style{.radius = 20}))
+        .setSize(MessureVec2(0.5, 0.5))
+        .setOffset(MessureVec2(100, 500))
+        .setSizing(Sizing::Fixed, Sizing::Fit)
         .build();
 
     auto image = LayoutBuilder(window.get_layout())
         .setRenderable(std::make_unique<Image>("assets/image.png", Style{.radius = 20}))
         .setSize(MessureVec2(0.5, 0.5))
-        .setOffset(MessureVec2(100, 800))
+        .setOffset(MessureVec2(100, 1200))
         .setSizing(Sizing::Fixed, Sizing::Fit)
         .build();
 

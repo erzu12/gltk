@@ -6,4 +6,5 @@
 #include "layout.h"
 #include "text.h"
 #include "layout_builder.h"
+#include "render.h"
 #include "canvas.h"

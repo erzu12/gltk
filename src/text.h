@@ -41,7 +41,7 @@ class Text : public IRenderable {
 
     std::map<char, Character> Characters;
 
-    void loadCharacters(std::string font, int fontSize);
+    void loadCharacters();
     Vec2 getRenderdSize(std::vector<std::string> lines);
     int getRenderdLineWidht(std::string line);
     float getVerticalStartPos(float inPos, float boxSize, std::vector<std::string> lines);

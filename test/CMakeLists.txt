@@ -21,9 +21,11 @@ foreach(FILE ${TEST_FILES})
     target_link_libraries(
         ${FILE_NAME}
         ${FREETYPE_LIBRARIES}
+        fontconfig
         glfw
         glad
         stb
+        lunasvg
         GTest::gtest_main
     )
     target_include_directories(${FILE_NAME} PRIVATE
