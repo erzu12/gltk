@@ -43,7 +43,7 @@ void renderQuad(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipReg
     shader.UniformFloat("radius", clipedRadius);
     shader.UniformVec2("pixelSize", size);
     glEnable(GL_SCISSOR_TEST);
-    glScissor(clipRegion.min.x, clipRegion.min.y, clipRegion.width(), clipRegion.height());
+    glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisable(GL_SCISSOR_TEST);

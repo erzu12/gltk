@@ -11,6 +11,9 @@ Vec2 Box::getSize(Vec2 layoutSize, bool fixedX, bool fixedY) {
 Box::Box(Style style) : style(style), boxRenderer() {
 }
 
+Box::Box(Style style, Layout *layout) : style(style), boxRenderer(), layout(layout) {
+}
+
 void Box::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
     boxRenderer.render(viewSize, modelMatrix, size, clipRegion, style);
 }

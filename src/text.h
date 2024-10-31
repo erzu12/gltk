@@ -53,6 +53,7 @@ public:
 
     void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) override;
     Vec2 getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) override;
+    void setStyle(Style style) override { this->style = style; }
 };
 
 }

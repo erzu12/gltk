@@ -4,6 +4,12 @@ namespace gltk {
 
 LayoutBuilder::LayoutBuilder(Layout* parent) : parent(parent) {}
 
+LayoutBuilder& LayoutBuilder::addBox(Style style) {
+    this->style = style;
+    this->box = true;
+    return *this;
+}
+
 LayoutBuilder& LayoutBuilder::setAnchor(Vec2 anchor) {
     this->anchor = anchor;
     return *this;
@@ -74,7 +80,11 @@ std::unique_ptr<Layout> LayoutBuilder::build() {
         .horizontalSizing = horizontalSizing,
         .overflow = overflow
     };
-    return std::make_unique<Layout>(parent, positioning, std::move(renderable));
+    auto layout = std::make_unique<Layout>(parent, positioning, std::move(renderable));
+    if (box) {
+        layout->setRenderable(std::make_unique<Box>(style, layout.get()));
+    }
+    return layout;
 }
 
 } // namespace gltk

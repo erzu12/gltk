@@ -160,10 +160,10 @@ BoundingBox Layout::resolveListTransform() {
         Vec2 childSize = child->positioning.size.resolve(paddedSize());
         BoundingBox retBound;
         if (ListDirection::Down == positioning.listDirection || ListDirection::Right == positioning.listDirection) {
-            retBound = child->resolveTransform(getListParentSize(childSize), currentPosition, true);
+            retBound = child->resolveTransform(getListParentSize(childSize), currentPosition, true, positioning.listDirection);
         }
         else {
-            retBound = child->resolveTransform(getListParentSize(childSize), currentPosition - childSize, true);
+            retBound = child->resolveTransform(getListParentSize(childSize), currentPosition - childSize, true, positioning.listDirection);
         }
         adjustCurrentPosition(retBound.size(), currentPosition);
         childBounds.add(retBound);
