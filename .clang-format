@@ -1,0 +1,14 @@
+﻿---
+AlignAfterOpenBracket: BlockIndent
+AlignEscapedNewlines: Right
+BinPackParameters: 'false'
+BinPackArguments: 'false'
+AllowAllArgumentsOnNextLine: 'true'
+ContinuationIndentWidth: '4'
+ColumnLimit: '120'
+IndentWidth: '4'
+Cpp11BracedListStyle: 'true'
+UseTab: Never
+
+...
+

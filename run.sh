@@ -6,7 +6,7 @@ mv -f build/compile_commands.json .
 
 printf "\n\n=============================================================================\n\n"
 
-cmake --build build --config Release -j 16
+cmake --build build --config Debug -j 16
 
 printf "\n\n=============================================================================\n\n"
 
@@ -14,5 +14,5 @@ cd build/test && ctest -j 16 --output-on-failure
 cd ../..
 
 
-./build/simple_slide
+# ./build/simple_slide
 # ./build/gltk_test_app

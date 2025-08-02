@@ -24,4 +24,5 @@ target_include_directories("${PROJECT_NAME}"
     PUBLIC ${CMAKE_SOURCE_DIR}/../lunasvg/include
     PUBLIC ${CMAKE_SOURCE_DIR}/extern/stb
     PUBLIC ${FREETYPE_INCLUDE_DIRS}
+    PUBLIC ${CMAKE_SOURCE_DIR}/src
 )

@@ -1,5 +1,54 @@
 #include "vec_math.h"
 
+Ivec2 Ivec2::operator+(const Ivec2 b) const {
+    Ivec2 c;
+    c.x = this->x + b.x;
+    c.y = this->y + b.y;
+    return c;
+}
+
+Ivec2 Ivec2::operator+=(const Ivec2 b) {
+    this->x += b.x;
+    this->y += b.y;
+    return *this;
+}
+
+Ivec2 Ivec2::operator-(const Ivec2 b) const {
+    Ivec2 c;
+    c.x = this->x - b.x;
+    c.y = this->y - b.y;
+    return c;
+}
+
+Ivec2 Ivec2::operator-=(const Ivec2 b) {
+    this->x -= b.x;
+    this->y -= b.y;
+    return *this;
+}
+
+Ivec2 Ivec2::operator-() const {
+    Ivec2 c;
+    c.x = -this->x;
+    c.y = -this->y;
+    return c;
+}
+
+float Ivec2::Magnitude() const {
+    return sqrt((float)this->x*(float)this->x + (float)this->y*(float)this->y);
+}
+
+float Ivec2::Dot(const Ivec2 b) const {
+    return (float)this->x * (float)b.x + (float)this->y * (float)b.y;
+}
+
+bool Ivec2::operator==(const Ivec2 &b) const {
+    return this->x == b.x && this->y == b.y;
+}
+
+std::ostream &operator<<(std::ostream &os, const Ivec2 &f2) {
+    os << "{" << f2.x << ", " << f2.y << "}";
+    return os;
+}
 
 void Vec2::asArray(float *dest) {
     dest[0] = this->x;

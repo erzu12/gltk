@@ -7,6 +7,32 @@
 
 #define PI 3.14159265359f
 
+class Ivec2 {
+public:
+    int x;
+    int y;
+
+    Ivec2() : x(0), y(0) {}
+    Ivec2(int xy) : x(xy), y(xy) {}
+    Ivec2(int x, int y) : x(x), y(y) {}
+
+    Ivec2 operator+(const Ivec2 b) const;
+    Ivec2 operator+=(const Ivec2 b);
+
+    Ivec2 operator-(const Ivec2 b) const;
+    Ivec2 operator-=(const Ivec2 b);
+
+    Ivec2 operator-() const;
+
+    float Magnitude() const;
+
+    float Dot(const Ivec2 b) const;
+
+    bool operator==(const Ivec2 &b) const;
+
+    friend std::ostream &operator<<(std::ostream &os, const Ivec2 &f2);
+};
+
 class Vec2 {
 public:
     float x;

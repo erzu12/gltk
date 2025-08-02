@@ -120,10 +120,10 @@ Vec2 ListStrechResolver::getListParentSize(Vec2 childSize) {
 
 IMessure *ListStrechResolver::getListDirectionMessure(MessureVec2 *messure) {
     if (listDirection == ListDirection::Down || listDirection == ListDirection::Up) {
-        return messure->y;
+        return messure->y.get();
     }
     else {
-        return messure->x;
+        return messure->x.get();
     }
 }
 
