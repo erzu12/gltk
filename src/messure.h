@@ -3,24 +3,6 @@
 #include "vec_math.h"
 #include <memory>
 
-/*
- * Fixed: The size of the element is set by the size property.
- * Expand: The size of the element is expanded to include all of its children, if the children are larger than the
- * element itself. Shrink: The size of the element is shrunk to fit its children, if the children are smaller than the
- * element itself. Fit: The size of the element is adjusted to fit its children, ignoring the size of the element
- * itself.
- *
- * Note: Children with relative sizes will use the original size of the element, not the adjusted size.
- */
-enum class Sizing {
-    Fixed,
-    Expand,
-    Shrink,
-    Fit,
-};
-
-std::ostream &operator<<(std::ostream &os, const Sizing &sizing);
-
 class IMessure {
   public:
     virtual float resolve(float parrentSize) = 0;
@@ -68,8 +50,8 @@ struct MessureVec2 {
     Vec2 resolve(Vec2 parentSize);
 };
 
-AbsoluteMessure operator"" _px(unsigned long long int value);
-RelativeMessure operator"" _percent(long double value);
-RelativeMessure operator"" _pct(long double value);
-RelativeMessure operator"" _percent(unsigned long long int value);
-RelativeMessure operator"" _pct(unsigned long long int value);
+AbsoluteMessure operator""_px(unsigned long long int value);
+RelativeMessure operator""_percent(long double value);
+RelativeMessure operator""_pct(long double value);
+RelativeMessure operator""_percent(unsigned long long int value);
+RelativeMessure operator""_pct(unsigned long long int value);

@@ -2,16 +2,16 @@
 
 #include <lunasvg.h>
 
-#include "render.h"
 #include "render_objects.h"
+#include "renderable.h"
 
 namespace gltk {
-
 
 class Image : public IRenderable {
     Style style;
     ImageRenderer imageRenderer;
-public:
+
+  public:
     Image(std::string path, Style style);
 
     Vec2 getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) override;
@@ -24,7 +24,8 @@ class SVGImage : public IRenderable {
     ImageRenderer imageRenderer;
     std::unique_ptr<lunasvg::Document> document;
     lunasvg::Bitmap bitmap;
-public:
+
+  public:
     SVGImage(std::string path, Style style);
 
     Vec2 getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) override;
@@ -32,4 +33,4 @@ public:
     void setStyle(Style style) override { this->style = style; }
 };
 
-}
+} // namespace gltk

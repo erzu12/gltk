@@ -1,15 +1,15 @@
 #pragma once
 
+#include "renderable.h"
 #include "shader.h"
-#include "render.h"
 
 namespace gltk {
-
 
 class BoxRenderer {
     const Shader shader = Shader("assets/box.vert", "assets/box.frag");
     unsigned int VAO, VBO;
-public:
+
+  public:
     BoxRenderer();
     ~BoxRenderer();
 
@@ -20,7 +20,8 @@ class ImageRenderer {
     const Shader shader = Shader("assets/image.vert", "assets/image.frag");
     unsigned int VAO, VBO;
     unsigned int texture;
-public:
+
+  public:
     int width, height = 0;
     ImageRenderer(std::string path);
     ImageRenderer();
@@ -31,4 +32,4 @@ public:
     void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRergion, Style style);
 };
 
-}
+} // namespace gltk

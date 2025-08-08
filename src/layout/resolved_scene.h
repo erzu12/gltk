@@ -1,29 +1,38 @@
 #pragma once
 
-#include "render.h"
-#include "tree.h"
+#include "renderable.h"
+#include <memory>
+#include <optional>
 
 namespace gltk {
 
 struct ResolvedLayout {
-    std::optional<std::unique_ptr<IRenderable>> renderable;
-    Renderer *renderer;
+    std::optional<IRenderable *> renderable;
     Vec2 Position;
     Vec2 Size;
-    Mat3 Transform;
     std::vector<ResolvedLayout *> children;
 };
 
 class ResolvedScene {
-    std::unique_ptr<ResolvedLayout> root;
+    std::optional<ResolvedLayout *> root;
     std::vector<std::unique_ptr<ResolvedLayout>> layouts;
-public:
-    explicit ResolvedScene(std::vector<std::unique_ptr<ResolvedLayout>> layouts) : layouts(std::move(layouts)) {
-        root = std::move(this->layouts[0]);
+
+  public:
+    explicit ResolvedScene(std::vector<std::unique_ptr<ResolvedLayout>> layouts, int rootId)
+        : layouts(std::move(layouts)) {
+        if (this->layouts.empty()) {
+            throw std::runtime_error("ResolvedScene must contain at least one layout");
+        }
+        root = this->layouts[rootId].get();
     }
 
+    void render() const;
+
     ResolvedLayout *getRoot() const {
-        return root.get();
+        if (!root.has_value()) {
+            throw std::runtime_error("Root layout is not set");
+        }
+        return root.value();
     }
 
     std::vector<ResolvedLayout *> getLayouts() const {
@@ -34,8 +43,7 @@ public:
         return result;
     }
 
-    ResolvedLayout *getLayout(size_t id) const {
-        return layouts[id].get();
-    }
+    ResolvedLayout *getLayout(size_t id) const { return layouts[id].get(); }
 };
+
 } // namespace gltk

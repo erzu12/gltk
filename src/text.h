@@ -1,10 +1,10 @@
 #pragma once
 
+#include "renderable.h"
 #include "shader.h"
-#include "render.h"
 
-#include <map>
 #include <ft2build.h>
+#include <map>
 #include FT_FREETYPE_H
 
 namespace gltk {
@@ -47,8 +47,14 @@ class Text : public IRenderable {
     float getVerticalStartPos(float inPos, float boxSize, std::vector<std::string> lines);
     float getHorizontalStartPos(float inPos, float boxSize, std::string line);
     std::vector<std::string> splitTextToLines(std::string text, float boxWidth);
-public:
-    Text(std::string text, Style Style, HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left, VerticalTextAlign verticalAlign = VerticalTextAlign::Top);
+
+  public:
+    Text(
+        std::string text,
+        Style Style,
+        HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left,
+        VerticalTextAlign verticalAlign = VerticalTextAlign::Top
+    );
     ~Text();
 
     void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) override;
@@ -56,4 +62,4 @@ public:
     void setStyle(Style style) override { this->style = style; }
 };
 
-}
+} // namespace gltk

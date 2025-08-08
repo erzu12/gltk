@@ -1,20 +1,13 @@
 #include "render_objects.h"
-#include <stb_image.h>
 #include <iostream>
+#include <stb_image.h>
 
 namespace gltk {
 
 namespace {
 
 void createQuad(unsigned int &VAO, unsigned int &VBO) {
-    float vertices[] = {
-        -0.5f, -0.5f,
-        -0.5f, 0.5f,
-        0.5f, -0.5f,
-        0.5f, -0.5f,
-        -0.5f, 0.5f,
-        0.5f, 0.5f
-    };
+    float vertices[] = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f};
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -24,11 +17,19 @@ void createQuad(unsigned int &VAO, unsigned int &VBO) {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 }
 
-void renderQuad(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion, Style style, unsigned int VAO, const Shader &shader) {
+void renderQuad(
+    Vec2 viewSize,
+    Mat3 &modelMatrix,
+    Vec2 size,
+    BoundingBox clipRegion,
+    Style style,
+    unsigned int VAO,
+    const Shader &shader
+) {
     Mat3 viewMatrix = Mat3::viewMatrix(viewSize);
     shader.use();
     shader.UniformColor("color", style.color);
@@ -42,35 +43,34 @@ void renderQuad(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipReg
     float clipedRadius = std::min(style.radius, std::min(size.x, size.y) / 2.0f);
     shader.UniformFloat("radius", clipedRadius);
     shader.UniformVec2("pixelSize", size);
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
+    // glEnable(GL_SCISSOR_TEST);
+    //  glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDisable(GL_SCISSOR_TEST);
+    // glDisable(GL_SCISSOR_TEST);
 }
 
 void setImageData(unsigned int texture, int width, int height, int nrChannels, uint8_t *data) {
     int glFormat = GL_RGBA;
     switch (nrChannels) {
-        case 1:
-            glFormat = GL_RED;
-            break;
-        case 3:
-            glFormat = GL_RGB;
-            break;
-        case 4:
-            glFormat = GL_RGBA;
-            break;
-        default:
-            throw std::runtime_error("Unsupported number of color channels: " + std::to_string(nrChannels));
+    case 1:
+        glFormat = GL_RED;
+        break;
+    case 3:
+        glFormat = GL_RGB;
+        break;
+    case 4:
+        glFormat = GL_RGBA;
+        break;
+    default:
+        throw std::runtime_error("Unsupported number of color channels: " + std::to_string(nrChannels));
     }
 
     glTexImage2D(GL_TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-unsigned int loadImage(std::string path, int *width, int *height)
-{
+unsigned int loadImage(std::string path, int *width, int *height) {
     unsigned int image;
     int nrChannels;
     unsigned char *data;
@@ -87,8 +87,7 @@ unsigned int loadImage(std::string path, int *width, int *height)
 
     if (data) {
         setImageData(image, *width, *height, nrChannels, data);
-    }
-    else {
+    } else {
         throw std::runtime_error("Failed to load image: " + path);
     }
     stbi_image_free(data);
@@ -98,10 +97,7 @@ unsigned int loadImage(std::string path, int *width, int *height)
 
 } // namespace
 
-
-BoxRenderer::BoxRenderer() {
-    createQuad(VAO, VBO);
-}
+BoxRenderer::BoxRenderer() { createQuad(VAO, VBO); }
 
 void BoxRenderer::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion, Style style) {
     renderQuad(viewSize, modelMatrix, size, clipRegion, style, VAO, shader);
@@ -137,8 +133,7 @@ void ImageRenderer::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, Bounding
     if (width >= 0 || height >= 0) {
         glBindTexture(GL_TEXTURE_2D, texture);
         renderQuad(viewSize, modelMatrix, size, clipRegion, style, VAO, shader);
-    }
-    else {
+    } else {
         std::cout << "Image not loaded" << std::endl;
     }
 }
@@ -155,4 +150,4 @@ ImageRenderer::~ImageRenderer() {
     glDeleteBuffers(1, &VBO);
 }
 
-}
+} // namespace gltk

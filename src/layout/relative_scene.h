@@ -2,7 +2,7 @@
 
 #include "list_resolvers.h"
 #include "messure.h"
-#include "render.h"
+#include "renderable.h"
 #include "vec_math.h"
 
 #include <cassert>
@@ -45,17 +45,23 @@ struct Padding {
     int left;
 };
 
+enum class SizingMode { Layout, Content };
+
+struct Sizing {
+    SizingMode horizontal;
+    SizingMode vertical;
+};
+
 struct Positioning {
     MessureVec2 size = MessureVec2(0_px, 0_px);
     MessureVec2 offset = MessureVec2(0_px, 0_px);
     Vec2 anchor = Anchors::Center;
     Vec2 pivot = Anchors::Center;
+    Sizing sizing = {SizingMode::Layout, SizingMode::Layout};
     Padding padding = {0, 0, 0, 0};
     int test = 100;
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
-    Sizing verticalSizing = Sizing::Fixed;
-    Sizing horizontalSizing = Sizing::Fixed;
     Overflow overflow = Overflow::Scroll;
 };
 
@@ -65,63 +71,21 @@ struct RelativeLayout {
     Positioning positioning;
     Vec2 scrolePosition = Vec2(1, 1);
     std::vector<RelativeLayout *> children;
-    std::optional<RelativeLayout *>parent = std::nullopt;
-
-    bool hasFixedHeight() {
-        return positioning.size.y->isAbsolute() || (renderable.has_value() && positioning.verticalSizing == Sizing::Fit);
-    }
-
-    bool hasFixedWidth() {
-        return positioning.size.x->isAbsolute() || (renderable.has_value() && positioning.horizontalSizing == Sizing::Fit);
-    }
+    std::optional<RelativeLayout *> parent = std::nullopt;
 };
 
 class RelativeScene {
     std::vector<std::unique_ptr<RelativeLayout>> layouts;
-    std::optional<RelativeLayout *> root;
+    std::optional<RelativeLayout *> root = std::nullopt;
 
-public:
+  public:
+    RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout);
 
-    RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout) {
-        if (root.has_value()) {
-            RelativeLayout *old_root = root.value();
-            root = layout.get();
-            root.value()->children.push_back(old_root);
-        } else {
-            root = layout.get();
-        }
-        if (layout->id == -1) {
-            layout->id = layouts.size();
-        } else {
-            throw std::invalid_argument("Layout ID must be -1");
-        }
-        layouts.push_back(std::move(layout));
-        return layouts.back().get();
-    }
+    RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout, RelativeLayout *parent);
 
-    RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout, RelativeLayout *parent) {
-        if (!parent) throw std::invalid_argument("Parent layout cannot be null");
-        parent->children.push_back(layout.get());
-        if (layout->id == -1) {
-            layout->id = layouts.size();
-        } else {
-            throw std::invalid_argument("Layout ID must be -1");
-        }
-        layouts.push_back(std::move(layout));
-        return layouts.back().get();
-    }
+    RelativeLayout *getRoot() const;
 
-    RelativeLayout *getRoot() const {
-        return root.value();
-    }
-
-    std::vector<RelativeLayout *> getLayouts() const {
-        std::vector<RelativeLayout *> result;
-        for (auto &layout : layouts) {
-            result.push_back(layout.get());
-        }
-        return result;
-    }
+    std::vector<RelativeLayout *> getLayouts() const;
 };
 
 } // namespace gltk

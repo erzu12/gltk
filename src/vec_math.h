@@ -1,14 +1,14 @@
 #pragma once
 
-#include <math.h>
 #include <array>
+#include <math.h>
 #include <ostream>
 #include <vector>
 
 #define PI 3.14159265359f
 
 class Ivec2 {
-public:
+  public:
     int x;
     int y;
 
@@ -34,7 +34,7 @@ public:
 };
 
 class Vec2 {
-public:
+  public:
     float x;
     float y;
 
@@ -80,7 +80,7 @@ public:
 };
 
 class Vec3 {
-public:
+  public:
     float x, y, z;
 
     Vec3() : x(0), y(0), z(0) {}
@@ -121,11 +121,10 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Vec3 &f3);
 };
 
-
 class Mat3 {
-public:
+  public:
     std::array<float, 9> mat;
-    
+
     Mat3();
 
     Mat3 operator*(const Mat3 &b) const;
@@ -152,13 +151,14 @@ public:
 };
 
 class BoundingBox {
-public:
+  public:
     Vec2 min;
     Vec2 max;
 
     BoundingBox() : min(Vec2(float(INFINITY), float(INFINITY))), max(Vec2(float(-INFINITY), float(-INFINITY))) {}
     BoundingBox(Vec2 min, Vec2 max) : min(min), max(max) {}
-    BoundingBox(Vec2 position, Vec2 size, Vec2 pivot) : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
+    BoundingBox(Vec2 position, Vec2 size, Vec2 pivot)
+        : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
     void add(const BoundingBox &other);
     void addPadding(float top, float right, float bottom, float left);
     bool contains(Vec2 point);
@@ -169,7 +169,5 @@ public:
     BoundingBox intersect(const BoundingBox &other);
     static BoundingBox fromPoints(std::vector<Vec2> points);
 
-
     friend std::ostream &operator<<(std::ostream &os, const BoundingBox &bb);
 };
-

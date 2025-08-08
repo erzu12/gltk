@@ -13,6 +13,5 @@ printf "\n\n====================================================================
 cd build/test && ctest -j 16 --output-on-failure
 cd ../..
 
-
 # ./build/simple_slide
-# ./build/gltk_test_app
+./build/gltk_test_app

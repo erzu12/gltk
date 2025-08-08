@@ -8,20 +8,15 @@
 
 namespace gltk {
 
-namespace {
-
-
-}
+namespace {}
 
 Vec2 Image::getSize(Vec2 layoutSize, bool fixedX, bool fixedY) {
-    Vec2 outSize = Vec2();
+    Vec2 outSize = Vec2(imageRenderer.width, imageRenderer.height);
     if (fixedX && fixedY) {
         outSize = layoutSize;
-    }
-    else if (fixedX) {
+    } else if (fixedX) {
         outSize = Vec2(layoutSize.x, layoutSize.x * imageRenderer.height / imageRenderer.width);
-    }
-    else if (fixedY) {
+    } else if (fixedY) {
         outSize = Vec2(layoutSize.y * imageRenderer.width / imageRenderer.height, layoutSize.y);
     }
     return outSize;
@@ -35,7 +30,7 @@ void Image::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clip
 
 SVGImage::SVGImage(std::string path, Style style) : style(style), imageRenderer() {
     FontLoader fontLoader;
-    lunasvg::FontManager::registerMissingFontCalback([&fontLoader](const std::string& family, bool bold, bool italic) {
+    lunasvg::FontManager::registerMissingFontCalback([&fontLoader](const std::string &family, bool bold, bool italic) {
         FontSlant slant = italic ? FontSlant::Italic : FontSlant::Roman;
         FontWeight weight = bold ? FontWeight::Bold : FontWeight::Normal;
         std::string path = fontLoader.getFontPath(family, slant, weight);
@@ -57,17 +52,15 @@ void SVGImage::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox c
 }
 
 Vec2 SVGImage::getSize(Vec2 layoutSize, bool fixedX, bool fixedY) {
-    Vec2 outSize = Vec2();
+    Vec2 outSize = Vec2(document->width(), document->height());
     if (fixedX && fixedY) {
         outSize = layoutSize;
-    }
-    else if (fixedX) {
+    } else if (fixedX) {
         outSize = Vec2(layoutSize.x, layoutSize.x * document->height() / document->width());
-    }
-    else if (fixedY) {
+    } else if (fixedY) {
         outSize = Vec2(layoutSize.y * document->width() / document->height(), layoutSize.y);
     }
     return outSize;
 }
 
-};
+}; // namespace gltk

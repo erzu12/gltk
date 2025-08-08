@@ -3,3 +3,6 @@ build/
 .gdb*
 compile_commands.json
 *.out.*
+.vscode/
+\\
+]

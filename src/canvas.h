@@ -1,24 +1,20 @@
 #pragma once
 
-#include "shader.h"
-#include "render.h"
 #include "render_objects.h"
+#include "renderable.h"
+#include "shader.h"
 
 namespace gltk {
-
 
 class CanvasObject {
     int z_index = 0;
 
-    int operator<(const CanvasObject &other) {
-        return z_index < other.z_index;
-    }
-    
-public:
+    int operator<(const CanvasObject &other) { return z_index < other.z_index; }
+
+  public:
     virtual void render(Mat3 &viewMatrix) = 0;
     virtual bool pointInObject(Vec2 point) = 0;
 };
-
 
 class PathObject : public CanvasObject {
     std::vector<Vec2> points;
@@ -35,7 +31,8 @@ class PathObject : public CanvasObject {
     BoundingBox boundingBox;
     Vec2 pos = Vec2(0, 0);
     bool dirty = true;
-public:
+
+  public:
     PathObject(std::vector<Vec2> points, Vec2 pos, Style style, bool interpolate, bool closed = false);
     ~PathObject();
 
@@ -46,32 +43,32 @@ public:
     void render(Mat3 &viewMatrix) override;
 
     bool pointInObject(Vec2 point) override;
-private:
+
+  private:
     void regenerateGeometry();
     BoundingBox generateBorder(std::vector<Vec2> points, float width, bool closed);
     std::vector<Vec2> bezierInterpolation(std::vector<Vec2> points);
 };
 
-
 class Rectangle : public PathObject {
-public:
+  public:
     Rectangle(Vec2 pos, Vec2 size, Style style);
 };
 
-
 class Oval : public PathObject {
     static std::array<Vec2, 16> ovalPoints();
-public:
+
+  public:
     Oval(Vec2 pos, Vec2 size, Style style);
 };
-
 
 class Canvas : public IRenderable {
     Style style;
     std::vector<std::unique_ptr<CanvasObject>> objects;
     BoxRenderer boxRenderer;
     Vec2 size;
-public:
+
+  public:
     Canvas(Style style, Vec2 size);
 
     void addObject(std::unique_ptr<CanvasObject> object);
@@ -82,4 +79,4 @@ public:
     void setStyle(Style style) override { this->style = style; }
 };
 
-}
+} // namespace gltk
