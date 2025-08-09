@@ -48,6 +48,8 @@ struct MessureVec2 {
         : x(std::make_unique<RelativeMessure>(x_)), y(std::make_unique<AbsoluteMessure>(y_)) {}
 
     Vec2 resolve(Vec2 parentSize);
+
+    std::unique_ptr<IMessure> &operator[](int index);
 };
 
 AbsoluteMessure operator""_px(unsigned long long int value);

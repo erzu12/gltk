@@ -169,4 +169,201 @@ TEST_F(LayoutTest, centerSquareAbsoluteWithRandomPadding) {
     ASSERT_FLOAT_EQ(position.y, 110.0f);
 }
 
+TEST_F(LayoutTest, listDownAbsolute) {
+    auto parent = std::make_unique<RelativeLayout>();
+    parent->positioning = Positioning{
+        .size = MessureVec2(100_px, 100_px),
+        .anchor = Anchors::TopLeft,
+        .pivot = Anchors::TopLeft,
+        .childPlacement = ChildPlacement::List,
+        .listDirection = ListDirection::Down
+    };
+    RelativeLayout *parentRef = scene->addRelativeLayout(std::move(parent), rootLayoutRef);
+
+    std::vector<RelativeLayout *> children;
+    for (int i = 0; i < 3; ++i) {
+        auto layout = std::make_unique<RelativeLayout>();
+        layout->positioning =
+            Positioning{.size = MessureVec2(100_px, 20_px), .anchor = Anchors::Center, .pivot = Anchors::Center};
+        children.push_back(scene->addRelativeLayout(std::move(layout), parentRef));
+    }
+
+    auto resolvedScene = resolveScene(*scene, Vec2(200, 200));
+
+    for (size_t i = 0; i < children.size(); ++i) {
+        Vec2 position = resolvedScene->getLayout(children[i]->id)->Position;
+        Vec2 size = resolvedScene->getLayout(children[i]->id)->Size;
+
+        ASSERT_FLOAT_EQ(size.x, 100.0f);
+        ASSERT_FLOAT_EQ(size.y, 20.0f);
+        ASSERT_FLOAT_EQ(position.x, 50.0f);
+        ASSERT_FLOAT_EQ(position.y, 10.0f + i * 20.0f);
+    }
+}
+
+TEST_F(LayoutTest, listLeftAbsolute) {
+    auto parent = std::make_unique<RelativeLayout>();
+    parent->positioning = Positioning{
+        .size = MessureVec2(100_px, 100_px),
+        .anchor = Anchors::TopLeft,
+        .pivot = Anchors::TopLeft,
+        .childPlacement = ChildPlacement::List,
+        .listDirection = ListDirection::Left
+    };
+    RelativeLayout *parentRef = scene->addRelativeLayout(std::move(parent), rootLayoutRef);
+
+    std::vector<RelativeLayout *> children;
+    for (int i = 0; i < 3; ++i) {
+        auto layout = std::make_unique<RelativeLayout>();
+        layout->positioning =
+            Positioning{.size = MessureVec2(20_px, 100_px), .anchor = Anchors::Center, .pivot = Anchors::Center};
+        children.push_back(scene->addRelativeLayout(std::move(layout), parentRef));
+    }
+
+    auto resolvedScene = resolveScene(*scene, Vec2(200, 200));
+
+    for (size_t i = 0; i < children.size(); ++i) {
+        Vec2 position = resolvedScene->getLayout(children[i]->id)->Position;
+        Vec2 size = resolvedScene->getLayout(children[i]->id)->Size;
+
+        ASSERT_FLOAT_EQ(size.x, 20.0f);
+        ASSERT_FLOAT_EQ(size.y, 100.0f);
+        ASSERT_FLOAT_EQ(position.x, 90.0f - i * 20.0f);
+        ASSERT_FLOAT_EQ(position.y, 50.0f);
+    }
+}
+
+TEST_F(LayoutTest, listDownAbsoluteAnchorTopLeft) {
+    auto parent = std::make_unique<RelativeLayout>();
+    parent->positioning = Positioning{
+        .size = MessureVec2(100_px, 100_px),
+        .anchor = Anchors::TopLeft,
+        .pivot = Anchors::TopLeft,
+        .childPlacement = ChildPlacement::List,
+        .listDirection = ListDirection::Down
+    };
+    RelativeLayout *parentRef = scene->addRelativeLayout(std::move(parent), rootLayoutRef);
+
+    std::vector<RelativeLayout *> children;
+    for (int i = 0; i < 3; ++i) {
+        auto layout = std::make_unique<RelativeLayout>();
+        layout->positioning =
+            Positioning{.size = MessureVec2(100_px, 20_px), .anchor = Anchors::TopLeft, .pivot = Anchors::TopLeft};
+        children.push_back(scene->addRelativeLayout(std::move(layout), parentRef));
+    }
+
+    auto resolvedScene = resolveScene(*scene, Vec2(200, 200));
+
+    for (size_t i = 0; i < children.size(); ++i) {
+        Vec2 position = resolvedScene->getLayout(children[i]->id)->Position;
+        Vec2 size = resolvedScene->getLayout(children[i]->id)->Size;
+
+        ASSERT_FLOAT_EQ(size.x, 100.0f);
+        ASSERT_FLOAT_EQ(size.y, 20.0f);
+        ASSERT_FLOAT_EQ(position.x, 50.0f);
+        ASSERT_FLOAT_EQ(position.y, 10.0f + i * 20.0f);
+    }
+}
+
+TEST_F(LayoutTest, listDownRelative) {
+    auto parent = std::make_unique<RelativeLayout>();
+    parent->positioning = Positioning{
+        .size = MessureVec2(100_px, 100_px),
+        .anchor = Anchors::TopLeft,
+        .pivot = Anchors::TopLeft,
+        .childPlacement = ChildPlacement::List,
+        .listDirection = ListDirection::Down
+    };
+    RelativeLayout *parentRef = scene->addRelativeLayout(std::move(parent), rootLayoutRef);
+
+    std::vector<RelativeLayout *> children;
+    for (int i = 0; i < 3; ++i) {
+        auto layout = std::make_unique<RelativeLayout>();
+        layout->positioning =
+            Positioning{.size = MessureVec2(100_pct, 20_pct), .anchor = Anchors::Center, .pivot = Anchors::Center};
+        children.push_back(scene->addRelativeLayout(std::move(layout), parentRef));
+    }
+
+    auto resolvedScene = resolveScene(*scene, Vec2(200, 200));
+
+    for (size_t i = 0; i < children.size(); ++i) {
+        Vec2 position = resolvedScene->getLayout(children[i]->id)->Position;
+        Vec2 size = resolvedScene->getLayout(children[i]->id)->Size;
+
+        ASSERT_FLOAT_EQ(size.x, 100.0f);
+        ASSERT_FLOAT_EQ(size.y, 20.0f);
+        ASSERT_FLOAT_EQ(position.x, 50.0f);
+        ASSERT_FLOAT_EQ(position.y, 10.0f + i * 20.0f);
+    }
+}
+
+TEST_F(LayoutTest, listStretchDownRelative) {
+    auto parent = std::make_unique<RelativeLayout>();
+    parent->positioning = Positioning{
+        .size = MessureVec2(100_px, 100_px),
+        .anchor = Anchors::TopLeft,
+        .pivot = Anchors::TopLeft,
+        .childPlacement = ChildPlacement::ListStretch,
+        .listDirection = ListDirection::Down
+    };
+    RelativeLayout *parentRef = scene->addRelativeLayout(std::move(parent), rootLayoutRef);
+
+    std::vector<RelativeLayout *> children;
+    for (int i = 0; i < 3; ++i) {
+        auto layout = std::make_unique<RelativeLayout>();
+        layout->positioning =
+            Positioning{.size = MessureVec2(100_pct, 100_pct), .anchor = Anchors::Center, .pivot = Anchors::Center};
+        children.push_back(scene->addRelativeLayout(std::move(layout), parentRef));
+    }
+
+    auto resolvedScene = resolveScene(*scene, Vec2(200, 200));
+
+    for (size_t i = 0; i < children.size(); ++i) {
+        Vec2 position = resolvedScene->getLayout(children[i]->id)->Position;
+        Vec2 size = resolvedScene->getLayout(children[i]->id)->Size;
+
+        ASSERT_FLOAT_EQ(size.x, 100.0f);
+        ASSERT_FLOAT_EQ(size.y, 100.0f / 3.0f);
+        ASSERT_FLOAT_EQ(position.x, 50.0f);
+        ASSERT_FLOAT_EQ(position.y, 100.0f / 6.0f + i * 100.0f / 3.0f);
+    }
+}
+
+TEST_F(LayoutTest, listStretchDownAbsoluteWithAbsolute) {
+    auto parent = std::make_unique<RelativeLayout>();
+    parent->positioning = Positioning{
+        .size = MessureVec2(100_px, 100_px),
+        .anchor = Anchors::TopLeft,
+        .pivot = Anchors::TopLeft,
+        .childPlacement = ChildPlacement::ListStretch,
+        .listDirection = ListDirection::Down
+    };
+    RelativeLayout *parentRef = scene->addRelativeLayout(std::move(parent), rootLayoutRef);
+
+    auto absolutLayout = std::make_unique<RelativeLayout>();
+    absolutLayout->positioning =
+        Positioning{.size = MessureVec2(100_pct, 25_px), .anchor = Anchors::Center, .pivot = Anchors::Center};
+    scene->addRelativeLayout(std::move(absolutLayout), parentRef);
+
+    std::vector<RelativeLayout *> children;
+    for (int i = 0; i < 3; ++i) {
+        auto layout = std::make_unique<RelativeLayout>();
+        layout->positioning =
+            Positioning{.size = MessureVec2(100_pct, 100_pct), .anchor = Anchors::Center, .pivot = Anchors::Center};
+        children.push_back(scene->addRelativeLayout(std::move(layout), parentRef));
+    }
+
+    auto resolvedScene = resolveScene(*scene, Vec2(200, 200));
+
+    for (size_t i = 0; i < children.size(); ++i) {
+        Vec2 position = resolvedScene->getLayout(children[i]->id)->Position;
+        Vec2 size = resolvedScene->getLayout(children[i]->id)->Size;
+
+        ASSERT_FLOAT_EQ(size.x, 100.0f);
+        ASSERT_FLOAT_EQ(size.y, 25.0f);
+        ASSERT_FLOAT_EQ(position.x, 50.0f);
+        ASSERT_FLOAT_EQ(position.y, 25.0f + 12.5f + i * 25.0f);
+    }
+}
+
 } // namespace gltk

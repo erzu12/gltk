@@ -43,11 +43,11 @@ void renderQuad(
     float clipedRadius = std::min(style.radius, std::min(size.x, size.y) / 2.0f);
     shader.UniformFloat("radius", clipedRadius);
     shader.UniformVec2("pixelSize", size);
-    // glEnable(GL_SCISSOR_TEST);
-    //  glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(clipRegion.min.x, viewSize.y - clipRegion.max.y, clipRegion.width(), clipRegion.height());
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    // glDisable(GL_SCISSOR_TEST);
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void setImageData(unsigned int texture, int width, int height, int nrChannels, uint8_t *data) {

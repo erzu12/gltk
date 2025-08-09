@@ -6,6 +6,16 @@ float AbsoluteMessure::resolve(float parentSize) { return (float)value; }
 
 float RelativeMessure::resolve(float parentSize) { return value * parentSize; }
 
+std::unique_ptr<IMessure> &MessureVec2::operator[](int index) {
+    if (index == 0) {
+        return x;
+    } else if (index == 1) {
+        return y;
+    } else {
+        throw std::out_of_range("Index out of range for MessureVec2");
+    }
+}
+
 AbsoluteMessure operator""_px(unsigned long long int value) { return AbsoluteMessure((int)value); }
 
 RelativeMessure operator""_percent(long double value) { return RelativeMessure((float)value / 100.0f); }

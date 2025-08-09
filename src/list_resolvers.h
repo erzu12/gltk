@@ -19,6 +19,20 @@ enum class ListDirection {
     Up,
 };
 
+const Vec2 ListDireectionVector[] = {
+    Vec2(0, 1),  // Down
+    Vec2(1, 0),  // Right
+    Vec2(-1, 0), // Left
+    Vec2(0, -1), // Up
+};
+
+const int ListDirectionAxis[] = {
+    1, // Down
+    0, // Right
+    0, // Left
+    1, // Up
+};
+
 // struct ChildData {
 //     MessureVec2 *size;
 //     std::function<BoundingBox(Vec2, Vec2, bool, ListDirection)> resolveTransform;

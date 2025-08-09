@@ -30,6 +30,8 @@ class Ivec2 {
 
     bool operator==(const Ivec2 &b) const;
 
+    float operator[](int index) const;
+
     friend std::ostream &operator<<(std::ostream &os, const Ivec2 &f2);
 };
 
@@ -75,6 +77,7 @@ class Vec2 {
     bool isInsideTriangle(Vec2 a, Vec2 b, Vec2 c);
 
     bool operator==(const Vec2 &b) const;
+    float &operator[](int index);
 
     friend std::ostream &operator<<(std::ostream &os, const Vec2 &f2);
 };
@@ -117,6 +120,8 @@ class Vec3 {
     Vec3 lerp(const Vec3 &b, float t) const;
 
     bool operator==(const Vec3 &b) const;
+
+    float operator[](int index) const;
 
     friend std::ostream &operator<<(std::ostream &os, const Vec3 &f3);
 };

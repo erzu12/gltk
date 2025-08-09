@@ -10,6 +10,4 @@ namespace gltk {
 
 std::unique_ptr<ResolvedScene> resolveScene(const RelativeScene &scene, Vec2 viewportSize);
 
-
-
 } // namespace gltk

@@ -33,16 +33,18 @@ Ivec2 Ivec2::operator-() const {
     return c;
 }
 
-float Ivec2::Magnitude() const {
-    return sqrt((float)this->x*(float)this->x + (float)this->y*(float)this->y);
-}
+float Ivec2::Magnitude() const { return sqrt((float)this->x * (float)this->x + (float)this->y * (float)this->y); }
 
-float Ivec2::Dot(const Ivec2 b) const {
-    return (float)this->x * (float)b.x + (float)this->y * (float)b.y;
-}
+float Ivec2::Dot(const Ivec2 b) const { return (float)this->x * (float)b.x + (float)this->y * (float)b.y; }
 
-bool Ivec2::operator==(const Ivec2 &b) const {
-    return this->x == b.x && this->y == b.y;
+bool Ivec2::operator==(const Ivec2 &b) const { return this->x == b.x && this->y == b.y; }
+
+float Ivec2::operator[](int index) const {
+    if (index == 0)
+        return this->x;
+    if (index == 1)
+        return this->y;
+    throw std::out_of_range("Index out of range for Ivec2");
 }
 
 std::ostream &operator<<(std::ostream &os, const Ivec2 &f2) {
@@ -88,52 +90,47 @@ Vec2 Vec2::operator-() const {
     return c;
 }
 
-float Vec2::Magnitude() const {
-    return sqrt(this->x*this->x + this->y*this->y);
-}
+float Vec2::Magnitude() const { return sqrt(this->x * this->x + this->y * this->y); }
 
 Vec2 Vec2::Normalize() {
     float mag = Magnitude();
-    if(mag == 0) return *this;
+    if (mag == 0)
+        return *this;
     this->x /= mag;
     this->y /= mag;
     return *this;
 }
 
-Vec2 Vec2::operator* (const float b) const {
+Vec2 Vec2::operator*(const float b) const {
     Vec2 c;
     c.x = this->x * b;
     c.y = this->y * b;
     return c;
 }
 
-Vec2 Vec2::operator*= (const float b) {
+Vec2 Vec2::operator*=(const float b) {
     this->x *= b;
     this->y *= b;
     return *this;
 }
 
-Vec2 Vec2::operator* (const Vec2 b) const {
+Vec2 Vec2::operator*(const Vec2 b) const {
     Vec2 c;
     c.x = this->x * b.x;
     c.y = this->y * b.y;
     return c;
 }
 
-Vec2 Vec2::operator/ (const float b) const {
+Vec2 Vec2::operator/(const float b) const {
     Vec2 c;
     c.x = this->x / b;
     c.y = this->y / b;
     return c;
 }
 
-float Vec2::Dot(const Vec2 b) const {
-    return this->x * b.x + this->y * b.y;
-}
+float Vec2::Dot(const Vec2 b) const { return this->x * b.x + this->y * b.y; }
 
-float Vec2::Angle(const Vec2 b) const {
-    return  atan2(this->x * b.y - this->y * b.x, this->x * b.x + this->y * b.y);
-}
+float Vec2::Angle(const Vec2 b) const { return atan2(this->x * b.y - this->y * b.x, this->x * b.x + this->y * b.y); }
 
 Vec2 Vec2::Rot(float rot) const {
     Vec2 b;
@@ -175,8 +172,14 @@ bool Vec2::isInsideTriangle(Vec2 a, Vec2 b, Vec2 c) {
     return (u >= 0) && (v >= 0) && (u + v < 1);
 }
 
-bool Vec2::operator==(const Vec2 &b) const {
-    return this->x == b.x && this->y == b.y;
+bool Vec2::operator==(const Vec2 &b) const { return this->x == b.x && this->y == b.y; }
+
+float &Vec2::operator[](int index) {
+    if (index == 0)
+        return this->x;
+    if (index == 1)
+        return this->y;
+    throw std::out_of_range("Index out of range for Vec2");
 }
 
 std::ostream &operator<<(std::ostream &os, const Vec2 &f2) {
@@ -184,40 +187,35 @@ std::ostream &operator<<(std::ostream &os, const Vec2 &f2) {
     return os;
 }
 
-Vec3 Vec3::operator+(const Vec3 &b) const
-{
+Vec3 Vec3::operator+(const Vec3 &b) const {
     Vec3 c;
     c.x = this->x + b.x;
     c.y = this->y + b.y;
     c.z = this->z + b.z;
     return c;
 }
-Vec3 Vec3::operator+=(const Vec3 &b)
-{
+Vec3 Vec3::operator+=(const Vec3 &b) {
     this->x += b.x;
     this->y += b.y;
     this->z += b.z;
     return *this;
 }
 
-Vec3 Vec3::operator-(const Vec3 &b) const
-{
+Vec3 Vec3::operator-(const Vec3 &b) const {
     Vec3 c;
     c.x = this->x - b.x;
     c.y = this->y - b.y;
     c.z = this->z - b.z;
     return c;
 }
-Vec3 Vec3::operator-=(const Vec3 &b)
-{
+Vec3 Vec3::operator-=(const Vec3 &b) {
     this->x -= b.x;
     this->y -= b.y;
     this->z -= b.z;
     return *this;
 }
 
-Vec3 Vec3::operator-() const
-{
+Vec3 Vec3::operator-() const {
     Vec3 c;
     c.x = -this->x;
     c.y = -this->y;
@@ -225,12 +223,9 @@ Vec3 Vec3::operator-() const
     return c;
 }
 
-float Vec3::magnitude() const {
-    return sqrt(this->x * this->x + this->y * this->y + this->z * this->z); 
-}
+float Vec3::magnitude() const { return sqrt(this->x * this->x + this->y * this->y + this->z * this->z); }
 
-Vec3 Vec3::normalize()
-{
+Vec3 Vec3::normalize() {
     float mag = magnitude();
     if (mag == 0)
         return *this;
@@ -240,8 +235,7 @@ Vec3 Vec3::normalize()
     return *this;
 }
 
-Vec3 Vec3::operator*(float b) const
-{
+Vec3 Vec3::operator*(float b) const {
     Vec3 c;
     c.x = this->x * b;
     c.y = this->y * b;
@@ -249,16 +243,14 @@ Vec3 Vec3::operator*(float b) const
     return c;
 }
 
-Vec3 Vec3::operator*=(float b)
-{
+Vec3 Vec3::operator*=(float b) {
     this->x *= b;
     this->y *= b;
     this->z *= b;
     return *this;
 }
 
-Vec3 Vec3::operator*(const Vec3 &b) const
-{
+Vec3 Vec3::operator*(const Vec3 &b) const {
     Vec3 c;
     c.x = this->x * b.x;
     c.y = this->y * b.y;
@@ -266,8 +258,7 @@ Vec3 Vec3::operator*(const Vec3 &b) const
     return c;
 }
 
-Vec3 Vec3::operator/(float b) const
-{
+Vec3 Vec3::operator/(float b) const {
     Vec3 c;
     c.x = this->x / b;
     c.y = this->y / b;
@@ -277,8 +268,7 @@ Vec3 Vec3::operator/(float b) const
 
 float Vec3::dot(const Vec3 &b) const { return this->x * b.x + this->y * b.y + this->z * b.z; }
 
-Vec3 Vec3::cross(const Vec3 &b) const
-{
+Vec3 Vec3::cross(const Vec3 &b) const {
     Vec3 c;
     c.x = this->y * b.z - this->z * b.y;
     c.y = this->z * b.x - this->x * b.z;
@@ -286,59 +276,54 @@ Vec3 Vec3::cross(const Vec3 &b) const
     return c;
 }
 
-Vec3 Vec3::reflect(const Vec3 &normal) const
-{
-    return *this - normal * 2 * this->dot(normal);
-}
+Vec3 Vec3::reflect(const Vec3 &normal) const { return *this - normal * 2 * this->dot(normal); }
 
-Vec3 Vec3::max(const Vec3 &b)
-{
+Vec3 Vec3::max(const Vec3 &b) {
     this->x = this->x > b.x ? this->x : b.x;
     this->y = this->y > b.y ? this->y : b.y;
     this->z = this->z > b.z ? this->z : b.z;
     return *this;
 }
 
-Vec3 Vec3::min(const Vec3 &b)
-{
+Vec3 Vec3::min(const Vec3 &b) {
     this->x = this->x < b.x ? this->x : b.x;
     this->y = this->y < b.y ? this->y : b.y;
     this->z = this->z < b.z ? this->z : b.z;
     return *this;
 }
 
-Vec3 Vec3::lerp(const Vec3 &b, float t) const
-{
-    return *this * (1 - t) + b * t;
+Vec3 Vec3::lerp(const Vec3 &b, float t) const { return *this * (1 - t) + b * t; }
+
+bool Vec3::operator==(const Vec3 &b) const { return this->x == b.x && this->y == b.y && this->z == b.z; }
+
+float Vec3::operator[](int index) const {
+    if (index == 0)
+        return this->x;
+    if (index == 1)
+        return this->y;
+    if (index == 2)
+        return this->z;
+    throw std::out_of_range("Index out of range for Vec3");
 }
 
-bool Vec3::operator==(const Vec3 &b) const
-{
-    return this->x == b.x && this->y == b.y && this->z == b.z;
-}
-
-std::ostream &operator<<(std::ostream &os, const Vec3 &f3)
-{
+std::ostream &operator<<(std::ostream &os, const Vec3 &f3) {
     os << "{" << f3.x << ", " << f3.y << ", " << f3.z << "}";
     return os;
 }
 
-
-Mat3::Mat3() {
-    mat = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-}
+Mat3::Mat3() { mat = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f}; }
 
 Mat3 Mat3::operator*(const Mat3 &b) const {
     Mat3 c;
     c.mat[0] = this->mat[0] * b.mat[0] + this->mat[1] * b.mat[3] + this->mat[2] * b.mat[6];
     c.mat[1] = this->mat[0] * b.mat[1] + this->mat[1] * b.mat[4] + this->mat[2] * b.mat[7];
     c.mat[2] = this->mat[0] * b.mat[2] + this->mat[1] * b.mat[5] + this->mat[2] * b.mat[8];
-    c.mat[3] = this->mat[3] * b.mat[0] + this->mat[4] * b.mat[3] + this->mat[5] * b.mat[6]; 
-    c.mat[4] = this->mat[3] * b.mat[1] + this->mat[4] * b.mat[4] + this->mat[5] * b.mat[7]; 
-    c.mat[5] = this->mat[3] * b.mat[2] + this->mat[4] * b.mat[5] + this->mat[5] * b.mat[8]; 
-    c.mat[6] = this->mat[6] * b.mat[0] + this->mat[7] * b.mat[3] + this->mat[8] * b.mat[6]; 
-    c.mat[7] = this->mat[6] * b.mat[1] + this->mat[7] * b.mat[4] + this->mat[8] * b.mat[7]; 
-    c.mat[8] = this->mat[6] * b.mat[2] + this->mat[7] * b.mat[5] + this->mat[8] * b.mat[8]; 
+    c.mat[3] = this->mat[3] * b.mat[0] + this->mat[4] * b.mat[3] + this->mat[5] * b.mat[6];
+    c.mat[4] = this->mat[3] * b.mat[1] + this->mat[4] * b.mat[4] + this->mat[5] * b.mat[7];
+    c.mat[5] = this->mat[3] * b.mat[2] + this->mat[4] * b.mat[5] + this->mat[5] * b.mat[8];
+    c.mat[6] = this->mat[6] * b.mat[0] + this->mat[7] * b.mat[3] + this->mat[8] * b.mat[6];
+    c.mat[7] = this->mat[6] * b.mat[1] + this->mat[7] * b.mat[4] + this->mat[8] * b.mat[7];
+    c.mat[8] = this->mat[6] * b.mat[2] + this->mat[7] * b.mat[5] + this->mat[8] * b.mat[8];
     return c;
 }
 
@@ -358,11 +343,11 @@ Mat3 Mat3::rotationMatrix(float angle) {
 
 Mat3 Mat3::scalingMatrix(Vec2 scale) {
     Mat3 scaleMat;
-    scaleMat.mat[0] = scale.x; 
-    scaleMat.mat[1] = 0.0f; 
-    scaleMat.mat[2] = 0.0f; 
+    scaleMat.mat[0] = scale.x;
+    scaleMat.mat[1] = 0.0f;
+    scaleMat.mat[2] = 0.0f;
     scaleMat.mat[3] = 0.0f;
-    scaleMat.mat[4] = scale.y; 
+    scaleMat.mat[4] = scale.y;
     scaleMat.mat[5] = 0.0f;
     scaleMat.mat[6] = 0.0f;
     scaleMat.mat[7] = 0.0f;
@@ -372,10 +357,10 @@ Mat3 Mat3::scalingMatrix(Vec2 scale) {
 
 Mat3 Mat3::translationMatrix(Vec2 translate) {
     Mat3 translateionMat;
-    translateionMat.mat[0] = 1.0f; 
-    translateionMat.mat[1] = 0.0f; 
-    translateionMat.mat[2] = translate.x; 
-    translateionMat.mat[3] = 0.0f; 
+    translateionMat.mat[0] = 1.0f;
+    translateionMat.mat[1] = 0.0f;
+    translateionMat.mat[2] = translate.x;
+    translateionMat.mat[3] = 0.0f;
     translateionMat.mat[4] = 1.0f;
     translateionMat.mat[5] = translate.y;
     translateionMat.mat[6] = 0.0f;
@@ -413,9 +398,7 @@ void Mat3::translateMatrix(Vec2 translate) {
     *this = *this * translateionMat;
 }
 
-float *Mat3::data() {
-    return mat.data();
-}
+float *Mat3::data() { return mat.data(); }
 
 std::array<float, 3> Mat3::operator[](int index) const {
     return {mat[index * 3], mat[index * 3 + 1], mat[index * 3 + 2]};
