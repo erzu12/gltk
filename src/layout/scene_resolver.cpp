@@ -107,33 +107,42 @@ void calculateListStretchTransforms(
 
 void resolveLayouts(
     const std::vector<RelativeLayout *> &relativeLayouts,
-    const RelativeLayout *layout,
+    const RelativeLayout *parent,
     std::vector<std::unique_ptr<ResolvedLayout>> &resolvedLayouts,
     const Vec2 viewportSize
 ) {
-    const ResolvedLayout *resolvedLayout = resolvedLayouts[layout->id].get();
-    Vec2 paddingTopLeftOffset(layout->positioning.padding.left, layout->positioning.padding.top);
-    Vec2 paddingBottomRightOffset(layout->positioning.padding.right, layout->positioning.padding.bottom);
+    const ResolvedLayout *resolvedLayout = resolvedLayouts[parent->id].get();
+    Vec2 paddingTopLeftOffset(parent->positioning.padding.left, parent->positioning.padding.top);
+    Vec2 paddingBottomRightOffset(parent->positioning.padding.right, parent->positioning.padding.bottom);
     Vec2 paddedParentSize = resolvedLayout->Size - paddingTopLeftOffset - paddingBottomRightOffset;
     Vec2 paddedParentPosition = resolvedLayout->Position + (paddingTopLeftOffset - paddingBottomRightOffset) / 2.0f;
-    switch (layout->positioning.childPlacement) {
+    switch (parent->positioning.childPlacement) {
     case ChildPlacement::Free:
-        calculateFreeTransforms(layout->children, resolvedLayouts, paddedParentSize, paddedParentPosition);
+        calculateFreeTransforms(parent->children, resolvedLayouts, paddedParentSize, paddedParentPosition);
         break;
     case ChildPlacement::List:
         calculateListTransforms(
-            layout->children, resolvedLayouts, paddedParentSize, paddedParentPosition, layout->positioning.listDirection
+            parent->children, resolvedLayouts, paddedParentSize, paddedParentPosition, parent->positioning.listDirection
         );
         break;
     case ChildPlacement::ListStretch:
         calculateListStretchTransforms(
-            layout->children, resolvedLayouts, paddedParentSize, paddedParentPosition, layout->positioning.listDirection
+            parent->children, resolvedLayouts, paddedParentSize, paddedParentPosition, parent->positioning.listDirection
         );
         break;
     }
-    for (auto &child : layout->children) {
+    for (auto &child : parent->children) {
+        BoundingBox boundingBox = BoundingBox(resolvedLayouts[child->id]->Position, resolvedLayouts[child->id]->Size);
+        boundingBox.intersect(resolvedLayouts[parent->id]->clipRegion);
+        resolvedLayouts[child->id]->clipRegion = boundingBox;
         resolveLayouts(relativeLayouts, child, resolvedLayouts, viewportSize);
     }
+}
+
+void resolveRootLayout(RelativeLayout *rootLayout, Vec2 viewportSize, ResolvedLayout *resolvedLayout) {
+    calculateSize(rootLayout, viewportSize, resolvedLayout);
+    calculatePosition(rootLayout, viewportSize, viewportSize / 2.0f, resolvedLayout);
+    resolvedLayout->clipRegion = BoundingBox(resolvedLayout->Position, resolvedLayout->Size);
 }
 
 std::unique_ptr<ResolvedScene> resolveScene(const RelativeScene &scene, Vec2 viewportSize) {
@@ -146,13 +155,7 @@ std::unique_ptr<ResolvedScene> resolveScene(const RelativeScene &scene, Vec2 vie
         }
     }
 
-    calculateSize(relativeLayouts[scene.getRoot()->id], viewportSize, resolvedLayouts[scene.getRoot()->id].get());
-    calculatePosition(
-        relativeLayouts[scene.getRoot()->id],
-        viewportSize,
-        viewportSize / 2.0f,
-        resolvedLayouts[scene.getRoot()->id].get()
-    );
+    resolveRootLayout(scene.getRoot(), viewportSize, resolvedLayouts[scene.getRoot()->id].get());
 
     resolveLayouts(relativeLayouts, scene.getRoot(), resolvedLayouts, viewportSize);
 

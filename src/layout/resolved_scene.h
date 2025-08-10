@@ -10,6 +10,7 @@ struct ResolvedLayout {
     std::optional<IRenderable *> renderable;
     Vec2 Position;
     Vec2 Size;
+    BoundingBox clipRegion;
     std::vector<ResolvedLayout *> children;
 };
 

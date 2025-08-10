@@ -161,9 +161,7 @@ class BoundingBox {
     Vec2 max;
 
     BoundingBox() : min(Vec2(float(INFINITY), float(INFINITY))), max(Vec2(float(-INFINITY), float(-INFINITY))) {}
-    BoundingBox(Vec2 min, Vec2 max) : min(min), max(max) {}
-    BoundingBox(Vec2 position, Vec2 size, Vec2 pivot)
-        : min(position - size * pivot), max(position + size * (Vec2(1, 1) - pivot)) {}
+    BoundingBox(Vec2 position, Vec2 size) : min(position - size / 2.0f), max(position + size / 2.0f) {}
     void add(const BoundingBox &other);
     void addPadding(float top, float right, float bottom, float left);
     bool contains(Vec2 point);
