@@ -18,7 +18,7 @@ void Window::framebuffer_size_callback(GLFWwindow *glfwWindow, int width, int he
 void Window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
     KeyModifierFlags key_mods(mods);
-    KeyEvent event{static_cast<Key>(key), key_mods};
+    KeyEvent event(static_cast<Key>(key), key_mods);
     if (action == GLFW_PRESS) {
         for (auto &callback : w->key_down_callbacks) {
             callback(event);
@@ -31,33 +31,27 @@ void Window::key_callback(GLFWwindow *window, int key, int scancode, int action,
 }
 
 void Window::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
-    // double xpos, ypos;
-    // glfwGetCursorPos(window, &xpos, &ypos);
-    // float xscale, yscale;
-    // glfwGetWindowContentScale(window, &xscale, &yscale);
-    // Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    // KeyModifierFlags key_mods(mods);
-    // MouseButtonEvent event{
-    //     static_cast<MouseButton>(button),
-    //     key_mods,
-    //     Vec2(xpos * xscale, ypos * yscale),
-    //     Vec2(xpos * xscale, ypos * yscale),
-    // };
-    // if (action == GLFW_PRESS) {
-    //     w->rootLayout.mouseKeyDownEventRecursive(
-    //         Vec2(xpos * xscale, ypos * yscale), static_cast<MouseButton>(button), key_mods
-    //     );
-    //     for (auto &callback : w->mouse_down_callbacks) {
-    //         callback(event);
-    //     }
-    // } else if (action == GLFW_RELEASE) {
-    //     w->rootLayout.mouseKeyUpEventRecursive(
-    //         Vec2(xpos * xscale, ypos * yscale), static_cast<MouseButton>(button), key_mods
-    //     );
-    //     for (auto &callback : w->mouse_up_callbacks) {
-    //         callback(event);
-    //     }
-    // }
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
+    KeyModifierFlags key_mods(mods);
+    MouseButtonEvent event{
+        static_cast<MouseButton>(button),
+        static_cast<MouseAction>(action),
+        key_mods,
+        Vec2(xpos * xscale, ypos * yscale),
+    };
+    for (auto &callback : w->mouse_down_callbacks) {
+        callback(event);
+    }
+    for (auto &callback : w->mouse_up_callbacks) {
+        callback(event);
+    }
+    if (w->resolvedScene) {
+        w->resolvedScene->sendEvent(event);
+    }
 }
 
 void Window::scrole_callback(GLFWwindow *window, double xoffset, double yoffset) {
@@ -76,9 +70,12 @@ void Window::cursor_position_callback(GLFWwindow *window, double xpos, double yp
     Vec2 mousePos(xpos * xscale, ypos * yscale);
     Vec2 delta = mousePos - w->lastMousePos;
     w->lastMousePos = mousePos;
+    MouseMoveEvent event(delta, mousePos, mousePos);
     for (auto &callback : w->mouse_move_callbacks) {
-        MouseMoveEvent event = {delta, mousePos, mousePos};
         callback(event);
+    }
+    if (w->resolvedScene) {
+        w->resolvedScene->sendEvent(event);
     }
 }
 
@@ -144,7 +141,7 @@ void Window::run(std::function<void(Vec2)> render_callback) {
     while (!glfwWindowShouldClose(window.get())) {
         glClearColor(.1f, .1f, .1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        auto resolvedScene = resolveScene(*relativeScene, Vec2(width, height));
+        resolvedScene = resolveScene(*relativeScene, Vec2(width, height));
         resolvedScene->render();
         render_callback(Vec2(width, height));
 

@@ -1,8 +1,11 @@
 #pragma once
 
+#include "events.h"
 #include "renderable.h"
+#include <functional>
 #include <memory>
 #include <optional>
+#include <typeindex>
 
 namespace gltk {
 
@@ -12,6 +15,7 @@ struct ResolvedLayout {
     Vec2 Size;
     BoundingBox clipRegion;
     std::vector<ResolvedLayout *> children;
+    std::unordered_map<std::type_index, std::vector<std::function<void(IMouseEvent &)>>> eventCallbacks;
 };
 
 class ResolvedScene {
@@ -28,6 +32,18 @@ class ResolvedScene {
     }
 
     void render() const;
+
+    template <typename T>
+        requires std::derived_from<T, IMouseEvent>
+    void sendEvent(T &event) {
+        for (const auto &layout : layouts) {
+            if (layout->clipRegion.contains(event.getPos())) {
+                for (const auto &callback : layout->eventCallbacks[std::type_index(typeid(T))]) {
+                    callback(event);
+                }
+            }
+        }
+    }
 
     ResolvedLayout *getRoot() const {
         if (!root.has_value()) {

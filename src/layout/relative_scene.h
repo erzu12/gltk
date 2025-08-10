@@ -1,5 +1,6 @@
 #pragma once
 
+#include "events.h"
 #include "list_resolvers.h"
 #include "messure.h"
 #include "renderable.h"
@@ -8,6 +9,7 @@
 #include <cassert>
 #include <memory>
 #include <optional>
+#include <typeindex>
 #include <vector>
 
 namespace gltk {
@@ -72,6 +74,7 @@ struct RelativeLayout {
     Vec2 scrolePosition = Vec2(1, 1);
     std::vector<RelativeLayout *> children;
     std::optional<RelativeLayout *> parent = std::nullopt;
+    std::unordered_map<std::type_index, std::vector<std::function<void(IMouseEvent &)>>> eventCallbacks;
 };
 
 class RelativeScene {
@@ -86,6 +89,13 @@ class RelativeScene {
     RelativeLayout *getRoot() const;
 
     std::vector<RelativeLayout *> getLayouts() const;
+
+    template <typename T>
+        requires std::derived_from<T, IMouseEvent>
+    void addEventCallback(std::function<void(T &)> callback, RelativeLayout *layout) {
+        auto wrapper = [callback](IMouseEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
+        layout->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
+    }
 };
 
 } // namespace gltk

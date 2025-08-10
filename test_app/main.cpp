@@ -44,6 +44,10 @@ int main() {
                     .setSize(MessureVec2(50_pct, 20_pct))
                     .build();
 
+    window.getScene()->addEventCallback<MouseMoveEvent>(
+        [&](MouseMoveEvent &event) { std::cout << "Mouse moved at: " << event.pos << std::endl; }, svg.get()
+    );
+
     // window.getScene()->addRelativeLayout(std::move(bg));
     auto bgRef = bg.get();
     window.getScene()->addRelativeLayout(std::move(bg), rootLayout);
