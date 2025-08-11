@@ -152,8 +152,8 @@ std::unique_ptr<ResolvedScene> resolveScene(const RelativeScene &scene, Vec2 vie
         resolvedLayouts[i] = std::make_unique<ResolvedLayout>();
         if (relativeLayouts[i]->renderable.has_value()) {
             resolvedLayouts[i]->renderable = relativeLayouts[i]->renderable->get();
-            resolvedLayouts[i]->eventCallbacks = relativeLayouts[i]->eventCallbacks;
         }
+        resolvedLayouts[i]->eventCallbacks = relativeLayouts[i]->eventCallbacks;
     }
 
     resolveRootLayout(scene.getRoot(), viewportSize, resolvedLayouts[scene.getRoot()->id].get());

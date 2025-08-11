@@ -28,6 +28,8 @@ const Vec2 BottomCenter = Vec2(0.5, 1);
 const Vec2 BottomRight = Vec2(1, 1);
 } // namespace Anchors
 
+namespace Pivot = Anchors;
+
 enum class ChildPlacement {
     Free,
     List,
@@ -58,7 +60,7 @@ struct Positioning {
     MessureVec2 size = MessureVec2(0_px, 0_px);
     MessureVec2 offset = MessureVec2(0_px, 0_px);
     Vec2 anchor = Anchors::Center;
-    Vec2 pivot = Anchors::Center;
+    Vec2 pivot = Pivot::Center;
     Sizing sizing = {SizingMode::Layout, SizingMode::Layout};
     Padding padding = {0, 0, 0, 0};
     int test = 100;

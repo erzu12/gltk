@@ -3,7 +3,8 @@
 
 namespace gltk {
 
-LayoutBuilder::LayoutBuilder(RelativeLayout *parent) : parent(parent) {}
+LayoutBuilder::LayoutBuilder(RelativeScene *scene) : scene(scene), parent(scene->getRoot()) {}
+LayoutBuilder::LayoutBuilder(RelativeScene *scene, RelativeLayout *parent) : scene(scene), parent(parent) {}
 
 LayoutBuilder &LayoutBuilder::addBox(Style style) {
     this->style = style;
@@ -61,7 +62,7 @@ LayoutBuilder &LayoutBuilder::setOverflow(Overflow overflow) {
     return *this;
 }
 
-std::unique_ptr<RelativeLayout> LayoutBuilder::build() {
+RelativeLayout *LayoutBuilder::build() {
     Positioning positioning{
         .size = std::move(size),
         .offset = std::move(offset),
@@ -80,7 +81,8 @@ std::unique_ptr<RelativeLayout> LayoutBuilder::build() {
     if (box) {
         layout->renderable = std::make_unique<Box>(style);
     }
-    return layout;
+    auto layoutRef = scene->addRelativeLayout(std::move(layout), parent);
+    return layoutRef;
 }
 
 } // namespace gltk

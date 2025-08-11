@@ -23,6 +23,7 @@ RelativeLayout *RelativeScene::addRelativeLayout(std::unique_ptr<RelativeLayout>
     if (!parent)
         throw std::invalid_argument("Parent layout cannot be null");
     parent->children.push_back(layout.get());
+    layout->parent = parent;
     if (layout->id == -1) {
         layout->id = layouts.size();
     } else {

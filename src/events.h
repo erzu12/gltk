@@ -23,7 +23,7 @@ enum class KeyModifiers {
     NUM_LOCK = 0x0020
 };
 
-enum class MouseAction { PRESS = 0, RELEASE = 1, REPEAT = 2 };
+enum class MouseAction { RELEASE = 0, PRESS = 1, REPEAT = 2 };
 
 class KeyModifierFlags {
   private:

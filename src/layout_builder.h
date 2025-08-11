@@ -6,7 +6,8 @@ namespace gltk {
 
 class LayoutBuilder {
   public:
-    LayoutBuilder(RelativeLayout *parent);
+    LayoutBuilder(RelativeScene *scene);
+    LayoutBuilder(RelativeScene *scene, RelativeLayout *parent);
 
     LayoutBuilder &setSize(MessureVec2 size);
     LayoutBuilder &setRenderable(std::unique_ptr<IRenderable> renderable);
@@ -19,13 +20,14 @@ class LayoutBuilder {
     LayoutBuilder &setChildPlacement(ChildPlacement childPlacement);
     LayoutBuilder &setListDirection(ListDirection listDirection);
     LayoutBuilder &setOverflow(Overflow overflow);
-    std::unique_ptr<RelativeLayout> build();
+    RelativeLayout *build();
 
   private:
+    RelativeScene *scene;
+    RelativeLayout *parent;
     bool box = false;
     Style style;
-    RelativeLayout *parent;
-    std::unique_ptr<IRenderable> renderable = nullptr;
+    std::optional<std::unique_ptr<IRenderable>> renderable = std::nullopt;
     Vec2 anchor = Anchors::Center;
     MessureVec2 offset = MessureVec2(0_px, 0_px);
     Sizing sizing = {SizingMode::Layout, SizingMode::Layout};
