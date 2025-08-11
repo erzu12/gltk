@@ -1,5 +1,6 @@
 #pragma once
 
+#include "animation.h"
 #include "events.h"
 #include "list_resolvers.h"
 #include "messure.h"
@@ -82,6 +83,7 @@ struct RelativeLayout {
 class RelativeScene {
     std::vector<std::unique_ptr<RelativeLayout>> layouts;
     std::optional<RelativeLayout *> root = std::nullopt;
+    AnimationManager animationManager;
 
   public:
     RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout);
@@ -98,6 +100,13 @@ class RelativeScene {
         auto wrapper = [callback](IMouseEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
         layout->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
     }
+
+    template <AnimatableType T, typename U>
+    void addAnimation(U *property, const T &startValue, const T &endValue, float duration) {
+        animationManager.create(property, startValue, endValue, duration);
+    }
+
+    void updateAnimations() { animationManager.update(); }
 };
 
 } // namespace gltk

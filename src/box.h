@@ -17,6 +17,7 @@ class Box : public IRenderable {
     void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRergion) override;
 
     void setStyle(Style style) override { this->style = style; }
+    Style *getStyle() override { return &style; }
 };
 
 } // namespace gltk

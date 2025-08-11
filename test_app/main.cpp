@@ -1,3 +1,4 @@
+#include "animation.h"
 #include <gltk.h>
 #include <iostream>
 
@@ -8,12 +9,14 @@ class ToggleButton {
 
   public:
     ToggleButton(RelativeScene *scene, RelativeLayout *parent) {
+        Color offColor = Color(0.3f, 0.3f, 0.3f);
+        Color onColor = Color(0.3f, 0.3f, 1.0f);
+
         auto toggleRoot = LayoutBuilder(scene).setSize(MessureVec2(100_px, 50_px)).build();
-        auto toggleSlider =
-            LayoutBuilder(scene, toggleRoot)
-                .setRenderable(std::make_unique<Box>(Style{.color = Color(0.5f, 0.5f, 0.5f), .radius = 50}))
-                .setSize(MessureVec2(100_pct, 100_pct))
-                .build();
+        auto toggleSlider = LayoutBuilder(scene, toggleRoot)
+                                .setRenderable(std::make_unique<Box>(Style{.color = offColor, .radius = 50}))
+                                .setSize(MessureVec2(100_pct, 100_pct))
+                                .build();
         auto toggleDot =
             LayoutBuilder(scene, toggleRoot)
                 .setRenderable(std::make_unique<Box>(Style{.color = Color(1.0f, 1.0f, 1.0f), .radius = 50}))
@@ -23,12 +26,15 @@ class ToggleButton {
                 .build();
 
         scene->addEventCallback<MouseButtonEvent>(
-            [toggleDot, this](MouseButtonEvent &event) {
+            [=, this](MouseButtonEvent &event) {
                 if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
+                    Style *style = toggleSlider->renderable.value()->getStyle();
                     if (isOn) {
-                        toggleDot->positioning.offset = MessureVec2(25_px, 0_px);
+                        scene->addAnimation(toggleDot->positioning.offset.x.get(), 75_px, 25_px, 0.1f);
+                        scene->addAnimation(&style->color, onColor, offColor, 0.1f);
                     } else {
-                        toggleDot->positioning.offset = MessureVec2(75_px, 0_px);
+                        scene->addAnimation(toggleDot->positioning.offset.x.get(), 25_px, 75_px, 0.1f);
+                        scene->addAnimation(&style->color, offColor, onColor, 0.1f);
                     }
                     isOn = !isOn;
                 }
@@ -44,7 +50,6 @@ int main() {
     auto rootLayout = window.getScene()->getRoot();
 
     auto bg = LayoutBuilder(window.getScene())
-                  .setRenderable(std::make_unique<Box>(Style{Color(0.0f, 0.0f, 0.5f)}))
                   .setSize(MessureVec2(80_pct, 80_pct))
                   .setChildPlacement(ChildPlacement::ListStretch)
                   .build();

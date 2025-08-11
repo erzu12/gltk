@@ -6,6 +6,8 @@
 class IMessure {
   public:
     virtual float resolve(float parrentSize) = 0;
+    virtual void setValue(float value) = 0;
+    virtual float getValue() const = 0;
     virtual bool isAbsolute() = 0;
     virtual ~IMessure() = default;
 };
@@ -19,6 +21,8 @@ class AbsoluteMessure : public IMessure {
     explicit AbsoluteMessure(const AbsoluteMessure &other) : value(other.value) {}
     float resolve(float parrentSize) override;
     bool isAbsolute() override { return true; }
+    void setValue(float value) override { this->value = round(value); }
+    float getValue() const override { return static_cast<float>(value); }
 };
 
 class RelativeMessure : public IMessure {
@@ -26,9 +30,11 @@ class RelativeMessure : public IMessure {
     float value;
 
   public:
-    explicit RelativeMessure(float value) : value(value) {}
     float resolve(float parrentSize) override;
+    explicit RelativeMessure(float value) : value(value) {}
     bool isAbsolute() override { return false; }
+    void setValue(float value) override { this->value = value; }
+    float getValue() const override { return value; }
 };
 
 struct MessureVec2 {

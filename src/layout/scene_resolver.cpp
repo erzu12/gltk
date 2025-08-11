@@ -145,7 +145,9 @@ void resolveRootLayout(RelativeLayout *rootLayout, Vec2 viewportSize, ResolvedLa
     resolvedLayout->clipRegion = BoundingBox(resolvedLayout->Position, resolvedLayout->Size);
 }
 
-std::unique_ptr<ResolvedScene> resolveScene(const RelativeScene &scene, Vec2 viewportSize) {
+std::unique_ptr<ResolvedScene> resolveScene(RelativeScene &scene, Vec2 viewportSize) {
+    scene.updateAnimations();
+
     auto relativeLayouts = scene.getLayouts();
     std::vector<std::unique_ptr<ResolvedLayout>> resolvedLayouts(relativeLayouts.size());
     for (size_t i = 0; i < relativeLayouts.size(); ++i) {

@@ -24,6 +24,7 @@ class IRenderable {
     virtual void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) = 0;
 
     virtual void setStyle(Style style) = 0;
+    virtual Style *getStyle() = 0;
 };
 
 } // namespace gltk
