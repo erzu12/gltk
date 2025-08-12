@@ -4,6 +4,7 @@
 #include "messure.h"
 #include <algorithm>
 #include <chrono>
+#include <functional>
 
 namespace gltk {
 
@@ -26,6 +27,7 @@ template <AnimatableType T> class AnimationRunner : public IAnimationRunner {
     T endValue;
     float duration;
     float elapsedTime = 0.0f;
+    std::function<float(float)> easingFunc = nullptr;
 
     void update(float deltaTime) {
         elapsedTime += deltaTime;
@@ -34,6 +36,9 @@ template <AnimatableType T> class AnimationRunner : public IAnimationRunner {
             elapsedTime = duration; // Clamp to duration
         } else {
             float progress = elapsedTime / duration;
+            if (easingFunc) {
+                progress = easingFunc(progress);
+            }
             *property = startValue + (endValue - startValue) * progress;
         }
     }
@@ -41,8 +46,10 @@ template <AnimatableType T> class AnimationRunner : public IAnimationRunner {
     bool isCompleted() const { return elapsedTime >= duration; }
 
   public:
-    AnimationRunner(T *property, T startValue, T endValue, float duration)
-        : property(property), startValue(startValue), endValue(endValue), duration(duration) {}
+    AnimationRunner(
+        T *property, T startValue, T endValue, float duration, std::function<float(float)> easingFunc = nullptr
+    )
+        : property(property), startValue(startValue), endValue(endValue), duration(duration), easingFunc(easingFunc) {}
 };
 
 template <typename T>
@@ -54,6 +61,7 @@ class AnimationRunner<T> : public IAnimationRunner {
     std::unique_ptr<IMessure> endValue;
     float duration;
     float elapsedTime = 0.0f;
+    std::function<float(float)> easingFunc = nullptr;
 
     void update(float deltaTime) {
         elapsedTime += deltaTime;
@@ -62,6 +70,9 @@ class AnimationRunner<T> : public IAnimationRunner {
             elapsedTime = duration; // Clamp to duration
         } else {
             float progress = elapsedTime / duration;
+            if (easingFunc) {
+                progress = easingFunc(progress);
+            }
             float newValue = startValue->getValue() + (endValue->getValue() - startValue->getValue()) * progress;
             property->setValue(newValue);
         }
@@ -71,9 +82,14 @@ class AnimationRunner<T> : public IAnimationRunner {
 
   public:
     AnimationRunner(
-        IMessure *property, std::unique_ptr<IMessure> startValue, std::unique_ptr<IMessure> endValue, float duration
+        IMessure *property,
+        std::unique_ptr<IMessure> startValue,
+        std::unique_ptr<IMessure> endValue,
+        float duration,
+        std::function<float(float)> easingFunc = nullptr
     )
-        : property(property), startValue(std::move(startValue)), endValue(std::move(endValue)), duration(duration) {}
+        : property(property), startValue(std::move(startValue)), endValue(std::move(endValue)), duration(duration),
+          easingFunc(easingFunc) {}
 };
 
 class AnimationManager {
@@ -86,17 +102,27 @@ class AnimationManager {
 
     template <typename T>
         requires std::integral<T> || std::floating_point<T> || VectorType<T>
-    void create(T *property, T startValue, T endValue, float duration) {
-        animationRunners.push_back(std::make_unique<AnimationRunner<T>>(property, startValue, endValue, duration));
+    void
+    create(T *property, T startValue, T endValue, float duration, std::function<float(float)> easingFunc = nullptr) {
+        animationRunners.push_back(
+            std::make_unique<AnimationRunner<T>>(property, startValue, endValue, duration, easingFunc)
+        );
     }
 
     template <typename T>
         requires std::derived_from<T, IMessure>
-    void create(IMessure *property, const T &startValue, const T &endValue, float duration) {
+    void create(
+        IMessure *property,
+        const T &startValue,
+        const T &endValue,
+        float duration,
+        std::function<float(float)> easingFunc = nullptr
+    ) {
         std::unique_ptr<IMessure> startValuePtr = std::make_unique<T>(startValue);
         std::unique_ptr<IMessure> endValuePtr = std::make_unique<T>(endValue);
-        auto animRunner =
-            std::make_unique<AnimationRunner<T>>(property, std::move(startValuePtr), std::move(endValuePtr), duration);
+        auto animRunner = std::make_unique<AnimationRunner<T>>(
+            property, std::move(startValuePtr), std::move(endValuePtr), duration, easingFunc
+        );
         animationRunners.push_back(std::move(animRunner));
     }
 
@@ -117,5 +143,39 @@ class AnimationManager {
         );
     }
 };
+
+namespace easing {
+float easeOutBounce(float x);
+float easeInQuad(float x);
+float easeOutQuad(float x);
+float easeInOutQuad(float x);
+float easeInCubic(float x);
+float easeOutCubic(float x);
+float easeInOutCubic(float x);
+float easeInQuart(float x);
+float easeOutQuart(float x);
+float easeInOutQuart(float x);
+float easeInQuint(float x);
+float easeOutQuint(float x);
+float easeInOutQuint(float x);
+float easeInSine(float x);
+float easeOutSine(float x);
+float easeInOutSine(float x);
+float easeInExpo(float x);
+float easeOutExpo(float x);
+float easeInOutExpo(float x);
+float easeInCirc(float x);
+float easeOutCirc(float x);
+float easeInOutCirc(float x);
+float easeInBack(float x);
+float easeOutBack(float x);
+float easeInOutBack(float x);
+float easeInElastic(float x);
+float easeOutElastic(float x);
+float easeInOutElastic(float x);
+float easeInBounce(float x);
+float easeInOutBounce(float x);
+
+} // namespace easing
 
 } // namespace gltk

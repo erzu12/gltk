@@ -102,8 +102,14 @@ class RelativeScene {
     }
 
     template <AnimatableType T, typename U>
-    void addAnimation(U *property, const T &startValue, const T &endValue, float duration) {
-        animationManager.create(property, startValue, endValue, duration);
+    void addAnimation(
+        U *property,
+        const T &startValue,
+        const T &endValue,
+        float duration,
+        std::function<float(float)> easingFunc = nullptr
+    ) {
+        animationManager.create(property, startValue, endValue, duration, easingFunc);
     }
 
     void updateAnimations() { animationManager.update(); }
