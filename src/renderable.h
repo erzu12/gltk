@@ -1,22 +1,9 @@
 #pragma once
 
-#include "color.h"
-#include "fontloader.h"
+#include "style.h"
 #include "vec_math.h"
 
 namespace gltk {
-
-struct Style {
-    Color color = Color(1.0);
-    std::string font = "Arial";
-    FontSlant slant = FontSlant::Roman;
-    FontWeight weight = FontWeight::Normal;
-    int fontSize = 16;
-    float radius = 0.0f;
-    float borderWidth = 0.0f;
-    Color borderColor = Color();
-    float rotation = 0.0f;
-};
 
 class IRenderable {
   public:

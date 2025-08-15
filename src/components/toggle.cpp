@@ -6,6 +6,12 @@ namespace gltk {
 
 ToggleButton::ToggleButton(RelativeScene *scene, RelativeLayout *parent, ToggleButtonSettings settings) {
 
+    if (settings.styleSheet.has_value()) {
+        settings.offColor = settings.styleSheet->getStyle("inputBackground").color;
+        settings.onColor = settings.styleSheet->getStyle("accentBackground").color;
+        settings.dotColor = settings.styleSheet->getStyle("primaryForeground").color;
+    }
+
     auto toggleRoot = LayoutBuilder(scene, parent)
                           .setSize(MessureVec2(AbsoluteMessure(settings.size * 2), AbsoluteMessure(settings.size)))
                           .build();

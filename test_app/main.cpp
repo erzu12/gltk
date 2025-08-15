@@ -1,3 +1,4 @@
+#include "styleSheet.h"
 #include <components.h>
 #include <gltk.h>
 #include <iostream>
@@ -9,17 +10,19 @@ int main() {
     window.add_key_down_callback([](auto e) { std::cout << "Key down: " << static_cast<int>(e.key) << std::endl; });
     auto rootLayout = window.getScene()->getRoot();
 
+    auto styleSheet = getStyleSheet();
+
     auto bg = LayoutBuilder(window.getScene())
                   .setSize(MessureVec2(80_pct, 80_pct))
                   .setChildPlacement(ChildPlacement::ListStretch)
                   .build();
 
-    ToggleButton toggleButton(window.getScene(), bg, {.animationDuration = 0.5});
+    ToggleButton toggleButton(window.getScene(), bg, {.styleSheet = styleSheet});
     toggleButton.registerStateChangeCallback([](bool state) {
         std::cout << "Toggle state changed: " << (state ? "ON" : "OFF") << std::endl;
     });
 
-    Button button(window.getScene(), bg);
+    Button button(window.getScene(), bg, {.text = "Click Me", .styleSheet = styleSheet});
 
     // window.getScene()->addEventCallback<MouseMoveEvent>(
     //     [&](MouseMoveEvent &event) { std::cout << "Mouse moved at: " << event.pos << std::endl; }, svg.get()
