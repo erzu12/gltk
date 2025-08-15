@@ -23,6 +23,7 @@ int main() {
     });
 
     Button button(window.getScene(), bg, {.text = "Click Me", .styleSheet = styleSheet});
+    button.registerClickCallback([]() { std::cout << "Button clicked!" << std::endl; });
 
     // window.getScene()->addEventCallback<MouseMoveEvent>(
     //     [&](MouseMoveEvent &event) { std::cout << "Mouse moved at: " << event.pos << std::endl; }, svg.get()
