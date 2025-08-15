@@ -6,7 +6,7 @@ namespace gltk {
 
 ToggleButton::ToggleButton(RelativeScene *scene, RelativeLayout *parent, ToggleButtonSettings settings) {
 
-    auto toggleRoot = LayoutBuilder(scene)
+    auto toggleRoot = LayoutBuilder(scene, parent)
                           .setSize(MessureVec2(AbsoluteMessure(settings.size * 2), AbsoluteMessure(settings.size)))
                           .build();
     auto toggleSlider =
@@ -31,23 +31,15 @@ ToggleButton::ToggleButton(RelativeScene *scene, RelativeLayout *parent, ToggleB
             if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
                 Style *style = toggleSlider->renderable.value()->getStyle();
                 if (isOn) {
-                    scene->addAnimation(
-                        toggleDot->positioning.offset.x.get(),
-                        75_pct,
-                        25_pct,
-                        settings.animationDuration,
-                        settings.easingFunc
+                    toggleDot->animate(
+                        &Positioning::offset, MessureVec2(25_pct, 0_px), settings.animationDuration, settings.easingFunc
                     );
-                    scene->addAnimation(&style->color, settings.onColor, settings.offColor, settings.animationDuration);
+                    toggleSlider->animate(&Style::color, settings.offColor, settings.animationDuration);
                 } else {
-                    scene->addAnimation(
-                        toggleDot->positioning.offset.x.get(),
-                        25_pct,
-                        75_pct,
-                        settings.animationDuration,
-                        settings.easingFunc
+                    toggleDot->animate(
+                        &Positioning::offset, MessureVec2(75_pct, 0_px), settings.animationDuration, settings.easingFunc
                     );
-                    scene->addAnimation(&style->color, settings.offColor, settings.onColor, settings.animationDuration);
+                    toggleSlider->animate(&Style::color, settings.onColor, settings.animationDuration);
                 }
                 isOn = !isOn;
                 for (const auto &callback : stateChangeCallbacks) {

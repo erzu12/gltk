@@ -48,4 +48,15 @@ std::vector<RelativeLayout *> RelativeScene::getLayouts() const {
     return result;
 }
 
+void RelativeScene::updateAnimations() {
+    auto now = std::chrono::steady_clock::now();
+    float deltaTime = std::chrono::duration<float>(now - lastUpdateTime).count();
+    lastUpdateTime = now;
+    for (auto &layout : layouts) {
+        for (auto &runner : layout->animationRunners) {
+            runner->update(deltaTime);
+        }
+    }
+}
+
 }; // namespace gltk

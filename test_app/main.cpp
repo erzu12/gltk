@@ -14,10 +14,12 @@ int main() {
                   .setChildPlacement(ChildPlacement::ListStretch)
                   .build();
 
-    ToggleButton toggleButton(window.getScene(), bg, {});
+    ToggleButton toggleButton(window.getScene(), bg, {.animationDuration = 0.5});
     toggleButton.registerStateChangeCallback([](bool state) {
         std::cout << "Toggle state changed: " << (state ? "ON" : "OFF") << std::endl;
     });
+
+    Button button(window.getScene(), bg);
 
     // window.getScene()->addEventCallback<MouseMoveEvent>(
     //     [&](MouseMoveEvent &event) { std::cout << "Mouse moved at: " << event.pos << std::endl; }, svg.get()

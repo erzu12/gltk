@@ -8,6 +8,7 @@
 #include "vec_math.h"
 
 #include <cassert>
+#include <chrono>
 #include <memory>
 #include <optional>
 #include <typeindex>
@@ -64,26 +65,51 @@ struct Positioning {
     Vec2 pivot = Pivot::Center;
     Sizing sizing = {SizingMode::Layout, SizingMode::Layout};
     Padding padding = {0, 0, 0, 0};
-    int test = 100;
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
     Overflow overflow = Overflow::Scroll;
+    Vec2 scrolePosition = Vec2(1, 1);
 };
 
 struct RelativeLayout {
     size_t id = -1;
     std::optional<std::unique_ptr<IRenderable>> renderable;
     Positioning positioning;
-    Vec2 scrolePosition = Vec2(1, 1);
     std::vector<RelativeLayout *> children;
     std::optional<RelativeLayout *> parent = std::nullopt;
     std::unordered_map<std::type_index, std::vector<std::function<void(IMouseEvent &)>>> eventCallbacks;
+    std::vector<std::unique_ptr<IAnimationRunner>> animationRunners;
+
+    template <typename T, typename V>
+    void
+    animate(T Positioning::*property, V endValue, float duration, std::function<float(float)> easingFunc = nullptr) {
+        auto &pos = this->positioning;
+        auto animationRunner = std::make_unique<AnimationRunner<V>>(&(pos.*property), endValue, duration, easingFunc);
+        animationRunners.push_back(std::move(animationRunner));
+    }
+
+    template <typename T, typename V>
+    void animate(T Padding::*property, V endValue, float duration, std::function<float(float)> easingFunc = nullptr) {
+        auto &pos = this->positioning.padding;
+        auto animationRunner = std::make_unique<AnimationRunner<V>>(&(pos.*property), endValue, duration, easingFunc);
+        animationRunners.push_back(std::move(animationRunner));
+    }
+    template <typename T, typename V>
+    void animate(T Style::*property, V endValue, float duration, std::function<float(float)> easingFunc = nullptr) {
+        if (!renderable.has_value()) {
+            throw std::runtime_error("Renderable is not set for this layout");
+        }
+        auto style = renderable.value()->getStyle();
+        auto animationRunner =
+            std::make_unique<AnimationRunner<V>>(&(style->*property), endValue, duration, easingFunc);
+        animationRunners.push_back(std::move(animationRunner));
+    }
 };
 
 class RelativeScene {
     std::vector<std::unique_ptr<RelativeLayout>> layouts;
     std::optional<RelativeLayout *> root = std::nullopt;
-    AnimationManager animationManager;
+    std::chrono::time_point<std::chrono::steady_clock> lastUpdateTime;
 
   public:
     RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout);
@@ -101,18 +127,7 @@ class RelativeScene {
         layout->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
     }
 
-    template <AnimatableType T, typename U>
-    void addAnimation(
-        U *property,
-        const T &startValue,
-        const T &endValue,
-        float duration,
-        std::function<float(float)> easingFunc = nullptr
-    ) {
-        animationManager.create(property, startValue, endValue, duration, easingFunc);
-    }
-
-    void updateAnimations() { animationManager.update(); }
+    void updateAnimations();
 };
 
 } // namespace gltk
