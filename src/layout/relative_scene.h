@@ -4,7 +4,7 @@
 #include "events.h"
 #include "list_resolvers.h"
 #include "messure.h"
-#include "renderable.h"
+#include "renderables/renderable.h"
 #include "vec_math.h"
 
 #include <cassert>
@@ -79,6 +79,19 @@ struct RelativeLayout {
     std::optional<RelativeLayout *> parent = std::nullopt;
     std::unordered_map<std::type_index, std::vector<std::function<void(IMouseEvent &)>>> eventCallbacks;
     std::vector<std::unique_ptr<IAnimationRunner>> animationRunners;
+
+    template <typename T>
+        requires std::derived_from<T, IRenderable>
+    T *getRenderable() {
+        if (!renderable.has_value()) {
+            throw std::runtime_error("Renderable is not set for this layout");
+        }
+        T *ret = dynamic_cast<T *>(renderable.value().get());
+        if (ret == nullptr) {
+            throw std::runtime_error("Renderable is not of the requested type");
+        }
+        return ret;
+    }
 
     template <typename T, typename V>
     void

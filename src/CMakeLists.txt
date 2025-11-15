@@ -9,15 +9,16 @@ add_library(${PROJECT_NAME}
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-
 target_link_libraries("${PROJECT_NAME}"
     glad
     glfw
     stb
     lunasvg
     fontconfig
+    utf8cpp
     ${FREETYPE_LIBRARIES}
 )
+
 
 target_include_directories("${PROJECT_NAME}"
     PUBLIC ${CMAKE_SOURCE_DIR}/extern/glad/include
@@ -25,4 +26,5 @@ target_include_directories("${PROJECT_NAME}"
     PUBLIC ${CMAKE_SOURCE_DIR}/extern/stb
     PUBLIC ${FREETYPE_INCLUDE_DIRS}
     PUBLIC ${CMAKE_SOURCE_DIR}/src
+    PUBLIC ${utf8cpp_SOURCE_DIR}/source
 )

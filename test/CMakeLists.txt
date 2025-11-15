@@ -32,6 +32,7 @@ foreach(FILE ${TEST_FILES})
         ${CMAKE_SOURCE_DIR}/extern/glad/include
         ${CMAKE_SOURCE_DIR}/extern/stb
         ${CMAKE_SOURCE_DIR}/src
+        PUBLIC ${utf8cpp_SOURCE_DIR}/source
         PUBLIC ${FREETYPE_INCLUDE_DIRS}
     )
     gtest_discover_tests(${FILE_NAME})

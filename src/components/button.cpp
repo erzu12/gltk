@@ -1,7 +1,7 @@
 #include "button.h"
-#include "box.h"
 #include "layout_builder.h"
-#include "text.h"
+#include "renderables/box.h"
+#include "renderables/text.h"
 
 namespace gltk {
 

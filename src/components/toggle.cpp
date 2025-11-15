@@ -1,6 +1,6 @@
 #include "toggle.h"
-#include "box.h"
 #include "layout_builder.h"
+#include "renderables/box.h"
 
 namespace gltk {
 

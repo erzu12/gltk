@@ -25,6 +25,13 @@ endif()
 
 
 include(FetchContent)
+
+fetchContent_Declare(
+    utf8cpp
+    URL https://github.com/nemtrif/utfcpp/archive/refs/tags/v4.0.6.zip
+)
+FetchContent_MakeAvailable(utf8cpp)
+
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip

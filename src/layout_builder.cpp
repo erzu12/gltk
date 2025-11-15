@@ -1,5 +1,5 @@
 #include "layout_builder.h"
-#include "box.h"
+#include "renderables/box.h"
 
 namespace gltk {
 

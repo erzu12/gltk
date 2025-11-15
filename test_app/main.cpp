@@ -1,3 +1,4 @@
+#include "components/edit_text.h"
 #include "styleSheet.h"
 #include <components.h>
 #include <gltk.h>
@@ -23,7 +24,7 @@ int main() {
     });
 
     Button button(window.getScene(), bg, {.text = "Click Me", .styleSheet = styleSheet});
-    button.registerClickCallback([]() { std::cout << "Button clicked!" << std::endl; });
+    EditText editText(window.getScene(), &window, bg, {.text = "Edit Me", .styleSheet = styleSheet});
 
     // window.getScene()->addEventCallback<MouseMoveEvent>(
     //     [&](MouseMoveEvent &event) { std::cout << "Mouse moved at: " << event.pos << std::endl; }, svg.get()

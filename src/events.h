@@ -50,11 +50,12 @@ struct MouseMoveEvent : public IMouseEvent {
 };
 
 struct MouseButtonEvent : public IMouseEvent {
-    MouseButtonEvent(MouseButton button, MouseAction action, KeyModifierFlags mods, Vec2 pos)
-        : button(button), action(action), mods(mods), pos(pos) {}
+    MouseButtonEvent(MouseButton button, MouseAction action, KeyModifierFlags mods, int repeat, Vec2 pos)
+        : button(button), action(action), mods(mods), repeat(repeat), pos(pos) {}
     MouseButton button;
     MouseAction action;
     KeyModifierFlags mods;
+    int repeat;
     Vec2 pos;
     Vec2 getPos() const override { return pos; }
 };
@@ -67,6 +68,11 @@ struct KeyEvent {
     KeyEvent(Key key, KeyModifierFlags mods) : key(key), mods(mods) {}
     Key key;
     KeyModifierFlags mods;
+};
+
+struct TextInputEvent {
+    std::string text;
+    TextInputEvent(std::string text) : text(text) {}
 };
 
 enum class Key {

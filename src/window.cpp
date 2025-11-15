@@ -2,6 +2,7 @@
 #include "layout/scene_resolver.h"
 #include <iostream>
 #include <thread>
+#include <utf8.h>
 
 namespace gltk {
 
@@ -37,10 +38,21 @@ void Window::mouse_button_callback(GLFWwindow *window, int button, int action, i
     glfwGetWindowContentScale(window, &xscale, &yscale);
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
     KeyModifierFlags key_mods(mods);
+    if (std::chrono::steady_clock::now() - w->lastMouseButtonTime < std::chrono::milliseconds(300) &&
+        static_cast<MouseButton>(button) == w->lastMouseButton) {
+        if (action == GLFW_PRESS) {
+            w->mouseButtonRepeat++;
+        }
+    } else {
+        w->mouseButtonRepeat = 0;
+        w->lastMouseButton = static_cast<MouseButton>(button);
+    }
+    w->lastMouseButtonTime = std::chrono::steady_clock::now();
     MouseButtonEvent event{
         static_cast<MouseButton>(button),
         static_cast<MouseAction>(action),
         key_mods,
+        w->mouseButtonRepeat,
         Vec2(xpos * xscale, ypos * yscale),
     };
     for (auto &callback : w->mouse_down_callbacks) {
@@ -51,6 +63,16 @@ void Window::mouse_button_callback(GLFWwindow *window, int button, int action, i
     }
     if (w->resolvedScene) {
         w->resolvedScene->sendEvent(event);
+    }
+}
+
+void Window::char_callback(GLFWwindow *window, unsigned int codepoint) {
+    Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
+    std::string str;
+    utf8::append(codepoint, std::back_inserter(str));
+    TextInputEvent event(str);
+    for (auto &callback : w->text_input_callbacks) {
+        callback(event);
     }
 }
 
@@ -105,6 +127,7 @@ Window::Window() {
     glfwSetWindowUserPointer(window.get(), this);
     glfwSetKeyCallback(window.get(), key_callback);
     glfwSetMouseButtonCallback(window.get(), mouse_button_callback);
+    glfwSetCharCallback(window.get(), char_callback);
     glfwSetScrollCallback(window.get(), scrole_callback);
     glfwSetCursorPosCallback(window.get(), cursor_position_callback);
 
@@ -156,6 +179,10 @@ Vec2 Window::get_mouse_pos() { return lastMousePos; }
 void Window::add_key_up_callback(std::function<void(KeyEvent)> callback) { key_up_callbacks.push_back(callback); }
 
 void Window::add_key_down_callback(std::function<void(KeyEvent)> callback) { key_down_callbacks.push_back(callback); }
+
+void Window::add_text_input_callback(std::function<void(TextInputEvent)> callback) {
+    text_input_callbacks.push_back(callback);
+}
 
 void Window::add_mouse_move_callback(std::function<void(MouseMoveEvent)> callback) {
     mouse_move_callbacks.push_back(callback);

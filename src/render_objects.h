@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderable.h"
 #include "shader.h"
+#include "style.h"
 
 namespace gltk {
 

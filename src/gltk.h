@@ -1,8 +1,8 @@
 #pragma once
-#include "box.h"
-#include "canvas.h"
-#include "image.h"
 #include "layout_builder.h"
+#include "renderables/box.h"
+#include "renderables/canvas.h"
+#include "renderables/image.h"
+#include "renderables/text.h"
 #include "shader.h"
-#include "text.h"
 #include "window.h"
