@@ -1,7 +1,7 @@
 #pragma once
 
 #include "color.h"
-#include "layout/relative_scene.h"
+#include "layout/scene.h"
 #include "messure.h"
 #include "renderables/text.h"
 #include "window.h"
@@ -25,7 +25,7 @@ class EditText {
     Vec2 dragStart;
 
   public:
-    EditText(RelativeScene *scene, Window *window, RelativeLayout *parent, EditTextSettings settings = {});
+    EditText(Scene *scene, Window *window, Layout *parent, EditTextSettings settings = {});
 };
 
 } // namespace gltk

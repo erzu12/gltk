@@ -1,7 +1,7 @@
 #pragma once
 
 #include "color.h"
-#include "layout/relative_scene.h"
+#include "layout/scene.h"
 #include <functional>
 
 namespace gltk {
@@ -21,7 +21,7 @@ class ToggleButton {
     std::vector<std::function<void(bool)>> stateChangeCallbacks;
 
   public:
-    ToggleButton(RelativeScene *scene, RelativeLayout *parent, ToggleButtonSettings settings = {});
+    ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings settings = {});
 
     bool getState() const { return isOn; }
     void registerStateChangeCallback(std::function<void(bool)> callback) { stateChangeCallbacks.push_back(callback); }

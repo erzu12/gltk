@@ -4,7 +4,7 @@
 
 namespace gltk {
 
-ToggleButton::ToggleButton(RelativeScene *scene, RelativeLayout *parent, ToggleButtonSettings settings) {
+ToggleButton::ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings settings) {
 
     if (settings.styleSheet.has_value()) {
         settings.offColor = settings.styleSheet->getStyle("inputBackground").color;

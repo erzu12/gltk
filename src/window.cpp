@@ -13,7 +13,7 @@ void Window::framebuffer_size_callback(GLFWwindow *glfwWindow, int width, int he
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
     window->width = width;
     window->height = height;
-    window->relativeScene->getRoot()->positioning.size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height));
+    window->scene->getRoot()->positioning.size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height));
 }
 
 void Window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -61,8 +61,8 @@ void Window::mouse_button_callback(GLFWwindow *window, int button, int action, i
     for (auto &callback : w->mouse_up_callbacks) {
         callback(event);
     }
-    if (w->resolvedScene) {
-        w->resolvedScene->sendEvent(event);
+    if (w->scene) {
+        w->scene->sendEvent(event);
     }
 }
 
@@ -96,8 +96,8 @@ void Window::cursor_position_callback(GLFWwindow *window, double xpos, double yp
     for (auto &callback : w->mouse_move_callbacks) {
         callback(event);
     }
-    if (w->resolvedScene) {
-        w->resolvedScene->sendEvent(event);
+    if (w->scene) {
+        w->scene->sendEvent(event);
     }
 }
 
@@ -151,11 +151,11 @@ Window::Window() {
 
     glEnable(GL_MULTISAMPLE);
 
-    relativeScene = std::make_unique<RelativeScene>();
-    relativeScene->addRelativeLayout(std::make_unique<RelativeLayout>());
-    relativeScene->getRoot()->positioning.anchor = Anchors::TopLeft;
-    relativeScene->getRoot()->positioning.pivot = Anchors::TopLeft;
-    relativeScene->getRoot()->positioning.size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height));
+    scene = std::make_unique<Scene>();
+    scene->addRelativeLayout(std::make_unique<Layout>());
+    scene->getRoot()->positioning.anchor = Anchors::TopLeft;
+    scene->getRoot()->positioning.pivot = Anchors::TopLeft;
+    scene->getRoot()->positioning.size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height));
 }
 
 void Window::run(std::function<void(Vec2)> render_callback) {
@@ -164,8 +164,8 @@ void Window::run(std::function<void(Vec2)> render_callback) {
     while (!glfwWindowShouldClose(window.get())) {
         glClearColor(.1f, .1f, .1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        resolvedScene = resolveScene(*relativeScene, Vec2(width, height));
-        resolvedScene->render();
+        resolveScene(*scene, Vec2(width, height));
+        scene->render();
         render_callback(Vec2(width, height));
 
         glfwSwapBuffers(window.get());

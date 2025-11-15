@@ -5,7 +5,7 @@
 
 namespace gltk {
 
-EditText::EditText(RelativeScene *scene, Window *window, RelativeLayout *parent, EditTextSettings settings) {
+EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSettings settings) {
 
     if (settings.styleSheet.has_value()) {
         settings.textStyle = settings.styleSheet->getStyle("primaryForeground");

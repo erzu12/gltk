@@ -1,10 +1,10 @@
-#include "relative_scene.h"
+#include "scene.h"
 
 namespace gltk {
 
-RelativeLayout *RelativeScene::addRelativeLayout(std::unique_ptr<RelativeLayout> layout) {
+Layout *Scene::addRelativeLayout(std::unique_ptr<Layout> layout) {
     if (root.has_value()) {
-        RelativeLayout *old_root = root.value();
+        Layout *old_root = root.value();
         root = layout.get();
         root.value()->children.push_back(old_root);
     } else {
@@ -19,7 +19,7 @@ RelativeLayout *RelativeScene::addRelativeLayout(std::unique_ptr<RelativeLayout>
     return layouts.back().get();
 }
 
-RelativeLayout *RelativeScene::addRelativeLayout(std::unique_ptr<RelativeLayout> layout, RelativeLayout *parent) {
+Layout *Scene::addRelativeLayout(std::unique_ptr<Layout> layout, Layout *parent) {
     if (!parent)
         throw std::invalid_argument("Parent layout cannot be null");
     parent->children.push_back(layout.get());
@@ -33,28 +33,43 @@ RelativeLayout *RelativeScene::addRelativeLayout(std::unique_ptr<RelativeLayout>
     return layouts.back().get();
 }
 
-RelativeLayout *RelativeScene::getRoot() const {
+Layout *Scene::getRoot() const {
     if (!root.has_value()) {
         throw std::runtime_error("Root layout is not set");
     }
     return root.value();
 }
 
-std::vector<RelativeLayout *> RelativeScene::getLayouts() const {
-    std::vector<RelativeLayout *> result;
+std::vector<Layout *> Scene::getLayouts() const {
+    std::vector<Layout *> result;
     for (auto &layout : layouts) {
         result.push_back(layout.get());
     }
     return result;
 }
 
-void RelativeScene::updateAnimations() {
+void Scene::updateAnimations() {
     auto now = std::chrono::steady_clock::now();
     float deltaTime = std::chrono::duration<float>(now - lastUpdateTime).count();
     lastUpdateTime = now;
     for (auto &layout : layouts) {
         for (auto &runner : layout->animationRunners) {
             runner->update(deltaTime);
+        }
+    }
+}
+
+void Scene::render() const {
+    if (!root.has_value()) {
+        return;
+    }
+    for (const auto &layout : layouts) {
+        if (layout->renderable.has_value()) {
+            Mat3 modelMatrix = Mat3::translationMatrix(layout->transform.Position);
+            modelMatrix = modelMatrix * Mat3::scalingMatrix(layout->transform.Size);
+            layout->renderable.value()->render(
+                root.value()->transform.Size, modelMatrix, layout->transform.Size, layout->transform.clipRegion
+            );
         }
     }
 }

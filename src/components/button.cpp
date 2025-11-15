@@ -5,7 +5,7 @@
 
 namespace gltk {
 
-Button::Button(RelativeScene *scene, RelativeLayout *parent, ButtonSettings settings) {
+Button::Button(Scene *scene, Layout *parent, ButtonSettings settings) {
 
     if (settings.styleSheet.has_value()) {
         settings.boxStyle = settings.styleSheet->getStyle("inputBackground");

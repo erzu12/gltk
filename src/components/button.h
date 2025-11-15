@@ -1,7 +1,7 @@
 #pragma once
 
 #include "color.h"
-#include "layout/relative_scene.h"
+#include "layout/scene.h"
 #include "messure.h"
 
 namespace gltk {
@@ -20,7 +20,7 @@ class Button {
     std::vector<std::function<void()>> clickCallbacks;
 
   public:
-    Button(RelativeScene *scene, RelativeLayout *parent, ButtonSettings settings = {});
+    Button(Scene *scene, Layout *parent, ButtonSettings settings = {});
 
     void registerClickCallback(std::function<void()> callback) { clickCallbacks.push_back(callback); }
 };

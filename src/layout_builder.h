@@ -1,13 +1,13 @@
 #pragma once
 
-#include "layout/relative_scene.h"
+#include "layout/scene.h"
 
 namespace gltk {
 
 class LayoutBuilder {
   public:
-    LayoutBuilder(RelativeScene *scene);
-    LayoutBuilder(RelativeScene *scene, RelativeLayout *parent);
+    LayoutBuilder(Scene *scene);
+    LayoutBuilder(Scene *scene, Layout *parent);
 
     LayoutBuilder &setSize(MessureVec2 size);
     LayoutBuilder &setRenderable(std::unique_ptr<IRenderable> renderable);
@@ -20,11 +20,11 @@ class LayoutBuilder {
     LayoutBuilder &setChildPlacement(ChildPlacement childPlacement);
     LayoutBuilder &setListDirection(ListDirection listDirection);
     LayoutBuilder &setOverflow(Overflow overflow);
-    RelativeLayout *build();
+    Layout *build();
 
   private:
-    RelativeScene *scene;
-    RelativeLayout *parent;
+    Scene *scene;
+    Layout *parent;
     bool box = false;
     Style style;
     std::optional<std::unique_ptr<IRenderable>> renderable = std::nullopt;

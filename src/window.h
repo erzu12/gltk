@@ -4,8 +4,7 @@
 #include "GLFW/glfw3.h"
 // clang-format on
 #include "events.h"
-#include "layout/relative_scene.h"
-#include "layout/resolved_scene.h"
+#include "layout/scene.h"
 #include "vec_math.h"
 #include <functional>
 #include <memory>
@@ -30,7 +29,7 @@ class Window {
     void add_mouse_up_callback(std::function<void(MouseButtonEvent)> callback);
     void run(std::function<void(Vec2)> render_callback);
     Vec2 get_mouse_pos();
-    RelativeScene *getScene() { return relativeScene.get(); }
+    Scene *getScene() { return scene.get(); }
 
   private:
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -50,8 +49,7 @@ class Window {
     static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
     std::vector<KeyModifiers> get_modifiers(int mods);
 
-    std::unique_ptr<RelativeScene> relativeScene;
-    std::unique_ptr<ResolvedScene> resolvedScene;
+    std::unique_ptr<Scene> scene;
 
     std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window = {nullptr, glfwDestroyWindow};
     std::vector<std::function<void(KeyEvent)>> key_down_callbacks;

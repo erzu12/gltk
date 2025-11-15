@@ -16,8 +16,6 @@
 
 namespace gltk {
 
-class Layout;
-
 namespace Anchors {
 const Vec2 TopLeft = Vec2(0, 0);
 const Vec2 TopCenter = Vec2(0.5, 0);
@@ -71,12 +69,19 @@ struct Positioning {
     Vec2 scrolePosition = Vec2(1, 1);
 };
 
-struct RelativeLayout {
+struct Transform {
+    Vec2 Position;
+    Vec2 Size;
+    BoundingBox clipRegion;
+};
+
+struct Layout {
     size_t id = -1;
     std::optional<std::unique_ptr<IRenderable>> renderable;
     Positioning positioning;
-    std::vector<RelativeLayout *> children;
-    std::optional<RelativeLayout *> parent = std::nullopt;
+    Transform transform;
+    std::vector<Layout *> children;
+    std::optional<Layout *> parent = std::nullopt;
     std::unordered_map<std::type_index, std::vector<std::function<void(IMouseEvent &)>>> eventCallbacks;
     std::vector<std::unique_ptr<IAnimationRunner>> animationRunners;
 
@@ -119,25 +124,41 @@ struct RelativeLayout {
     }
 };
 
-class RelativeScene {
-    std::vector<std::unique_ptr<RelativeLayout>> layouts;
-    std::optional<RelativeLayout *> root = std::nullopt;
+class Scene {
+    std::vector<std::unique_ptr<Layout>> layouts;
+    std::optional<Layout *> root = std::nullopt;
     std::chrono::time_point<std::chrono::steady_clock> lastUpdateTime;
 
   public:
-    RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout);
+    Layout *addRelativeLayout(std::unique_ptr<Layout> layout);
 
-    RelativeLayout *addRelativeLayout(std::unique_ptr<RelativeLayout> layout, RelativeLayout *parent);
+    Layout *addRelativeLayout(std::unique_ptr<Layout> layout, Layout *parent);
 
-    RelativeLayout *getRoot() const;
+    Layout *getRoot() const;
 
-    std::vector<RelativeLayout *> getLayouts() const;
+    void render() const;
+
+    std::vector<Layout *> getLayouts() const;
+
+    Layout *getLayout(size_t id) const { return layouts.at(id).get(); }
 
     template <typename T>
         requires std::derived_from<T, IMouseEvent>
-    void addEventCallback(std::function<void(T &)> callback, RelativeLayout *layout) {
+    void addEventCallback(std::function<void(T &)> callback, Layout *layout) {
         auto wrapper = [callback](IMouseEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
         layout->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
+    }
+
+    template <typename T>
+        requires std::derived_from<T, IMouseEvent>
+    void sendEvent(T &event) {
+        for (const auto &layout : layouts) {
+            if (layout->transform.clipRegion.contains(event.getPos())) {
+                for (const auto &callback : layout->eventCallbacks[std::type_index(typeid(T))]) {
+                    callback(event);
+                }
+            }
+        }
     }
 
     void updateAnimations();
