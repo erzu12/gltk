@@ -40,15 +40,14 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-#FetchContent_Declare(
-    #lunasvg
-    #GIT_REPOSITORY  https://github.com/sammycage/lunasvg.git
-    #GIT_TAG         master 
-#)
-#FetchContent_MakeAvailable(lunasvg)
+FetchContent_Declare(
+    lunasvg
+    GIT_REPOSITORY  https://github.com/sammycage/lunasvg.git
+    GIT_TAG         master 
+)
+FetchContent_MakeAvailable(lunasvg)
 
 
-add_subdirectory(../lunasvg lunasvg)
 add_subdirectory(extern/glad)
 add_subdirectory(extern/stb)
 add_subdirectory(src)

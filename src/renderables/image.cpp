@@ -30,12 +30,13 @@ void Image::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clip
 
 SVGImage::SVGImage(std::string path, Style style) : style(style), imageRenderer() {
     FontLoader fontLoader;
-    lunasvg::FontManager::registerMissingFontCalback([&fontLoader](const std::string &family, bool bold, bool italic) {
-        FontSlant slant = italic ? FontSlant::Italic : FontSlant::Roman;
-        FontWeight weight = bold ? FontWeight::Bold : FontWeight::Normal;
-        std::string path = fontLoader.getFontPath(family, slant, weight);
-        return path;
-    });
+    // lunasvg::FontManager::registerMissingFontCalback([&fontLoader](const std::string &family, bool bold, bool italic)
+    // {
+    //     FontSlant slant = italic ? FontSlant::Italic : FontSlant::Roman;
+    //     FontWeight weight = bold ? FontWeight::Bold : FontWeight::Normal;
+    //     std::string path = fontLoader.getFontPath(family, slant, weight);
+    //     return path;
+    // });
     document = lunasvg::Document::loadFromFile(path);
     if (!document) {
         throw std::runtime_error("Failed to load SVG file");
