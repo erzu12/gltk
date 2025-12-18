@@ -42,10 +42,10 @@ struct IMouseEvent {
 };
 
 struct MouseMoveEvent : public IMouseEvent {
-    MouseMoveEvent(Vec2 delta, Vec2 pos, Vec2 localPos) : delta(delta), pos(pos), loaclPos(localPos) {}
+    MouseMoveEvent(Vec2 delta, Vec2 pos, Vec2 localPos) : delta(delta), pos(pos), localPos(localPos) {}
     Vec2 delta;
     Vec2 pos;
-    Vec2 loaclPos;
+    Vec2 localPos;
     Vec2 getPos() const override { return pos; }
 };
 
@@ -57,6 +57,7 @@ struct MouseButtonEvent : public IMouseEvent {
     KeyModifierFlags mods;
     int repeat;
     Vec2 pos;
+    Vec2 localPos;
     Vec2 getPos() const override { return pos; }
 };
 

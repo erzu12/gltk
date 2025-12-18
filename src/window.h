@@ -19,7 +19,7 @@ class window_exception : public std::runtime_error {
 
 class Window {
   public:
-    Window();
+    Window(std::string title = "GLTK Window", int width = 800, int height = 600);
     ~Window();
     void add_key_down_callback(std::function<void(KeyEvent)> callback);
     void add_key_up_callback(std::function<void(KeyEvent)> callback);
@@ -32,11 +32,13 @@ class Window {
     Scene *getScene() { return scene.get(); }
 
   private:
+    std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window = {nullptr, glfwDestroyWindow};
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
     static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
     static void char_callback(GLFWwindow *window, unsigned int codepoint);
     static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
     static void scrole_callback(GLFWwindow *window, double xoffset, double yoffset);
+    static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
     static void debug_message_callback(
         GLenum source,
         GLenum type,
@@ -46,12 +48,11 @@ class Window {
         const GLchar *message,
         const void *userParam
     );
-    static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
+
     std::vector<KeyModifiers> get_modifiers(int mods);
 
     std::unique_ptr<Scene> scene;
 
-    std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window = {nullptr, glfwDestroyWindow};
     std::vector<std::function<void(KeyEvent)>> key_down_callbacks;
     std::vector<std::function<void(KeyEvent)>> key_up_callbacks;
     std::vector<std::function<void(TextInputEvent)>> text_input_callbacks;

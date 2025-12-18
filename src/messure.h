@@ -23,6 +23,8 @@ class AbsoluteMessure : public IMessure {
     bool isAbsolute() override { return true; }
     void setValue(float value) override { this->value = round(value); }
     float getValue() const override { return static_cast<float>(value); }
+
+    AbsoluteMessure operator-() const { return AbsoluteMessure(-value); }
 };
 
 class RelativeMessure : public IMessure {
@@ -35,12 +37,15 @@ class RelativeMessure : public IMessure {
     bool isAbsolute() override { return false; }
     void setValue(float value) override { this->value = value; }
     float getValue() const override { return value; }
+
+    RelativeMessure operator-() const { return RelativeMessure(-value); }
 };
 
 struct MessureVec2 {
     std::unique_ptr<IMessure> x;
     std::unique_ptr<IMessure> y;
 
+    MessureVec2() : x(std::make_unique<AbsoluteMessure>(0)), y(std::make_unique<AbsoluteMessure>(0)) {}
     MessureVec2(const AbsoluteMessure &x_, const AbsoluteMessure &y_)
         : x(std::make_unique<AbsoluteMessure>(x_)), y(std::make_unique<AbsoluteMessure>(y_)) {}
 

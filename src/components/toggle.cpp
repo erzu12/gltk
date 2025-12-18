@@ -32,29 +32,29 @@ ToggleButton::ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings se
             .setOffset(MessureVec2(25_pct, 0_px))
             .build();
 
-    scene->addEventCallback<MouseButtonEvent>(
-        [=, this](MouseButtonEvent &event) {
-            if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
-                Style *style = toggleSlider->renderable.value()->getStyle();
-                if (isOn) {
-                    toggleDot->animate(
-                        &Positioning::offset, MessureVec2(25_pct, 0_px), settings.animationDuration, settings.easingFunc
-                    );
-                    toggleSlider->animate(&Style::color, settings.offColor, settings.animationDuration);
-                } else {
-                    toggleDot->animate(
-                        &Positioning::offset, MessureVec2(75_pct, 0_px), settings.animationDuration, settings.easingFunc
-                    );
-                    toggleSlider->animate(&Style::color, settings.onColor, settings.animationDuration);
-                }
-                isOn = !isOn;
-                for (const auto &callback : stateChangeCallbacks) {
-                    callback(isOn);
-                }
+    scene->addEventCallback<MouseButtonEvent>(toggleRoot, [=, this](MouseButtonEvent &event) {
+        if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
+            Style *style = toggleSlider->renderable.value()->getStyle();
+            if (isOn) {
+                toggleDot->animate(
+                    &Positioning::offset, MessureVec2(25_pct, 0_px), settings.animationDuration, settings.easingFunc
+                );
+                toggleDot->animate(
+                    &Positioning::size, MessureVec2(40_pct, 80_px), settings.animationDuration, settings.easingFunc
+                );
+                toggleSlider->animate(&Style::color, settings.offColor, settings.animationDuration);
+            } else {
+                toggleDot->animate(
+                    &Positioning::offset, MessureVec2(75_pct, 0_px), settings.animationDuration, settings.easingFunc
+                );
+                toggleSlider->animate(&Style::color, settings.onColor, settings.animationDuration);
             }
-        },
-        toggleRoot
-    );
+            isOn = !isOn;
+            for (const auto &callback : stateChangeCallbacks) {
+                callback(isOn);
+            }
+        }
+    });
 }
 
 } // namespace gltk

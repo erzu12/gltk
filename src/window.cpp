@@ -38,16 +38,16 @@ void Window::mouse_button_callback(GLFWwindow *window, int button, int action, i
     glfwGetWindowContentScale(window, &xscale, &yscale);
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
     KeyModifierFlags key_mods(mods);
-    if (std::chrono::steady_clock::now() - w->lastMouseButtonTime < std::chrono::milliseconds(300) &&
-        static_cast<MouseButton>(button) == w->lastMouseButton) {
-        if (action == GLFW_PRESS) {
+    if (action == GLFW_PRESS) {
+        if (std::chrono::steady_clock::now() - w->lastMouseButtonTime < std::chrono::milliseconds(300) &&
+            static_cast<MouseButton>(button) == w->lastMouseButton) {
             w->mouseButtonRepeat++;
+        } else {
+            w->mouseButtonRepeat = 0;
+            w->lastMouseButton = static_cast<MouseButton>(button);
         }
-    } else {
-        w->mouseButtonRepeat = 0;
-        w->lastMouseButton = static_cast<MouseButton>(button);
+        w->lastMouseButtonTime = std::chrono::steady_clock::now();
     }
-    w->lastMouseButtonTime = std::chrono::steady_clock::now();
     MouseButtonEvent event{
         static_cast<MouseButton>(button),
         static_cast<MouseAction>(action),
@@ -86,6 +86,7 @@ void Window::scrole_callback(GLFWwindow *window, double xoffset, double yoffset)
 }
 
 void Window::cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
+    glfwGetCursorPos(window, &xpos, &ypos);
     float xscale, yscale;
     glfwGetWindowContentScale(window, &xscale, &yscale);
     Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
@@ -101,9 +102,10 @@ void Window::cursor_position_callback(GLFWwindow *window, double xpos, double yp
     }
 }
 
-Window::Window() {
+Window::Window(std::string title, int width, int height) : width(width), height(height) {
     // glfw: initialize and configure
     // ------------------------------
+    glfwInitHint(GLFW_WAYLAND_LIBDECOR, GLFW_WAYLAND_DISABLE_LIBDECOR);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -116,7 +118,7 @@ Window::Window() {
 
     // glfw window creation
     // --------------------
-    window.reset(glfwCreateWindow(600, 800, "LearnOpenGL", NULL, NULL));
+    window.reset(glfwCreateWindow(width, height, title.c_str(), NULL, NULL));
     if (window == nullptr) {
         glfwTerminate();
         throw window_exception("Failed to create GLFW window");
@@ -131,9 +133,9 @@ Window::Window() {
     glfwSetScrollCallback(window.get(), scrole_callback);
     glfwSetCursorPosCallback(window.get(), cursor_position_callback);
 
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (glfwRawMouseMotionSupported()) {
-        glfwSetInputMode(window.get(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        // glfwSetInputMode(window.get(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
     // glad: load all OpenGL function pointers

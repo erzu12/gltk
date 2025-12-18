@@ -66,7 +66,6 @@ struct Positioning {
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
     Overflow overflow = Overflow::Scroll;
-    Vec2 scrolePosition = Vec2(1, 1);
 };
 
 struct Transform {
@@ -144,7 +143,7 @@ class Scene {
 
     template <typename T>
         requires std::derived_from<T, IMouseEvent>
-    void addEventCallback(std::function<void(T &)> callback, Layout *layout) {
+    void addEventCallback(Layout *layout, std::function<void(T &)> callback) {
         auto wrapper = [callback](IMouseEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
         layout->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
     }
@@ -155,6 +154,7 @@ class Scene {
         for (const auto &layout : layouts) {
             if (layout->transform.clipRegion.contains(event.getPos())) {
                 for (const auto &callback : layout->eventCallbacks[std::type_index(typeid(T))]) {
+                    event.localPos = event.getPos() - (layout->transform.Position - layout->transform.Size * 0.5f);
                     callback(event);
                 }
             }

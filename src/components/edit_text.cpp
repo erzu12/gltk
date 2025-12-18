@@ -36,37 +36,40 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
                     .setPivot(Pivot::CenterLeft)
                     .build();
 
-    scene->addEventCallback<MouseButtonEvent>(
-        [=, &settings, this](MouseButtonEvent &event) {
-            textAmount = TextAmount::Character;
-            std::cout << "repeat: " << event.repeat << std::endl;
-            if (event.repeat == 1) {
-                textAmount = TextAmount::Word;
-            } else if (event.repeat == 2) {
-                textAmount = TextAmount::Line;
-            } else if (event.repeat >= 3) {
-                textAmount = TextAmount::All;
+    scene->addEventCallback<MouseButtonEvent>(box, [=, &settings, this](MouseButtonEvent &event) {
+        textAmount = TextAmount::Character;
+        std::cout << "repeat: " << event.repeat << std::endl;
+        if (event.repeat == 1) {
+            textAmount = TextAmount::Word;
+        } else if (event.repeat == 2) {
+            textAmount = TextAmount::Line;
+        } else if (event.repeat >= 3) {
+            textAmount = TextAmount::All;
+        }
+        if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
+            dragging = true;
+            dragStart = event.pos;
+            if (textAmount == TextAmount::Character) {
+                text->getRenderable<Text>()->placeCaret(event.pos);
+            } else {
+                text->getRenderable<Text>()->select(event.pos, event.pos, textAmount);
             }
-            if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
-                dragging = true;
-                dragStart = event.pos;
-                if (textAmount == TextAmount::Character) {
-                    text->getRenderable<Text>()->placeCaret(event.pos);
-                } else {
-                    text->getRenderable<Text>()->select(event.pos, event.pos, textAmount);
-                }
-            }
-        },
-        text
-    );
-    scene->addEventCallback<MouseMoveEvent>(
-        [=, &settings, this](MouseMoveEvent &event) {
-            if (dragging) {
-                text->getRenderable<Text>()->select(dragStart, event.pos, textAmount);
-            }
-        },
-        text
-    );
+        }
+    });
+    scene->addEventCallback<MouseMoveEvent>(box, [=, &settings, this](MouseMoveEvent &event) {
+        if (dragging) {
+            text->getRenderable<Text>()->select(dragStart, event.pos, textAmount);
+            // std::cout << "local pos: " << event.localPos << " element size: " << box->transform.Size
+            //           << " text size: " << text->transform.Size << std::endl;
+            if (event.localPos.x < settings.scrollEdgeDistance) {
+                std::cout << "Scrolling left" << std::endl;
+                // text->animate(&Positioning::offset, MessureVec2(-1_px, 0_px));
+
+            } else if (event.localPos.x > box->transform.Size.x - settings.scrollEdgeDistance) {
+                text->positioning.offset.x->setValue(box->positioning.offset.x->getValue() + 10);
+            };
+        }
+    });
     window->add_mouse_up_callback([&](auto event) { dragging = false; });
     window->add_text_input_callback([=, &settings, this](TextInputEvent event) {
         std::cout << "Text input: " << event.text << std::endl;

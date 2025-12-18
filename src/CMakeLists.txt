@@ -11,13 +11,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 target_link_libraries("${PROJECT_NAME}"
     glad
-    glfw
     stb
     lunasvg
     fontconfig
     utf8cpp
+    -lglfw
     ${FREETYPE_LIBRARIES}
 )
+
 
 
 target_include_directories("${PROJECT_NAME}"

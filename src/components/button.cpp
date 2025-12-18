@@ -30,21 +30,18 @@ Button::Button(Scene *scene, Layout *parent, ButtonSettings settings) {
             .setAnchor(Anchors::Center)
             .build();
 
-    scene->addEventCallback<MouseButtonEvent>(
-        [=, &settings, this](MouseButtonEvent &event) {
-            if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
-                Style *style = buttonBox->renderable.value()->getStyle();
-                style->color = settings.activeColor;
-                for (const auto &callback : clickCallbacks) {
-                    callback();
-                }
-            } else if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::RELEASE) {
-                Style *style = buttonBox->renderable.value()->getStyle();
-                style->color = settings.boxStyle.color;
+    scene->addEventCallback<MouseButtonEvent>(buttonBox, [=, &settings, this](MouseButtonEvent &event) {
+        if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
+            Style *style = buttonBox->renderable.value()->getStyle();
+            style->color = settings.activeColor;
+            for (const auto &callback : clickCallbacks) {
+                callback();
             }
-        },
-        buttonBox
-    );
+        } else if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::RELEASE) {
+            Style *style = buttonBox->renderable.value()->getStyle();
+            style->color = settings.boxStyle.color;
+        }
+    });
 }
 
 } // namespace gltk
