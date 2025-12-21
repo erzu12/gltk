@@ -40,7 +40,7 @@ void renderQuad(
 
     Mat3 transform = viewMatrix * modelMatrix;
     shader.UniformMat3("transform", transform);
-    float clipedRadius = std::min(style.radius, std::min(size.x, size.y) / 2.0f);
+    float clipedRadius = std::min(style.radius.get(), std::min(size.x, size.y) / 2.0f);
     shader.UniformFloat("radius", clipedRadius);
     shader.UniformVec2("pixelSize", size);
     glEnable(GL_SCISSOR_TEST);

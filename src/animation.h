@@ -1,91 +1,75 @@
 #pragma once
 
 #include "color.h"
-#include "messure.h"
+#include "vec_math.h"
 #include <functional>
 
 namespace gltk {
 
-class IAnimationRunner {
-  public:
-    virtual void update(float deltaTime) = 0;
-    virtual bool isCompleted() const = 0;
-    virtual ~IAnimationRunner() = default;
-};
-
 template <typename T>
 concept VectorType = std::is_same_v<T, Vec2> || std::is_same_v<T, Vec3> || std::is_same_v<T, Color>;
 template <typename T>
-concept AnimatableType =
-    std::integral<T> || std::floating_point<T> || std::derived_from<T, MessureVec2> || VectorType<T>;
+concept AnimatableType = std::integral<T> || std::floating_point<T> || VectorType<T>;
 
-template <AnimatableType T> class AnimationRunner : public IAnimationRunner {
-  private:
-    T *property;
+template <AnimatableType T> class Animatable {
+    T value;
+    T targetValue;
     T startValue;
-    T endValue;
-    float duration;
+    float duration = 0.0f;
     float elapsedTime = 0.0f;
+    bool continuous = false;
     std::function<float(float)> easingFunc = nullptr;
 
+  public:
     void update(float deltaTime) {
-        elapsedTime += deltaTime;
-        if (elapsedTime >= duration) {
-            *property = endValue;
-            elapsedTime = duration; // Clamp to duration
-        } else {
-            float progress = elapsedTime / duration;
+        if (continuous) {
+            value = value + targetValue * deltaTime;
+        } else if (elapsedTime < duration) {
+            elapsedTime += deltaTime;
+            elapsedTime = std::min(elapsedTime, duration);
+            float t = elapsedTime / duration;
             if (easingFunc) {
-                progress = easingFunc(progress);
+                t = easingFunc(t);
             }
-            *property = startValue + (endValue - startValue) * progress;
+            value = startValue + (targetValue - startValue) * t;
+            if (elapsedTime >= duration) {
+                value = targetValue;
+            }
         }
     }
 
-    bool isCompleted() const { return elapsedTime >= duration; }
+    Animatable() : value{} {}
+    Animatable(const T &initialValue) : value(initialValue) {}
 
-  public:
-    AnimationRunner(T *property, T endValue, float duration, std::function<float(float)> easingFunc = nullptr)
-        : property(property), startValue(*property), endValue(endValue), duration(duration), easingFunc(easingFunc) {}
-};
-
-template <typename T>
-    requires std::derived_from<T, MessureVec2>
-class AnimationRunner<T> : public IAnimationRunner {
-  private:
-    MessureVec2 *property;
-    Vec2 startValue;
-    MessureVec2 endValue;
-    float duration;
-    float elapsedTime = 0.0f;
-    std::function<float(float)> easingFunc = nullptr;
-
-    void update(float deltaTime) {
-        elapsedTime += deltaTime;
-        if (elapsedTime >= duration) {
-            property->x->setValue(endValue.x->getValue());
-            property->y->setValue(endValue.y->getValue());
-            elapsedTime = duration; // Clamp to duration
-        } else {
-            float progress = elapsedTime / duration;
-            if (easingFunc) {
-                progress = easingFunc(progress);
-            }
-            float newValueX = startValue.x + (endValue.x->getValue() - startValue.x) * progress;
-            float newValueY = startValue.y + (endValue.y->getValue() - startValue.y) * progress;
-            property->x->setValue(newValueX);
-            property->y->setValue(newValueY);
-        }
+    void animateTo(const T &targetValue, float durationSeconds, std::function<float(float)> easing = nullptr) {
+        continuous = false;
+        startValue = value;
+        this->targetValue = targetValue;
+        duration = durationSeconds;
+        elapsedTime = 0.0f;
+        easingFunc = easing;
     }
 
-    bool isCompleted() const { return elapsedTime >= duration; }
+    void animate(const T &deltaValue) {
+        targetValue = deltaValue;
+        continuous = true;
+    }
 
-  public:
-    AnimationRunner(
-        MessureVec2 *property, MessureVec2 &endValue, float duration, std::function<float(float)> easingFunc = nullptr
-    )
-        : property(property), startValue(property->x->getValue(), property->y->getValue()),
-          endValue(std::move(endValue)), duration(duration), easingFunc(easingFunc) {}
+    void stopAnimation() {
+        continuous = false;
+        duration = 0.0f;
+        elapsedTime = 0.0f;
+    }
+
+    T get() const { return value; }
+    void set(const T &newValue) { value = newValue; }
+
+    Animatable<T> &operator=(const T &newValue) {
+        set(newValue);
+        return *this;
+    }
+
+    operator T() const { return get(); }
 };
 
 namespace easing {

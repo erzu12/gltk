@@ -53,8 +53,21 @@ void Scene::updateAnimations() {
     float deltaTime = std::chrono::duration<float>(now - lastUpdateTime).count();
     lastUpdateTime = now;
     for (auto &layout : layouts) {
-        for (auto &runner : layout->animationRunners) {
-            runner->update(deltaTime);
+        layout->positioning.offset.update(deltaTime);
+        layout->positioning.size.update(deltaTime);
+        layout->positioning.pivot.update(deltaTime);
+        layout->positioning.anchor.update(deltaTime);
+        layout->positioning.padding.top.update(deltaTime);
+        layout->positioning.padding.bottom.update(deltaTime);
+        layout->positioning.padding.left.update(deltaTime);
+        layout->positioning.padding.right.update(deltaTime);
+        if (layout->renderable.has_value()) {
+            layout->renderable.value()->getStyle()->color.update(deltaTime);
+            layout->renderable.value()->getStyle()->borderColor.update(deltaTime);
+            layout->renderable.value()->getStyle()->borderWidth.update(deltaTime);
+            layout->renderable.value()->getStyle()->radius.update(deltaTime);
+            layout->renderable.value()->getStyle()->rotation.update(deltaTime);
+            layout->renderable.value()->getStyle()->fontSize.update(deltaTime);
         }
     }
 }

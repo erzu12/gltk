@@ -1,10 +1,11 @@
 #include "canvas.h"
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 namespace gltk {
 
-PathObject::PathObject(std::vector<Vec2> points, Vec2 pos, Style style, bool interpolate, bool closed) : points(points), pos(pos), interpolate(interpolate), style(style), closed(closed) {
+PathObject::PathObject(std::vector<Vec2> points, Vec2 pos, Style style, bool interpolate, bool closed)
+    : points(points), pos(pos), interpolate(interpolate), style(style), closed(closed) {
     if (interpolate) {
         this->points = bezierInterpolation(points);
     }
@@ -13,7 +14,7 @@ PathObject::PathObject(std::vector<Vec2> points, Vec2 pos, Style style, bool int
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -24,17 +25,17 @@ PathObject::PathObject(std::vector<Vec2> points, Vec2 pos, Style style, bool int
     glBindVertexArray(quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     glGenVertexArrays(1, &borderVAO);
     glGenBuffers(1, &borderVBO);
     glGenBuffers(1, &borderEBO);
-    
+
     glBindVertexArray(borderVAO);
     glBindBuffer(GL_ARRAY_BUFFER, borderVBO);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 }
 
@@ -50,12 +51,18 @@ void PathObject::regenerateGeometry() {
     boundingBox = generateBorder(absolutePoints, style.borderWidth, closed);
 
     float vertices[] = {
-        boundingBox.min.x, boundingBox.min.y,
-        boundingBox.min.x, boundingBox.max.y,
-        boundingBox.max.x, boundingBox.min.y,
-        boundingBox.max.x, boundingBox.min.y,
-        boundingBox.min.x, boundingBox.max.y,
-        boundingBox.max.x, boundingBox.max.y
+        boundingBox.min.x,
+        boundingBox.min.y,
+        boundingBox.min.x,
+        boundingBox.max.y,
+        boundingBox.max.x,
+        boundingBox.min.y,
+        boundingBox.max.x,
+        boundingBox.min.y,
+        boundingBox.min.x,
+        boundingBox.max.y,
+        boundingBox.max.x,
+        boundingBox.max.y
     };
 
     glBindVertexArray(quadVAO);
@@ -94,7 +101,7 @@ std::vector<Vec2> PathObject::bezierInterpolation(std::vector<Vec2> points) {
 BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bool closed) {
     std::vector<Vec2> verts(points.size() * 2);
     borderIndCount = 6 * (points.size() - 1);
-    if(closed) {
+    if (closed) {
         borderIndCount += 6;
     }
     std::vector<unsigned int> inds(borderIndCount);
@@ -105,22 +112,19 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
         if (current == Vec2(0, 0)) {
             current = (points[0] - points[points.size() - 2]).Normalize();
         }
-    }
-    else {
+    } else {
         current = (points[1] - points[0]).Normalize();
     }
 
-    for(int i = 0; i < points.size(); i++) {
+    for (int i = 0; i < points.size(); i++) {
         Vec2 next;
-        if(i == points.size() - 1) {
+        if (i == points.size() - 1) {
             if (closed) {
                 next = (points[0] - points[i]).Normalize();
-            }
-            else {
+            } else {
                 next = current;
             }
-        }
-        else {
+        } else {
             next = (points[i + 1] - points[i]).Normalize();
         }
         float angle = (current.Angle(next)) / 2;
@@ -134,7 +138,7 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
         current = next;
     }
 
-    for(int i = 1; i < points.size(); i++) {
+    for (int i = 1; i < points.size(); i++) {
         inds[i * 6 - 6] = i * 2 - 2;
         inds[i * 6 - 5] = i * 2 - 1;
         inds[i * 6 - 4] = i * 2;
@@ -143,7 +147,7 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
         inds[i * 6 - 1] = i * 2;
     }
 
-    if(closed) {
+    if (closed) {
         inds[borderIndCount - 6] = 0;
         inds[borderIndCount - 5] = 1;
         inds[borderIndCount - 4] = points.size() * 2 - 2;
@@ -151,7 +155,6 @@ BoundingBox PathObject::generateBorder(std::vector<Vec2> points, float width, bo
         inds[borderIndCount - 2] = points.size() * 2 - 1;
         inds[borderIndCount - 1] = points.size() * 2 - 2;
     }
-
 
     glBindVertexArray(borderVAO);
 
@@ -172,9 +175,10 @@ void PathObject::render(Mat3 &viewMatrix) {
     shader.UniformColor("color", style.color);
     shader.UniformMat3("transform", viewMatrix);
 
-    //Using a triangle fan to triangulate the polygon causes points outside the polygon to be covered 
-    //by an evenen amount of triangles and points inside the polygon to be covered by an odd amount of triangles.
-    //Setting the stencil operation to invert will cause the stencil buffer to be set to 1 for points inside the polygon
+    // Using a triangle fan to triangulate the polygon causes points outside the polygon to be covered
+    // by an evenen amount of triangles and points inside the polygon to be covered by an odd amount of triangles.
+    // Setting the stencil operation to invert will cause the stencil buffer to be set to 1 for points inside the
+    // polygon
     glClear(GL_STENCIL_BUFFER_BIT);
     glEnable(GL_STENCIL_TEST);
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -184,8 +188,8 @@ void PathObject::render(Mat3 &viewMatrix) {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, points.size());
 
-    glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
-    glStencilFunc( GL_EQUAL, 0x1, 0x1 );
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glStencilFunc(GL_EQUAL, 0x1, 0x1);
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -200,8 +204,8 @@ void PathObject::render(Mat3 &viewMatrix) {
 
     // draw border
     shader.UniformColor("color", style.borderColor);
-    glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
-    glStencilFunc( GL_EQUAL, 0x1, 0x1 );
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glStencilFunc(GL_EQUAL, 0x1, 0x1);
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -216,8 +220,8 @@ bool PathObject::pointInObject(Vec2 point) {
         return false;
     }
     int intersectCount = 0;
-    if (style.color.a > 0.000001) {
-        for(int i = 2; i < points.size(); i++) {
+    if (style.color.get().a > 0.000001) {
+        for (int i = 2; i < points.size(); i++) {
             Vec2 a = points[0] + pos;
             Vec2 b = points[i - 1] + pos;
             Vec2 c = points[i] + pos;
@@ -230,8 +234,8 @@ bool PathObject::pointInObject(Vec2 point) {
     if (intersectCount % 2 == 1) {
         return true;
     }
-    if (style.borderWidth > 0.000001 && style.borderColor.a > 0.000001) {
-        for(int i = 1; i < points.size(); i++) {
+    if (style.borderWidth > 0.000001 && style.borderColor.get().a > 0.000001) {
+        for (int i = 1; i < points.size(); i++) {
             Vec2 tri1a = borderTriangles[i * 2 - 2];
             Vec2 tri1b = borderTriangles[i * 2 - 1];
             Vec2 tri1c = borderTriangles[i * 2];
@@ -269,62 +273,65 @@ void PathObject::scale(Vec2 scale) {
     dirty = true;
 }
 
-
 PathObject::~PathObject() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
 
-void Canvas::addObject(std::unique_ptr<CanvasObject> object) {
-    objects.push_back(std::move(object));
-}
+void Canvas::addObject(std::unique_ptr<CanvasObject> object) { objects.push_back(std::move(object)); }
 
-Rectangle::Rectangle(Vec2 pos, Vec2 size, Style style) : PathObject({
-    -size / 2.0f,
-    Vec2(size.x, -size.y) / 2.0f,
-    size / 2.0f,
-    Vec2(-size.x, size.y) / 2.0f
-}, pos, style, false, true) {}
+Rectangle::Rectangle(Vec2 pos, Vec2 size, Style style)
+    : PathObject(
+          {-size / 2.0f, Vec2(size.x, -size.y) / 2.0f, size / 2.0f, Vec2(-size.x, size.y) / 2.0f},
+          pos,
+          style,
+          false,
+          true
+      ) {}
 
-Oval::Oval(Vec2 pos, Vec2 size, Style style) : PathObject([&] {
-    // bezier curves cant be used to draw a perfect circle but a very close approximation is possible
-    // see https://spencermortensen.com/articles/bezier-circle/ for more information
-    float a = 1.00005519;
-    float b = 0.55342686;
-    float c = 0.99873585;
+Oval::Oval(Vec2 pos, Vec2 size, Style style)
+    : PathObject(
+          [&] {
+              // bezier curves cant be used to draw a perfect circle but a very close approximation is possible
+              // see https://spencermortensen.com/articles/bezier-circle/ for more information
+              float a = 1.00005519;
+              float b = 0.55342686;
+              float c = 0.99873585;
 
-    std::vector<Vec2> newPints {
-        Vec2(0, a),
-        Vec2(b, c),
-        Vec2(c, b),
-        Vec2(a, 0),
-        Vec2(a, 0),
-        Vec2(c, -b),
-        Vec2(b, -c),
-        Vec2(0, -a),
-        Vec2(0, -a),
-        Vec2(-b, -c),
-        Vec2(-c, -b),
-        Vec2(-a, 0),
-        Vec2(-a, 0),
-        Vec2(-c, b),
-        Vec2(-b, c),
-        Vec2(0, a)
-    };
+              std::vector<Vec2> newPints{
+                  Vec2(0, a),
+                  Vec2(b, c),
+                  Vec2(c, b),
+                  Vec2(a, 0),
+                  Vec2(a, 0),
+                  Vec2(c, -b),
+                  Vec2(b, -c),
+                  Vec2(0, -a),
+                  Vec2(0, -a),
+                  Vec2(-b, -c),
+                  Vec2(-c, -b),
+                  Vec2(-a, 0),
+                  Vec2(-a, 0),
+                  Vec2(-c, b),
+                  Vec2(-b, c),
+                  Vec2(0, a)
+              };
 
-    for (auto &point : newPints) {
-        point = point * size / 2.0f;
-    }
+              for (auto &point : newPints) {
+                  point = point * size / 2.0f;
+              }
 
-    return newPints;
-}(), pos, style, true, true) {}
+              return newPints;
+          }(),
+          pos,
+          style,
+          true,
+          true
+      ) {}
 
-Vec2 Canvas::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
-    return size;
-}
+Vec2 Canvas::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) { return size; }
 
-Canvas::Canvas(Style style, Vec2 size) : style(style), size(size), boxRenderer() {
-}
+Canvas::Canvas(Style style, Vec2 size) : style(style), size(size), boxRenderer() {}
 
 void Canvas::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
     boxRenderer.render(viewSize, modelMatrix, size, clipRegion, style);
@@ -345,4 +352,4 @@ void Canvas::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox cli
     glDisable(GL_SCISSOR_TEST);
 }
 
-};
+}; // namespace gltk

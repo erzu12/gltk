@@ -43,10 +43,10 @@ enum class Overflow {
 };
 
 struct Padding {
-    int top;
-    int right;
-    int bottom;
-    int left;
+    Animatable<int> top;
+    Animatable<int> right;
+    Animatable<int> bottom;
+    Animatable<int> left;
 };
 
 enum class SizingMode { Layout, Content };
@@ -59,8 +59,8 @@ struct Sizing {
 struct Positioning {
     MessureVec2 size = MessureVec2(0_px, 0_px);
     MessureVec2 offset = MessureVec2(0_px, 0_px);
-    Vec2 anchor = Anchors::Center;
-    Vec2 pivot = Pivot::Center;
+    Animatable<Vec2> anchor = Anchors::Center;
+    Animatable<Vec2> pivot = Pivot::Center;
     Sizing sizing = {SizingMode::Layout, SizingMode::Layout};
     Padding padding = {0, 0, 0, 0};
     ChildPlacement childPlacement = ChildPlacement::Free;
@@ -82,7 +82,6 @@ struct Layout {
     std::vector<Layout *> children;
     std::optional<Layout *> parent = std::nullopt;
     std::unordered_map<std::type_index, std::vector<std::function<void(IMouseEvent &)>>> eventCallbacks;
-    std::vector<std::unique_ptr<IAnimationRunner>> animationRunners;
 
     template <typename T>
         requires std::derived_from<T, IRenderable>
@@ -97,29 +96,11 @@ struct Layout {
         return ret;
     }
 
-    template <typename T, typename V>
-    void
-    animate(T Positioning::*property, V endValue, float duration, std::function<float(float)> easingFunc = nullptr) {
-        auto &pos = this->positioning;
-        auto animationRunner = std::make_unique<AnimationRunner<V>>(&(pos.*property), endValue, duration, easingFunc);
-        animationRunners.push_back(std::move(animationRunner));
-    }
-
-    template <typename T, typename V>
-    void animate(T Padding::*property, V endValue, float duration, std::function<float(float)> easingFunc = nullptr) {
-        auto &pos = this->positioning.padding;
-        auto animationRunner = std::make_unique<AnimationRunner<V>>(&(pos.*property), endValue, duration, easingFunc);
-        animationRunners.push_back(std::move(animationRunner));
-    }
-    template <typename T, typename V>
-    void animate(T Style::*property, V endValue, float duration, std::function<float(float)> easingFunc = nullptr) {
+    Style *getStyle() {
         if (!renderable.has_value()) {
             throw std::runtime_error("Renderable is not set for this layout");
         }
-        auto style = renderable.value()->getStyle();
-        auto animationRunner =
-            std::make_unique<AnimationRunner<V>>(&(style->*property), endValue, duration, easingFunc);
-        animationRunners.push_back(std::move(animationRunner));
+        return renderable.value()->getStyle();
     }
 };
 

@@ -55,11 +55,14 @@ void Window::mouse_button_callback(GLFWwindow *window, int button, int action, i
         w->mouseButtonRepeat,
         Vec2(xpos * xscale, ypos * yscale),
     };
-    for (auto &callback : w->mouse_down_callbacks) {
-        callback(event);
-    }
-    for (auto &callback : w->mouse_up_callbacks) {
-        callback(event);
+    if (action == GLFW_PRESS) {
+        for (auto &callback : w->mouse_down_callbacks) {
+            callback(event);
+        }
+    } else if (action == GLFW_RELEASE) {
+        for (auto &callback : w->mouse_up_callbacks) {
+            callback(event);
+        }
     }
     if (w->scene) {
         w->scene->sendEvent(event);

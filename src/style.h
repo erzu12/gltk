@@ -1,4 +1,5 @@
 #pragma once
+#include "animation.h"
 #include "color.h"
 #include "fontloader.h"
 #include <unordered_map>
@@ -6,15 +7,15 @@
 namespace gltk {
 
 struct Style {
-    Color color = Color(1.0);
+    Animatable<Color> color = Color(1.0);
     std::string font = "Arial";
     FontSlant slant = FontSlant::Roman;
     FontWeight weight = FontWeight::Normal;
-    int fontSize = 16;
-    float radius = 0.0f;
-    float borderWidth = 0.0f;
-    Color borderColor = Color();
-    float rotation = 0.0f;
+    Animatable<int> fontSize = 16;
+    Animatable<float> radius = 0.0f;
+    Animatable<float> borderWidth = 0.0f;
+    Animatable<Color> borderColor = Color();
+    Animatable<float> rotation = 0.0f;
 };
 
 class StyleSheet {

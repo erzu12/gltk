@@ -25,10 +25,10 @@ void calculateSize(Layout *layout, Vec2 parentSize) {
 
 void calculatePosition(Layout *layout, Vec2 parentSize, Vec2 parentPosition) {
 
-    Vec2 pivotPosition = layout->positioning.offset.resolve(parentSize) + layout->positioning.anchor * parentSize +
-                         (parentPosition - parentSize / 2.0f);
+    Vec2 pivotPosition = layout->positioning.offset.resolve(parentSize) +
+                         layout->positioning.anchor.get() * parentSize + (parentPosition - parentSize / 2.0f);
     Vec2 size = layout->transform.Size;
-    Vec2 pivotOffsetFromCenter = size / 2.0f - layout->positioning.pivot * size;
+    Vec2 pivotOffsetFromCenter = size / 2.0f - layout->positioning.pivot.get() * size;
     layout->transform.Position = pivotPosition + pivotOffsetFromCenter;
 }
 

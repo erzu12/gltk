@@ -2,9 +2,9 @@
 
 Vec2 MessureVec2::resolve(Vec2 parentSize) { return Vec2(x->resolve(parentSize.x), y->resolve(parentSize.y)); }
 
-float AbsoluteMessure::resolve(float parentSize) { return (float)value; }
+float AbsoluteMessure::resolve(float parentSize) { return value.get(); }
 
-float RelativeMessure::resolve(float parentSize) { return value * parentSize; }
+float RelativeMessure::resolve(float parentSize) { return value.get() * parentSize; }
 
 std::unique_ptr<IMessure> &MessureVec2::operator[](int index) {
     if (index == 0) {

@@ -59,18 +59,27 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
     scene->addEventCallback<MouseMoveEvent>(box, [=, &settings, this](MouseMoveEvent &event) {
         if (dragging) {
             text->getRenderable<Text>()->select(dragStart, event.pos, textAmount);
-            // std::cout << "local pos: " << event.localPos << " element size: " << box->transform.Size
-            //           << " text size: " << text->transform.Size << std::endl;
-            if (event.localPos.x < settings.scrollEdgeDistance) {
-                std::cout << "Scrolling left" << std::endl;
-                // text->animate(&Positioning::offset, MessureVec2(-1_px, 0_px));
-
-            } else if (event.localPos.x > box->transform.Size.x - settings.scrollEdgeDistance) {
-                text->positioning.offset.x->setValue(box->positioning.offset.x->getValue() + 10);
-            };
         }
     });
-    window->add_mouse_up_callback([&](auto event) { dragging = false; });
+    window->add_mouse_move_callback([=, &settings, this](MouseMoveEvent event) {
+        if (dragging) {
+            Vec2 boxLocalPos = event.pos - box->transform.Position + box->transform.Size / 2.0f;
+            if (boxLocalPos.x < settings.scrollEdgeDistance) {
+                float scrollSpeed = boxLocalPos.x - settings.scrollEdgeDistance;
+                text->positioning.offset.x->animate(AbsoluteMessure(scrollSpeed * 5));
+
+            } else if (event.localPos.x > box->transform.Size.x - settings.scrollEdgeDistance) {
+                float scrollSpeed = boxLocalPos.x - (box->transform.Size.x - settings.scrollEdgeDistance);
+                text->positioning.offset.x->animate(AbsoluteMessure(scrollSpeed * 5));
+            } else {
+                text->positioning.offset.x->stopAnimation();
+            }
+        }
+    });
+    window->add_mouse_up_callback([=, &settings, this](auto event) {
+        dragging = false;
+        text->positioning.offset.x->stopAnimation();
+    });
     window->add_text_input_callback([=, &settings, this](TextInputEvent event) {
         std::cout << "Text input: " << event.text << std::endl;
         text->getRenderable<Text>()->changeText(event.text);
