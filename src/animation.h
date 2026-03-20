@@ -17,16 +17,15 @@ template <AnimatableType T> class Animatable {
     T startValue;
     float duration = 0.0f;
     float elapsedTime = 0.0f;
-    bool continuous = false;
     std::function<float(float)> easingFunc = nullptr;
+    std::function<void(const T &, const T &)> onUpdate = nullptr;
 
   public:
     void update(float deltaTime) {
-        if (continuous) {
-            value = value + targetValue * deltaTime;
-        } else if (elapsedTime < duration) {
+        if (elapsedTime < duration) {
             elapsedTime += deltaTime;
             elapsedTime = std::min(elapsedTime, duration);
+            T lastValue = value;
             float t = elapsedTime / duration;
             if (easingFunc) {
                 t = easingFunc(t);
@@ -35,28 +34,36 @@ template <AnimatableType T> class Animatable {
             if (elapsedTime >= duration) {
                 value = targetValue;
             }
+            if (onUpdate) {
+                onUpdate(value - lastValue, value);
+            }
         }
     }
 
     Animatable() : value{} {}
     Animatable(const T &initialValue) : value(initialValue) {}
 
-    void animateTo(const T &targetValue, float durationSeconds, std::function<float(float)> easing = nullptr) {
-        continuous = false;
+    void
+    animate(const T &targetValue, float durationSeconds, std::function<void(const T &delta, const T &value)> onUpdate) {
+        animate(targetValue, durationSeconds, nullptr, onUpdate);
+    }
+
+    void animate(
+        const T &targetValue,
+        float durationSeconds,
+        std::function<float(float)> easing = nullptr,
+        std::function<void(const T &delta, const T &value)> onUpdate = nullptr
+    ) {
         startValue = value;
         this->targetValue = targetValue;
         duration = durationSeconds;
         elapsedTime = 0.0f;
         easingFunc = easing;
-    }
-
-    void animate(const T &deltaValue) {
-        targetValue = deltaValue;
-        continuous = true;
+        this->onUpdate = onUpdate;
     }
 
     void stopAnimation() {
-        continuous = false;
+        onUpdate = nullptr;
         duration = 0.0f;
         elapsedTime = 0.0f;
     }

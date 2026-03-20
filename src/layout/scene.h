@@ -81,7 +81,7 @@ struct Layout {
     Transform transform;
     std::vector<Layout *> children;
     std::optional<Layout *> parent = std::nullopt;
-    std::unordered_map<std::type_index, std::vector<std::function<void(IMouseEvent &)>>> eventCallbacks;
+    std::unordered_map<std::type_index, std::vector<std::function<void(IEvent &)>>> eventCallbacks;
 
     template <typename T>
         requires std::derived_from<T, IRenderable>
@@ -123,9 +123,9 @@ class Scene {
     Layout *getLayout(size_t id) const { return layouts.at(id).get(); }
 
     template <typename T>
-        requires std::derived_from<T, IMouseEvent>
+        requires std::derived_from<T, IEvent>
     void addEventCallback(Layout *layout, std::function<void(T &)> callback) {
-        auto wrapper = [callback](IMouseEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
+        auto wrapper = [callback](IEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
         layout->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
     }
 

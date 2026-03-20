@@ -121,14 +121,37 @@ void resolveRootLayout(Layout *rootLayout, Vec2 viewportSize) {
     rootLayout->transform.clipRegion = BoundingBox(rootLayout->transform.Position, rootLayout->transform.Size);
 }
 
+void sendTransformChangeEvents(
+    const std::vector<Layout *> &relativeLayouts, const std::vector<Transform> &startTransfomrs
+) {
+    for (size_t i = 0; i < relativeLayouts.size(); i++) {
+        if (relativeLayouts[i]->transform.Position != startTransfomrs[i].Position ||
+            relativeLayouts[i]->transform.Size != startTransfomrs[i].Size) {
+            for (const auto &callback :
+                 relativeLayouts[i]->eventCallbacks[std::type_index(typeid(TransformChangeEvent))]) {
+                TransformChangeEvent event;
+                event.pos = relativeLayouts[i]->transform.Position;
+                event.size = relativeLayouts[i]->transform.Size;
+                callback(event);
+            }
+        }
+    }
+}
+
 void resolveScene(Scene &scene, Vec2 viewportSize) {
     scene.updateAnimations();
 
     auto relativeLayouts = scene.getLayouts();
+    auto startTransfomrs = std::vector<Transform>(relativeLayouts.size());
+    for (size_t i = 0; i < relativeLayouts.size(); i++) {
+        startTransfomrs[i] = relativeLayouts[i]->transform;
+    }
 
     resolveRootLayout(scene.getRoot(), viewportSize);
 
     resolveLayouts(relativeLayouts, scene.getRoot(), viewportSize);
+
+    sendTransformChangeEvents(relativeLayouts, startTransfomrs);
 }
 
 } // namespace gltk

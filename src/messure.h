@@ -11,9 +11,15 @@ class IMessure {
     virtual float getValue() const = 0;
     virtual bool isAbsolute() const = 0;
 
-    virtual void
-    animateTo(const IMessure &targetValue, float durationSeconds, std::function<float(float)> easing = nullptr) = 0;
-    virtual void animate(const IMessure &deltaValue) = 0;
+    virtual void animate(
+        const IMessure &targetValue,
+        float durationSeconds,
+        std::function<float(float)> easing = nullptr,
+        std::function<void(float delta, float value)> onUpdate = nullptr
+    ) = 0;
+    virtual void animate(
+        const IMessure &targetValue, float durationSeconds, std::function<void(float delta, float value)> onUpdate
+    ) = 0;
     virtual void stopAnimation() = 0;
     virtual void update(float deltaTime) = 0;
 
@@ -32,19 +38,21 @@ class AbsoluteMessure : public IMessure {
     void setValue(float value) override { this->value.set(round(value)); }
     float getValue() const override { return static_cast<float>(round(value.get())); }
 
-    void animateTo(
-        const IMessure &targetValue, float durationSeconds, std::function<float(float)> easing = nullptr
+    void animate(
+        const IMessure &targetValue,
+        float durationSeconds,
+        std::function<float(float)> easing = nullptr,
+        std::function<void(float delta, float value)> onUpdate = nullptr
     ) override {
         if (!targetValue.isAbsolute()) {
             throw std::invalid_argument("Cannot animate AbsoluteMessure to RelativeMessure");
         }
-        value.animateTo(targetValue.getValue(), durationSeconds, easing);
+        value.animate(targetValue.getValue(), durationSeconds, easing, onUpdate);
     }
-    void animate(const IMessure &deltaValue) override {
-        if (!deltaValue.isAbsolute()) {
-            throw std::invalid_argument("Cannot animate AbsoluteMessure by RelativeMessure");
-        }
-        value.animate(deltaValue.getValue());
+    void animate(
+        const IMessure &targetValue, float durationSeconds, std::function<void(float delta, float value)> onUpdate
+    ) override {
+        animate(targetValue, durationSeconds, nullptr, onUpdate);
     }
     void stopAnimation() override { value.stopAnimation(); }
     void update(float deltaTime) override { value.update(deltaTime); }
@@ -63,19 +71,21 @@ class RelativeMessure : public IMessure {
     void setValue(float value) override { this->value.set(value); }
     float getValue() const override { return value.get(); }
 
-    void animateTo(
-        const IMessure &targetValue, float durationSeconds, std::function<float(float)> easing = nullptr
+    void animate(
+        const IMessure &targetValue,
+        float durationSeconds,
+        std::function<float(float)> easing = nullptr,
+        std::function<void(float delta, float value)> onUpdate = nullptr
     ) override {
         if (targetValue.isAbsolute()) {
             throw std::invalid_argument("Cannot animate RelativeMessure to AbsoluteMessure");
         }
-        value.animateTo(targetValue.getValue(), durationSeconds, easing);
+        value.animate(targetValue.getValue(), durationSeconds, easing, onUpdate);
     }
-    void animate(const IMessure &deltaValue) override {
-        if (deltaValue.isAbsolute()) {
-            throw std::invalid_argument("Cannot animate RelativeMessure by AbsoluteMessure");
-        }
-        value.animate(deltaValue.getValue());
+    void animate(
+        const IMessure &targetValue, float durationSeconds, std::function<void(float delta, float value)> onUpdate
+    ) override {
+        animate(targetValue, durationSeconds, nullptr, onUpdate);
     }
     void stopAnimation() override { value.stopAnimation(); }
     void update(float deltaTime) override { value.update(deltaTime); }

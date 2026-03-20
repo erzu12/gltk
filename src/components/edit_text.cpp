@@ -5,6 +5,32 @@
 
 namespace gltk {
 
+void calcTextOffset(Layout *textLayout, Layout *boxLayout) {
+    Vec2 caretPos = textLayout->getRenderable<Text>()->getCaretPosition();
+    float boxWidth =
+        boxLayout->transform.Size.x - boxLayout->positioning.padding.left - boxLayout->positioning.padding.right;
+    float textWidth = textLayout->getRenderable<Text>()->getSize(Vec2(0, 0), false, false).x;
+    float currentOffset = textLayout->positioning.offset.x->getValue();
+    // check if caret is outside of the box
+    std::cout << "caret pos: " << caretPos.x << " current offset: " << currentOffset << " box width: " << boxWidth
+              << " text width: " << textWidth << std::endl;
+    if (caretPos.x + currentOffset < 0) {
+        std::cout << "a" << std::endl;
+        textLayout->positioning.offset.x->setValue(-caretPos.x + 2.0f);
+    } else if (caretPos.x + currentOffset > boxWidth) {
+        std::cout << "b" << std::endl;
+        textLayout->positioning.offset.x->setValue(boxWidth - caretPos.x - 2.0f);
+    }
+    if (textWidth > boxWidth && textWidth + currentOffset < boxWidth) {
+        std::cout << "c" << std::endl;
+        textLayout->positioning.offset.x->setValue(boxWidth - textWidth);
+    }
+    if (textWidth < boxWidth && currentOffset < 0) {
+        std::cout << "d" << std::endl;
+        textLayout->positioning.offset.x->setValue(0);
+    }
+}
+
 EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSettings settings) {
 
     if (settings.styleSheet.has_value()) {
@@ -38,7 +64,7 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
 
     scene->addEventCallback<MouseButtonEvent>(box, [=, &settings, this](MouseButtonEvent &event) {
         textAmount = TextAmount::Character;
-        std::cout << "repeat: " << event.repeat << std::endl;
+        // std::cout << "repeat: " << event.repeat << std::endl;
         if (event.repeat == 1) {
             textAmount = TextAmount::Word;
         } else if (event.repeat == 2) {
@@ -48,29 +74,38 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
         }
         if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
             dragging = true;
-            dragStart = event.pos;
-            if (textAmount == TextAmount::Character) {
-                text->getRenderable<Text>()->placeCaret(event.pos);
-            } else {
-                text->getRenderable<Text>()->select(event.pos, event.pos, textAmount);
+            text->getRenderable<Text>()->placeCaret(event.pos);
+            if (textAmount != TextAmount::Character) {
+                text->getRenderable<Text>()->select(event.pos, textAmount);
             }
         }
     });
     scene->addEventCallback<MouseMoveEvent>(box, [=, &settings, this](MouseMoveEvent &event) {
         if (dragging) {
-            text->getRenderable<Text>()->select(dragStart, event.pos, textAmount);
+            text->getRenderable<Text>()->select(event.pos, textAmount);
         }
     });
     window->add_mouse_move_callback([=, &settings, this](MouseMoveEvent event) {
         if (dragging) {
             Vec2 boxLocalPos = event.pos - box->transform.Position + box->transform.Size / 2.0f;
-            if (boxLocalPos.x < settings.scrollEdgeDistance) {
-                float scrollSpeed = boxLocalPos.x - settings.scrollEdgeDistance;
-                text->positioning.offset.x->animate(AbsoluteMessure(scrollSpeed * 5));
+            float startOffset = text->positioning.offset.x->getValue();
+            if (boxLocalPos.x < settings.scrollTriggerSize) {
+                float scrollSpeed = (boxLocalPos.x - settings.scrollTriggerSize) * settings.scrollSpeed * -1.0f;
+                float endOffset = 0.0f;
+                float duration = std::max((endOffset - startOffset) / scrollSpeed, 0.0f);
+                text->positioning.offset.x->animate(AbsoluteMessure(endOffset), duration);
 
-            } else if (event.localPos.x > box->transform.Size.x - settings.scrollEdgeDistance) {
-                float scrollSpeed = boxLocalPos.x - (box->transform.Size.x - settings.scrollEdgeDistance);
-                text->positioning.offset.x->animate(AbsoluteMessure(scrollSpeed * 5));
+            } else if (boxLocalPos.x > box->transform.Size.x - settings.scrollTriggerSize) {
+                float scrollSpeed =
+                    (boxLocalPos.x - box->transform.Size.x + settings.scrollTriggerSize) * settings.scrollSpeed * -1.0f;
+                float endOffset = box->transform.Size.x - text->transform.Size.x - 20.0f;
+                float duration = std::max((endOffset - startOffset) / scrollSpeed, 0.0f);
+                text->positioning.offset.x
+                    ->animate(AbsoluteMessure(endOffset), duration, [=, this](float delta, float value) {
+                        std::cout << "dragging to " << value << " delta: " << delta << std::endl;
+                        std::cout << "actual pos: " << text->transform.Position.x << std::endl;
+                        text->getRenderable<Text>()->select(event.pos, textAmount);
+                    });
             } else {
                 text->positioning.offset.x->stopAnimation();
             }
@@ -83,6 +118,7 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
     window->add_text_input_callback([=, &settings, this](TextInputEvent event) {
         std::cout << "Text input: " << event.text << std::endl;
         text->getRenderable<Text>()->changeText(event.text);
+        calcTextOffset(text, box);
     });
     window->add_key_down_callback([=, &settings, this](KeyEvent event) {
         TextAmount amount = TextAmount::Character;
@@ -106,6 +142,7 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
         } else if (event.key == Key::KEY_ENTER || event.key == Key::KEY_KP_ENTER) {
             text->getRenderable<Text>()->changeText("\n", false, false, TextAmount::Character);
         }
+        calcTextOffset(text, box);
     });
 }
 

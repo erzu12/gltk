@@ -36,9 +36,18 @@ class KeyModifierFlags {
     }
 };
 
-struct IMouseEvent {
+struct IEvent {
+    virtual ~IEvent() = default;
+};
+
+struct IMouseEvent : public IEvent {
     virtual ~IMouseEvent() = default;
     virtual Vec2 getPos() const = 0;
+};
+
+struct TransformChangeEvent : public IEvent {
+    Vec2 pos;
+    Vec2 size;
 };
 
 struct MouseMoveEvent : public IMouseEvent {

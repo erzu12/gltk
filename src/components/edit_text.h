@@ -15,7 +15,8 @@ struct EditTextSettings {
     Style textStyle = Style({.color = Color(1.0f, 1.0f, 1.0f), .font = "Arial", .fontSize = 32});
     Style boxStyle = Style({.color = Color(0.1f, 0.1f, 0.1f), .radius = 5});
     Color selectColor = Color(0.3f, 0.3f, 0.8f);
-    float scrollEdgeDistance = 20.0f;
+    float scrollTriggerSize = 20.0f;
+    float scrollSpeed = 10.0f;
 };
 
 class EditText {
@@ -23,7 +24,6 @@ class EditText {
     bool focused = false;
     bool dragging = false;
     TextAmount textAmount = TextAmount::Character;
-    Vec2 dragStart;
 
   public:
     EditText(Scene *scene, Window *window, Layout *parent, EditTextSettings settings = {});

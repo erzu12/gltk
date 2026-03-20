@@ -36,11 +36,11 @@ ToggleButton::ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings se
         if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
             Style *style = toggleSlider->renderable.value()->getStyle();
             if (isOn) {
-                toggleDot->positioning.offset.x->animateTo(25_pct, settings.animationDuration, settings.easingFunc);
-                toggleSlider->getStyle()->color.animateTo(settings.offColor, settings.animationDuration);
+                toggleDot->positioning.offset.x->animate(25_pct, settings.animationDuration, settings.easingFunc);
+                toggleSlider->getStyle()->color.animate(settings.offColor, settings.animationDuration);
             } else {
-                toggleDot->positioning.offset.x->animateTo(75_pct, settings.animationDuration, settings.easingFunc);
-                toggleSlider->getStyle()->color.animateTo(settings.onColor, settings.animationDuration);
+                toggleDot->positioning.offset.x->animate(75_pct, settings.animationDuration, settings.easingFunc);
+                toggleSlider->getStyle()->color.animate(settings.onColor, settings.animationDuration);
             }
             isOn = !isOn;
             for (const auto &callback : stateChangeCallbacks) {
