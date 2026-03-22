@@ -11,22 +11,15 @@ void calcTextOffset(Layout *textLayout, Layout *boxLayout) {
         boxLayout->transform.Size.x - boxLayout->positioning.padding.left - boxLayout->positioning.padding.right;
     float textWidth = textLayout->getRenderable<Text>()->getSize(Vec2(0, 0), false, false).x;
     float currentOffset = textLayout->positioning.offset.x->getValue();
-    // check if caret is outside of the box
-    std::cout << "caret pos: " << caretPos.x << " current offset: " << currentOffset << " box width: " << boxWidth
-              << " text width: " << textWidth << std::endl;
     if (caretPos.x + currentOffset < 0) {
-        std::cout << "a" << std::endl;
         textLayout->positioning.offset.x->setValue(-caretPos.x + 2.0f);
     } else if (caretPos.x + currentOffset > boxWidth) {
-        std::cout << "b" << std::endl;
         textLayout->positioning.offset.x->setValue(boxWidth - caretPos.x - 2.0f);
     }
     if (textWidth > boxWidth && textWidth + currentOffset < boxWidth) {
-        std::cout << "c" << std::endl;
         textLayout->positioning.offset.x->setValue(boxWidth - textWidth);
     }
     if (textWidth < boxWidth && currentOffset < 0) {
-        std::cout << "d" << std::endl;
         textLayout->positioning.offset.x->setValue(0);
     }
 }
@@ -53,7 +46,7 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
     auto text = LayoutBuilder(scene, box)
                     .setRenderable(
                         std::make_unique<Text>(
-                            settings.text, settings.textStyle, HorizontalTextAlign::Left, VerticalTextAlign::Center
+                            settings.text, settings.textStyle, HorizontalTextAlign::Left, VerticalTextAlign::Top
                         )
                     )
                     .setSize(MessureVec2(100_pct, 100_pct))

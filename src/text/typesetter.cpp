@@ -5,6 +5,9 @@ namespace gltk {
 Typesetter::Typesetter(Font *font, std::string text) : font(font), text(text) { typeset(); }
 
 void Typesetter::setWidthLimit(float width) {
+    if (width == widthLimit) {
+        return;
+    }
     widthLimit = width;
     typeset();
 }
@@ -17,23 +20,22 @@ void Typesetter::setHorizontalAlign(HorizontalTextAlign align) {
 std::vector<std::vector<Character>> Typesetter::getLines() { return lines; }
 Vec2 Typesetter::getSize() {
     float width = 0;
-    float height = 0;
     for (int i = 0; i < lines.size(); i++) {
         std::vector<Character> line = lines[i];
         float lineStartX = lineColumnToCoordinate(i, 0).x;
         float lineEnd = lineColumnToCoordinate(i, line.size()).x;
         float lineWidth = lineEnd - lineStartX;
         width = std::max(width, lineWidth);
-        height += font->fontSize * lineHeight;
     }
+    float height = font->fontSize + font->fontSize * (lines.size() - 1) * lineHeight;
     return Vec2(width + 4, height); // leave some padding for caret and selection
 }
 
 void Typesetter::placeCaret(Vec2 position) {
-    std::cout << "place caret at: " << position.x << ", " << position.y << std::endl;
     caretPosition = 0;
     selectionStart = -1;
     caretPosition = coordinateToIndex(position);
+    preferredCaretX = indexToCoordinate(caretPosition).x;
 }
 
 void Typesetter::select(Vec2 toPos, TextAmount amount) {
@@ -58,6 +60,7 @@ void Typesetter::select(Vec2 toPos, TextAmount amount) {
     }
     caretPosition = carretAtBegining ? selectionBegin : selectionEnd;
     selectionStart = carretAtBegining ? selectionEnd : selectionBegin;
+    preferredCaretX = indexToCoordinate(caretPosition).x;
 }
 
 void Typesetter::moveCaret(bool forward, TextAmount amount, bool select) {
@@ -69,11 +72,7 @@ void Typesetter::moveCaret(bool forward, TextAmount amount, bool select) {
             } else if (amount == TextAmount::Word) {
                 pos = getNextWordEnd(pos);
             } else if (amount == TextAmount::Line) {
-                int lineIndex = indexToLineIndex(pos);
-                int newLineIndex = std::min(lineIndex + 1, (int)lineStartIndices.size() - 1);
-                int charIndex = pos - lineStartIndices[lineIndex];
-                charIndex = std::min(charIndex, (int)lines[newLineIndex].size() - 1);
-                pos = lineStartIndices[newLineIndex] + charIndex;
+                pos = moveCaretVertical(true);
             } else if (amount == TextAmount::All) {
                 pos = text.length();
             }
@@ -83,11 +82,7 @@ void Typesetter::moveCaret(bool forward, TextAmount amount, bool select) {
             } else if (amount == TextAmount::Word) {
                 pos = getPreviousWordStart(pos);
             } else if (amount == TextAmount::Line) {
-                int lineIndex = indexToLineIndex(pos);
-                int newLineIndex = std::max(0, lineIndex - 1);
-                int charIndex = pos - lineStartIndices[lineIndex];
-                charIndex = std::min(charIndex, (int)lines[newLineIndex].size() - 1);
-                pos = lineStartIndices[newLineIndex] + charIndex;
+                pos = moveCaretVertical(false);
             } else if (amount == TextAmount::All) {
                 pos = 0;
             }
@@ -104,11 +99,23 @@ void Typesetter::moveCaret(bool forward, TextAmount amount, bool select) {
             int selectionBegin = std::min(selectionStart, caretPosition);
             int selectionEnd = std::max(selectionStart, caretPosition);
             caretPosition = forward ? selectionEnd : selectionBegin;
+            preferredCaretX = indexToCoordinate(pos).x;
             selectionStart = -1;
         } else {
             caretPosition = pos;
         }
     }
+    if (amount == TextAmount::Character || amount == TextAmount::Word) {
+        preferredCaretX = indexToCoordinate(caretPosition).x;
+    }
+}
+
+int Typesetter::moveCaretVertical(bool forward) {
+    int lineIndex = indexToLineIndex(caretPosition);
+    int newLineIndex = forward ? std::min(lineIndex + 1, (int)lineStartIndices.size() - 1) : std::max(0, lineIndex - 1);
+    int charIndex = caretPosition - lineStartIndices[lineIndex];
+    int column = xCoordinateToColumn(newLineIndex, preferredCaretX);
+    return lineStartIndices[newLineIndex] + column;
 }
 
 void Typesetter::changeText(const std::string &newText, bool deleteText, bool forward, TextAmount amount) {
@@ -136,14 +143,21 @@ void Typesetter::changeText(const std::string &newText, bool deleteText, bool fo
                 caretPosition--;
             }
         }
-    } else {
-        text.insert(caretPosition, newText);
-        caretPosition += newText.length();
     }
+    text.insert(caretPosition, newText);
+    caretPosition += newText.length();
     typeset();
+    preferredCaretX = indexToCoordinate(caretPosition).x;
 }
 
 void Typesetter::deselect() { selectionStart = -1; }
+
+Vec2 Typesetter::getCaretPosition() {
+    if (caretPosition == -1) {
+        return Vec2(0, 0);
+    }
+    return indexToCoordinate(caretPosition);
+}
 
 std::vector<LineSelection> Typesetter::getSelection() {
     if (selectionStart == -1) {
@@ -161,8 +175,8 @@ std::vector<LineSelection> Typesetter::getSelection() {
     Vec2 end = indexToCoordinate(lineStartIndices[startLine] + lines[startLine].size());
     if (startLine == endLine) {
         end = indexToCoordinate(selectionEnd);
-        selections.push_back({LineSelection{.startX = start.x, .endX = end.x, .Y = start.y}});
     }
+    selections.push_back({LineSelection{.startX = start.x, .endX = end.x, .Y = start.y}});
 
     for (int lineIndex = startLine + 1; lineIndex < endLine; lineIndex++) {
         start = indexToCoordinate(lineStartIndices[lineIndex]);
@@ -213,6 +227,13 @@ void Typesetter::typeset() {
             character.position += Vec2(offsetX, offsetY);
         }
     }
+    if (horizontalAlign == HorizontalTextAlign::Left) {
+        emptyLineCursorX = -maxLineWidth / 2.0f;
+    } else if (horizontalAlign == HorizontalTextAlign::Center) {
+        emptyLineCursorX = 0;
+    } else if (horizontalAlign == HorizontalTextAlign::Right) {
+        emptyLineCursorX = maxLineWidth / 2.0f;
+    }
     lineStartIndices.clear();
     int index = 0;
     for (std::vector<Character> line : lines) {
@@ -222,19 +243,25 @@ void Typesetter::typeset() {
 }
 
 int Typesetter::coordinateToIndex(Vec2 position) {
-    int lineIndex = round((position.y + font->fontSize / 2.0f) / (font->fontSize * lineHeight));
+    Vec2 size = getSize();
+    int lineIndex = round((size.y / 2.0f + position.y - font->fontSize) / (font->fontSize * lineHeight));
     lineIndex = std::max(0, std::min(lineIndex, (int)lines.size() - 1));
-    int minDistanceIndex = 0;
+    int columnIndex = xCoordinateToColumn(lineIndex, position.x);
+    return lineStartIndices[lineIndex] + columnIndex;
+}
+
+int Typesetter::xCoordinateToColumn(int lineIndex, float x) {
+    int charIndex = 0;
     float minDistance = std::numeric_limits<float>::max();
     for (int i = 0; i <= (int)lines[lineIndex].size(); i++) {
         float charX = lineColumnToCoordinate(lineIndex, i).x;
-        float distance = std::abs(position.x - charX);
+        float distance = std::abs(x - charX);
         if (distance < minDistance) {
             minDistance = distance;
-            minDistanceIndex = i;
+            charIndex = i;
         }
     }
-    return lineStartIndices[lineIndex] + minDistanceIndex;
+    return charIndex;
 }
 
 int Typesetter::indexToLineIndex(int index) {
@@ -253,19 +280,24 @@ Vec2 Typesetter::indexToCoordinate(int index) {
 
 Vec2 Typesetter::lineColumnToCoordinate(int lineIndex, int charIndex) {
     float x = 0;
-    if (lines.size() == 0) {
+    if (lineIndex < 0 || lineIndex >= (int)lines.size()) {
+        std::cout << "line index: " << lineIndex << " is out of bounds, line count: " << lines.size() << std::endl;
         return Vec2(0, 0);
     }
     if (charIndex >= (int)lines[lineIndex].size()) {
         if (lines[lineIndex].size() == 0) {
-            x = 0;
+            x = emptyLineCursorX;
         } else {
             x = lines[lineIndex].back().position.x + (lines[lineIndex].back().glyph.advance >> 6);
         }
+    } else if (charIndex < 0) {
+        std::cout << "column index: " << charIndex << " is out of bounds" << std::endl;
+        x = lines[lineIndex][0].position.x - font->characters[lines[lineIndex][0].character].bearing.x;
     } else {
         x = lines[lineIndex][charIndex].position.x - font->characters[lines[lineIndex][charIndex].character].bearing.x;
     }
-    float y = lineIndex * font->fontSize * lineHeight;
+    float height = font->fontSize + font->fontSize * (lines.size() - 1) * lineHeight;
+    float y = font->fontSize + lineIndex * font->fontSize * lineHeight - height / 2.0f;
     return Vec2(x, y);
 }
 

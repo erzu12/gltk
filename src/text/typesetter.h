@@ -55,7 +55,7 @@ class Typesetter {
     void select(Vec2 toPos, TextAmount amount = TextAmount::Character);
     void deselect();
 
-    Vec2 getCaretPosition() { return indexToCoordinate(caretPosition); }
+    Vec2 getCaretPosition();
     int getCaretIndex() { return caretPosition; }
 
     std::vector<LineSelection> getSelection();
@@ -70,6 +70,7 @@ class Typesetter {
     void typeset();
 
     int coordinateToIndex(Vec2 position);
+    int xCoordinateToColumn(int lineIndex, float x);
     Vec2 indexToCoordinate(int index);
     Vec2 lineColumnToCoordinate(int lineIndex, int charIndex);
     int indexToLineIndex(int index);
@@ -79,17 +80,21 @@ class Typesetter {
     int getNextWordEnd(int index);
     std::vector<std::string> splitTextToLines(std::string text);
     int getLineWidht(std::string line);
+    int moveCaretVertical(bool forward);
 
     Font *font;
     std::vector<std::vector<Character>> lines;
     std::vector<int> lineStartIndices;
     std::string text;
     float widthLimit = std::numeric_limits<float>::max();
+    float emptyLineCursorX = 0;
     HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left;
     float lineHeight = 1.2f;
 
     int selectionStart = -1;
     int caretPosition = -1;
+
+    float preferredCaretX = 0;
 };
 
 } // namespace gltk

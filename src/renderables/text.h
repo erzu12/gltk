@@ -14,6 +14,10 @@ enum class VerticalTextAlign {
 };
 
 class Text : public IRenderable {
+    static constexpr float CURSOR_HIGHT_OFFSET = 1 / 2.6f;
+    static constexpr float CURSOR_HIGHT = 1.2f;
+    static constexpr float CURSOR_WIDTH = 2.0f;
+
     Style style;
     Color selectionColor;
     Typesetter typesetter;
@@ -27,6 +31,7 @@ class Text : public IRenderable {
     static FontManager fontManager;
 
     Vec2 currentInPos;
+    Vec2 currentTextOffset;
 
     Vec2 getTextOffset(Vec2 layoutSize);
 

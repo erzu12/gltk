@@ -43,9 +43,9 @@ Text::Text(
 void Text::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
     Vec2 inPos = Vec2(modelMatrix[0][2], modelMatrix[1][2]);
     this->currentInPos = inPos;
-    Vec2 offset = getTextOffset(size) + inPos;
-    renderSelection(viewSize, offset, clipRegion);
-    renderText(viewSize, inPos, size, clipRegion);
+    currentTextOffset = getTextOffset(size) + inPos;
+    renderSelection(viewSize, currentTextOffset, clipRegion);
+    renderText(viewSize, currentTextOffset, size, clipRegion);
 }
 
 void Text::renderText(Vec2 viewSize, Vec2 offset, Vec2 size, BoundingBox clipRegion) {
@@ -73,21 +73,22 @@ void Text::renderText(Vec2 viewSize, Vec2 offset, Vec2 size, BoundingBox clipReg
 
 void Text::renderSelection(Vec2 viewSize, Vec2 offset, BoundingBox clipRegion) {
     int caretPosition = typesetter.getCaretIndex();
-    auto selection = typesetter.getSelection();
     if (caretPosition >= 0) {
         Vec2 caretPos = typesetter.getCaretPosition() + offset;
+        caretPos.y -= style.fontSize * CURSOR_HIGHT_OFFSET;
         caretPos.x += 0.0f;
         Mat3 caretModelMat = Mat3::translationMatrix(caretPos);
-        Vec2 caretSize = Vec2(2.0f, style.fontSize);
+        Vec2 caretSize = Vec2(CURSOR_WIDTH, style.fontSize * CURSOR_HIGHT);
         boxRenderer.render(viewSize, caretModelMat, caretSize, clipRegion, style);
     }
     auto lines = typesetter.getLines();
+    auto selection = typesetter.getSelection();
     if (selection.size() > 0) {
         for (LineSelection lineSelection : selection) {
             renderLineSelection(
                 lineSelection.startX + offset.x,
                 lineSelection.endX + offset.x,
-                lineSelection.Y + offset.y,
+                lineSelection.Y + offset.y - style.fontSize / 2.6f,
                 viewSize,
                 clipRegion
             );
@@ -97,7 +98,7 @@ void Text::renderSelection(Vec2 viewSize, Vec2 offset, BoundingBox clipRegion) {
 
 void Text::renderLineSelection(float startX, float endX, float y, Vec2 viewSize, BoundingBox clipRegion) {
     Vec2 selectBoxPos = Vec2(lerp(startX, endX, 0.5f), y);
-    Vec2 selectBoxSize = Vec2(endX - startX, style.fontSize);
+    Vec2 selectBoxSize = Vec2(endX - startX, style.fontSize * 1.2f);
     Mat3 selectBoxModelMat = Mat3::translationMatrix(selectBoxPos);
     boxRenderer.render(
         viewSize, selectBoxModelMat, selectBoxSize, clipRegion, Style{.color = Color(0.2, 0.2, 0.8, 1.0)}
@@ -111,9 +112,13 @@ Vec2 Text::getSize(Vec2 LayoutSize, bool fixedX, bool fixedY) {
     return typesetter.getSize();
 }
 
-void Text::placeCaret(Vec2 position) { typesetter.placeCaret(position - currentInPos); }
+void Text::placeCaret(Vec2 position) {
+    typesetter.placeCaret(position - currentTextOffset + Vec2(0, style.fontSize * CURSOR_HIGHT_OFFSET));
+}
 
-void Text::select(Vec2 toPos, TextAmount amount) { typesetter.select(toPos - currentInPos, amount); }
+void Text::select(Vec2 toPos, TextAmount amount) {
+    typesetter.select(toPos - currentTextOffset + Vec2(0, style.fontSize * CURSOR_HIGHT_OFFSET), amount);
+}
 
 void Text::moveCaret(bool forward, TextAmount amount, bool select) { typesetter.moveCaret(forward, amount, select); }
 

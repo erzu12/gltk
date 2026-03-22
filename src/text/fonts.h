@@ -29,6 +29,7 @@ class Font {
 
     std::unordered_map<char, Glyph> characters;
     int fontSize = 0;
+    float centerHeight = 0;
 
   private:
     void loadCharacters(const FontSettings &settings, FontLoader &fontLoader, FT_Library &ft);
