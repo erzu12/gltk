@@ -65,5 +65,8 @@ class Text : public IRenderable {
         TextAmount amount = TextAmount::Character
     );
     void deselect();
+
+    std::string getText() { return typesetter.getText(); }
+    std::string getSelectedText() { return typesetter.getSelectedText(); }
 };
 } // namespace gltk

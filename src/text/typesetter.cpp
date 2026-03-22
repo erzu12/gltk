@@ -191,6 +191,15 @@ std::vector<LineSelection> Typesetter::getSelection() {
     return selections;
 }
 
+std::string Typesetter::getSelectedText() {
+    if (selectionStart == -1) {
+        return "";
+    }
+    int selectionBegin = std::min(selectionStart, caretPosition);
+    int selectionEnd = std::max(selectionStart, caretPosition);
+    return text.substr(selectionBegin, selectionEnd - selectionBegin);
+}
+
 void Typesetter::typeset() {
     std::vector<std::string> strLines = splitTextToLines(text);
     lines.clear();

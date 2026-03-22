@@ -132,6 +132,17 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
         } else if (event.key == Key::KEY_DOWN) {
             text->getRenderable<Text>()->moveCaret(true, TextAmount::Line, shift);
         } else if (event.key == Key::KEY_A && event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
+            text->getRenderable<Text>()->select(Vec2(0, 0), TextAmount::All);
+        } else if (event.key == Key::KEY_V && event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
+            std::string clipboardText = window->get_clipboard();
+            text->getRenderable<Text>()->changeText(clipboardText);
+        } else if (event.key == Key::KEY_C && event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
+            std::string selectedText = text->getRenderable<Text>()->getSelectedText();
+            window->set_clipboard(selectedText);
+        } else if (event.key == Key::KEY_X && event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
+            std::string selectedText = text->getRenderable<Text>()->getSelectedText();
+            text->getRenderable<Text>()->changeText("", true, false, TextAmount::Character);
+            window->set_clipboard(selectedText);
         } else if (event.key == Key::KEY_ENTER || event.key == Key::KEY_KP_ENTER) {
             text->getRenderable<Text>()->changeText("\n", false, false, TextAmount::Character);
         }

@@ -59,6 +59,7 @@ class Typesetter {
     int getCaretIndex() { return caretPosition; }
 
     std::vector<LineSelection> getSelection();
+    std::string getSelectedText();
 
     std::vector<std::vector<Character>> getLines();
     Vec2 getSize();

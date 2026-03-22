@@ -31,6 +31,9 @@ class Window {
     Vec2 get_mouse_pos();
     Scene *getScene() { return scene.get(); }
 
+    std::string get_clipboard();
+    void set_clipboard(const std::string &text);
+
   private:
     std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window = {nullptr, glfwDestroyWindow};
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);

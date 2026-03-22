@@ -181,6 +181,10 @@ void Window::run(std::function<void(Vec2)> render_callback) {
 
 Vec2 Window::get_mouse_pos() { return lastMousePos; }
 
+std::string Window::get_clipboard() { return std::string(glfwGetClipboardString(window.get())); }
+
+void Window::set_clipboard(const std::string &text) { glfwSetClipboardString(window.get(), text.c_str()); }
+
 void Window::add_key_up_callback(std::function<void(KeyEvent)> callback) { key_up_callbacks.push_back(callback); }
 
 void Window::add_key_down_callback(std::function<void(KeyEvent)> callback) { key_down_callbacks.push_back(callback); }
