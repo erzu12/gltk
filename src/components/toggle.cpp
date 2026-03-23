@@ -28,6 +28,7 @@ ToggleButton::ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings se
                 std::make_unique<Box>(Style{.color = settings.dotColor, .radius = static_cast<float>(settings.size)})
             )
             .setAnchor(Anchors::CenterLeft)
+            .setPivot(Anchors::Center)
             .setSize(MessureVec2(40_pct, 80_pct))
             .setOffset(MessureVec2(25_pct, 0_px))
             .build();

@@ -46,13 +46,12 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
     auto text = LayoutBuilder(scene, box)
                     .setRenderable(
                         std::make_unique<Text>(
-                            settings.text, settings.textStyle, HorizontalTextAlign::Left, VerticalTextAlign::Top
+                            settings.text, settings.textStyle, HorizontalTextAlign::Right, VerticalTextAlign::Top
                         )
                     )
                     .setSize(MessureVec2(100_pct, 100_pct))
-                    .setSizing(Sizing{SizingMode::Content, SizingMode::Layout})
+                    .setSizing(Sizing{SizingMode::Layout, SizingMode::Layout})
                     .setAnchor(Anchors::CenterLeft)
-                    .setPivot(Pivot::CenterLeft)
                     .build();
 
     scene->addEventCallback<MouseButtonEvent>(box, [=, &settings, this](MouseButtonEvent &event) {

@@ -49,6 +49,12 @@ struct Padding {
     Animatable<int> left;
 };
 
+/**
+ * SizingMode determines how the size of a layout is calculated. Layout means the size is determined by the
+ * layout system, while Content means the size is determined by the renderable content.
+ * Setting one of the dimensions to Content and the other to Layout allows for control over the size while allowing the
+ * content to keep its aspect ratio.
+ */
 enum class SizingMode { Layout, Content };
 
 struct Sizing {

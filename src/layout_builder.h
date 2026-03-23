@@ -29,9 +29,9 @@ class LayoutBuilder {
     Style style;
     std::optional<std::unique_ptr<IRenderable>> renderable = std::nullopt;
     Vec2 anchor = Anchors::Center;
+    Vec2 pivot = Vec2(-1, -1);
     MessureVec2 offset = MessureVec2(0_px, 0_px);
     Sizing sizing = {SizingMode::Layout, SizingMode::Layout};
-    Vec2 pivot = Anchors::Center;
     Padding padding = {0, 0, 0, 0};
     MessureVec2 size = MessureVec2(0_px, 0_px);
     ChildPlacement childPlacement = ChildPlacement::Free;

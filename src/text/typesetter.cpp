@@ -225,23 +225,23 @@ void Typesetter::typeset() {
         if (line.size() == 0) {
             continue;
         }
-        float lineWidth = line.back().position.x + line.back().glyph.size.x;
+        float lineWidth = line.back().position.x + (line.back().glyph.advance >> 6);
         float offsetX = -maxLineWidth / 2.0f;
         if (horizontalAlign == HorizontalTextAlign::Center) {
             offsetX = -lineWidth / 2.0f;
         } else if (horizontalAlign == HorizontalTextAlign::Right) {
-            offsetX = maxLineWidth - lineWidth;
+            offsetX = maxLineWidth / 2.0f - lineWidth - 2.0f;
         }
         for (Character &character : line) {
             character.position += Vec2(offsetX, offsetY);
         }
     }
     if (horizontalAlign == HorizontalTextAlign::Left) {
-        emptyLineCursorX = -maxLineWidth / 2.0f;
+        emptyLineCursorX = -maxLineWidth / 2.0f + 2.0f;
     } else if (horizontalAlign == HorizontalTextAlign::Center) {
         emptyLineCursorX = 0;
     } else if (horizontalAlign == HorizontalTextAlign::Right) {
-        emptyLineCursorX = maxLineWidth / 2.0f;
+        emptyLineCursorX = maxLineWidth / 2.0f - 2.0f;
     }
     lineStartIndices.clear();
     int index = 0;

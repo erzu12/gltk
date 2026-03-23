@@ -63,6 +63,10 @@ LayoutBuilder &LayoutBuilder::setOverflow(Overflow overflow) {
 }
 
 Layout *LayoutBuilder::build() {
+    if (pivot.x == -1) {
+        pivot.x = anchor.x;
+        pivot.y = anchor.y;
+    }
     Positioning positioning{
         .size = std::move(size),
         .offset = std::move(offset),
