@@ -38,6 +38,7 @@ class Font {
 class FontManager {
   public:
     FontManager();
+    ~FontManager();
 
     Font *getFont(FontSettings settings);
 

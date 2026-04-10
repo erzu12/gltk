@@ -39,6 +39,28 @@ float Ivec2::Dot(const Ivec2 b) const { return (float)this->x * (float)b.x + (fl
 
 bool Ivec2::operator==(const Ivec2 &b) const { return this->x == b.x && this->y == b.y; }
 
+bool Ivec2::operator!=(const Ivec2 &b) const { return !(*this == b); }
+
+bool Ivec2::operator<(const Ivec2 &b) const {
+    if (this->x < b.x)
+        return true;
+    if (this->x > b.x)
+        return false;
+    return this->y < b.y;
+}
+
+bool Ivec2::operator>(const Ivec2 &b) const {
+    if (this->x > b.x)
+        return true;
+    if (this->x < b.x)
+        return false;
+    return this->y > b.y;
+}
+
+bool Ivec2::operator<=(const Ivec2 &b) const { return !(*this > b); }
+
+bool Ivec2::operator>=(const Ivec2 &b) const { return !(*this < b); }
+
 float Ivec2::operator[](int index) const {
     if (index == 0)
         return this->x;

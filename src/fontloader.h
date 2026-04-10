@@ -3,11 +3,7 @@
 #include <fontconfig/fontconfig.h>
 #include <iostream>
 
-enum class FontSlant {
-    Roman = FC_SLANT_ROMAN,
-    Italic = FC_SLANT_ITALIC,
-    Oblique = FC_SLANT_OBLIQUE
-};
+enum class FontSlant { Roman = FC_SLANT_ROMAN, Italic = FC_SLANT_ITALIC, Oblique = FC_SLANT_OBLIQUE };
 
 enum class FontWeight {
     Thin = FC_WEIGHT_THIN,
@@ -22,10 +18,12 @@ enum class FontWeight {
 };
 
 class FontLoader {
-    FcConfig* config;
-public:
+    FcConfig *config = nullptr;
+
+  public:
     FontLoader();
     ~FontLoader();
 
-    std::string getFontPath(std::string fontName, FontSlant slant = FontSlant::Roman, FontWeight weight = FontWeight::Normal);
+    std::string
+    getFontPath(std::string fontName, FontSlant slant = FontSlant::Roman, FontWeight weight = FontWeight::Normal);
 };

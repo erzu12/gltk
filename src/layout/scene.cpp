@@ -81,7 +81,7 @@ void Scene::render() const {
             Mat3 modelMatrix = Mat3::translationMatrix(layout->transform.Position);
             modelMatrix = modelMatrix * Mat3::scalingMatrix(layout->transform.Size);
             layout->renderable.value()->render(
-                root.value()->transform.Size, modelMatrix, layout->transform.Size, layout->transform.clipRegion
+                root.value()->transform.Size, modelMatrix, layout->transform.Size, layout->transform.bbox
             );
         }
     }

@@ -53,7 +53,6 @@ class Text : public IRenderable {
     void setStyle(Style style) override { this->style = style; }
     Style *getStyle() override { return &style; }
     Vec2 getCaretPosition() { return typesetter.getCaretPosition() + typesetter.getSize() / 2.0f; }
-    int getCaretIndex() { return typesetter.getCaretIndex(); }
 
     void placeCaret(Vec2 position);
     void select(Vec2 toPos, TextAmount amount = TextAmount::Character);
@@ -64,7 +63,8 @@ class Text : public IRenderable {
         bool forward = false,
         TextAmount amount = TextAmount::Character
     );
-    void deselect();
+    void deactivate();
+    bool isActive() { return typesetter.isActive(); }
 
     std::string getText() { return typesetter.getText(); }
     std::string getSelectedText() { return typesetter.getSelectedText(); }

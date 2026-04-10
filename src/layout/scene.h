@@ -77,7 +77,7 @@ struct Positioning {
 struct Transform {
     Vec2 Position;
     Vec2 Size;
-    BoundingBox clipRegion;
+    BoundingBox bbox;
 };
 
 struct Layout {
@@ -139,7 +139,7 @@ class Scene {
         requires std::derived_from<T, IMouseEvent>
     void sendEvent(T &event) {
         for (const auto &layout : layouts) {
-            if (layout->transform.clipRegion.contains(event.getPos())) {
+            if (layout->transform.bbox.contains(event.getPos())) {
                 for (const auto &callback : layout->eventCallbacks[std::type_index(typeid(T))]) {
                     event.localPos = event.getPos() - (layout->transform.Position - layout->transform.Size * 0.5f);
                     callback(event);

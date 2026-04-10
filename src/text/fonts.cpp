@@ -10,6 +10,7 @@ Font::Font(const FontSettings &settings, FontLoader &fontLoader, FT_Library &ft)
 void Font::loadCharacters(const FontSettings &settings, FontLoader &fontLoader, FT_Library &ft) {
     fontSize = settings.fontSize;
     std::string fontPath = fontLoader.getFontPath(settings.font, settings.slant, settings.weight);
+    std::cout << fontPath.c_str() << std::endl;
 
     FT_Face face;
     if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
@@ -57,8 +58,9 @@ void Font::loadCharacters(const FontSettings &settings, FontLoader &fontLoader, 
     }
     glBindTexture(GL_TEXTURE_2D, 0);
     FT_Done_Face(face);
-    FT_Done_FreeType(ft);
 }
+
+FontManager::~FontManager() { FT_Done_FreeType(ft); }
 
 FontManager::FontManager() {
     if (FT_Init_FreeType(&ft)) {

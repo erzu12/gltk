@@ -72,8 +72,8 @@ void Text::renderText(Vec2 viewSize, Vec2 offset, Vec2 size, BoundingBox clipReg
 }
 
 void Text::renderSelection(Vec2 viewSize, Vec2 offset, BoundingBox clipRegion) {
-    int caretPosition = typesetter.getCaretIndex();
-    if (caretPosition >= 0) {
+    Ivec2 caretPosition = typesetter.getCaretIndex();
+    if (caretPosition >= Ivec2(0, 0)) {
         Vec2 caretPos = typesetter.getCaretPosition() + offset;
         caretPos.y -= style.fontSize * CURSOR_HIGHT_OFFSET;
         caretPos.x += 0.0f;
@@ -126,7 +126,7 @@ void Text::changeText(const std::string &newText, bool deleteText, bool forward,
     typesetter.changeText(newText, deleteText, forward, amount);
 }
 
-void Text::deselect() { typesetter.deselect(); }
+void Text::deactivate() { typesetter.deactivate(); }
 
 Vec2 Text::getTextOffset(Vec2 layoutSize) {
     Vec2 textSize = typesetter.getSize();

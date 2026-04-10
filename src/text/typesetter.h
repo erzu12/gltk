@@ -53,10 +53,11 @@ class Typesetter {
     void placeCaret(Vec2 position);
     void moveCaret(bool forward, TextAmount amount, bool select);
     void select(Vec2 toPos, TextAmount amount = TextAmount::Character);
-    void deselect();
+    void deactivate();
+    bool isActive() { return caretPosition != NO_POSITION; }
 
     Vec2 getCaretPosition();
-    int getCaretIndex() { return caretPosition; }
+    Ivec2 getCaretIndex() { return caretPosition; }
 
     std::vector<LineSelection> getSelection();
     std::string getSelectedText();
@@ -68,20 +69,21 @@ class Typesetter {
     std::string getText() { return text; }
 
   private:
+    static const Ivec2 NO_POSITION;
+
     void typeset();
 
-    int coordinateToIndex(Vec2 position);
+    Ivec2 coordinateToIndex(Vec2 position);
     int xCoordinateToColumn(int lineIndex, float x);
-    Vec2 indexToCoordinate(int index);
-    Vec2 lineColumnToCoordinate(int lineIndex, int charIndex);
-    int indexToLineIndex(int index);
-    int getLineStartIndex(int lineIndex);
-    int getLineEndIndex(int lineIndex);
-    int getPreviousWordStart(int index);
-    int getNextWordEnd(int index);
-    std::vector<std::string> splitTextToLines(std::string text);
+    Vec2 indexToCoordinate(Ivec2 index);
+    Ivec2 getPreviousWordStart(Ivec2 index);
+    Ivec2 getNextWordEnd(Ivec2 index);
+    std::vector<std::string> splitTextToLines();
     int getLineWidht(std::string line);
-    int moveCaretVertical(bool forward);
+    Ivec2 moveCaretVertical(bool forward);
+    int indexToTextIndex(Ivec2 index);
+    Ivec2 textIndexToIndex(int textIndex);
+    Ivec2 addToIndex(Ivec2 index, int amount);
 
     Font *font;
     std::vector<std::vector<Character>> lines;
@@ -92,8 +94,8 @@ class Typesetter {
     HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left;
     float lineHeight = 1.2f;
 
-    int selectionStart = -1;
-    int caretPosition = -1;
+    Ivec2 selectionStart = Ivec2(-1, -1);
+    Ivec2 caretPosition = Ivec2(-1, -1);
 
     float preferredCaretX = 0;
 };

@@ -24,39 +24,68 @@ void calcTextOffset(Layout *textLayout, Layout *boxLayout) {
     }
 }
 
-EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSettings settings) {
+EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSettings inSettings) {
 
-    if (settings.styleSheet.has_value()) {
-        settings.textStyle = settings.styleSheet->getStyle("primaryForeground");
-        settings.boxStyle = settings.styleSheet->getStyle("inputBackground");
+    if (inSettings.styleSheet.has_value()) {
+        inSettings.textStyle = inSettings.styleSheet->getStyle("primaryForeground");
+        inSettings.boxStyle = inSettings.styleSheet->getStyle("inputBackground");
     }
 
-    auto box = LayoutBuilder(scene, parent)
-                   .setRenderable(std::make_unique<Box>(settings.boxStyle))
-                   .setSize(std::move(settings.size))
-                   .setPadding({
-                       10,
-                       10,
-                       10,
-                       10,
-                   })
-                   .setAnchor(Anchors::Center)
-                   .build();
+    this->settings = std::move(inSettings);
 
-    auto text = LayoutBuilder(scene, box)
-                    .setRenderable(
-                        std::make_unique<Text>(
-                            settings.text, settings.textStyle, HorizontalTextAlign::Right, VerticalTextAlign::Top
-                        )
-                    )
-                    .setSize(MessureVec2(100_pct, 100_pct))
-                    .setSizing(Sizing{SizingMode::Layout, SizingMode::Layout})
-                    .setAnchor(Anchors::CenterLeft)
-                    .build();
+    box = LayoutBuilder(scene, parent)
+              .setRenderable(std::make_unique<Box>(settings.boxStyle))
+              .setSize(std::move(settings.size))
+              .setPadding({
+                  10,
+                  10,
+                  10,
+                  10,
+              })
+              .setAnchor(Anchors::Center)
+              .build();
 
-    scene->addEventCallback<MouseButtonEvent>(box, [=, &settings, this](MouseButtonEvent &event) {
+    Vec2 ancher = Vec2(0, 0);
+    if (settings.horizontalAlign == HorizontalTextAlign::Left) {
+        ancher.x = 0;
+    } else if (settings.horizontalAlign == HorizontalTextAlign::Center) {
+        ancher.x = 0.5f;
+    } else if (settings.horizontalAlign == HorizontalTextAlign::Right) {
+        ancher.x = 1.0f;
+    }
+
+    if (settings.multiline) {
+        if (settings.verticalAlign == VerticalTextAlign::Top) {
+            ancher.y = 0;
+        } else if (settings.verticalAlign == VerticalTextAlign::Center) {
+            ancher.y = 0.5f;
+        } else if (settings.verticalAlign == VerticalTextAlign::Bottom) {
+            ancher.y = 1.0f;
+        }
+    } else {
+        ancher.y = 0.5f;
+    }
+
+    SizingMode horizontalSizing = settings.multiline ? SizingMode::Layout : SizingMode::Content;
+
+    text = LayoutBuilder(scene, box)
+               .setRenderable(
+                   std::make_unique<Text>(
+                       settings.text, settings.textStyle, settings.horizontalAlign, settings.verticalAlign
+                   )
+               )
+               .setSize(MessureVec2(100_pct, 100_pct))
+               .setSizing(Sizing{horizontalSizing, SizingMode::Layout})
+               .setAnchor(ancher)
+               .build();
+
+    scene->addEventCallback<MouseButtonEvent>(box, [this](MouseButtonEvent &event) {
+        if (!text->getRenderable<Text>()->isActive()) {
+            for (auto &callback : enterCallbacks) {
+                callback();
+            }
+        }
         textAmount = TextAmount::Character;
-        // std::cout << "repeat: " << event.repeat << std::endl;
         if (event.repeat == 1) {
             textAmount = TextAmount::Word;
         } else if (event.repeat == 2) {
@@ -72,13 +101,9 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
             }
         }
     });
-    scene->addEventCallback<MouseMoveEvent>(box, [=, &settings, this](MouseMoveEvent &event) {
+    window->add_mouse_move_callback([this](MouseMoveEvent event) {
         if (dragging) {
             text->getRenderable<Text>()->select(event.pos, textAmount);
-        }
-    });
-    window->add_mouse_move_callback([=, &settings, this](MouseMoveEvent event) {
-        if (dragging) {
             Vec2 boxLocalPos = event.pos - box->transform.Position + box->transform.Size / 2.0f;
             float startOffset = text->positioning.offset.x->getValue();
             if (boxLocalPos.x < settings.scrollTriggerSize) {
@@ -92,27 +117,40 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
                     (boxLocalPos.x - box->transform.Size.x + settings.scrollTriggerSize) * settings.scrollSpeed * -1.0f;
                 float endOffset = box->transform.Size.x - text->transform.Size.x - 20.0f;
                 float duration = std::max((endOffset - startOffset) / scrollSpeed, 0.0f);
-                text->positioning.offset.x
-                    ->animate(AbsoluteMessure(endOffset), duration, [=, this](float delta, float value) {
-                        std::cout << "dragging to " << value << " delta: " << delta << std::endl;
-                        std::cout << "actual pos: " << text->transform.Position.x << std::endl;
-                        text->getRenderable<Text>()->select(event.pos, textAmount);
-                    });
+                text->positioning.offset.x->animate(
+                    AbsoluteMessure(endOffset),
+                    duration,
+                    [=, this](float delta, float value) { text->getRenderable<Text>()->select(event.pos, textAmount); }
+                );
             } else {
                 text->positioning.offset.x->stopAnimation();
             }
         }
     });
-    window->add_mouse_up_callback([=, &settings, this](auto event) {
+    window->add_mouse_up_callback([this](auto event) {
         dragging = false;
         text->positioning.offset.x->stopAnimation();
     });
-    window->add_text_input_callback([=, &settings, this](TextInputEvent event) {
-        std::cout << "Text input: " << event.text << std::endl;
+    window->add_mouse_down_callback([this](auto event) {
+        if (!box->transform.bbox.contains(event.pos)) {
+            for (auto &callback : leaveCallbacks) {
+                callback();
+            }
+            text->getRenderable<Text>()->deactivate();
+        }
+    });
+    window->add_text_input_callback([this](TextInputEvent event) {
+        if (!text->getRenderable<Text>()->isActive()) {
+            return;
+        }
         text->getRenderable<Text>()->changeText(event.text);
+        notifyChange(text->getRenderable<Text>()->getText());
         calcTextOffset(text, box);
     });
-    window->add_key_down_callback([=, &settings, this](KeyEvent event) {
+    window->add_key_down_callback([window, this](KeyEvent event) {
+        if (!text->getRenderable<Text>()->isActive()) {
+            return;
+        }
         TextAmount amount = TextAmount::Character;
         if (event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
             amount = TextAmount::Word;
@@ -120,8 +158,10 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
         bool shift = event.mods.isModSet(KeyModifiers::MOD_SHIFT);
         if (event.key == Key::KEY_BACKSPACE) {
             text->getRenderable<Text>()->changeText("", true, false, amount);
+            notifyChange(text->getRenderable<Text>()->getText());
         } else if (event.key == Key::KEY_DELETE) {
             text->getRenderable<Text>()->changeText("", true, true, amount);
+            notifyChange(text->getRenderable<Text>()->getText());
         } else if (event.key == Key::KEY_LEFT) {
             text->getRenderable<Text>()->moveCaret(false, amount, shift);
         } else if (event.key == Key::KEY_RIGHT) {
@@ -135,18 +175,39 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
         } else if (event.key == Key::KEY_V && event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
             std::string clipboardText = window->get_clipboard();
             text->getRenderable<Text>()->changeText(clipboardText);
+            notifyChange(text->getRenderable<Text>()->getText());
         } else if (event.key == Key::KEY_C && event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
             std::string selectedText = text->getRenderable<Text>()->getSelectedText();
             window->set_clipboard(selectedText);
         } else if (event.key == Key::KEY_X && event.mods.isModSet(KeyModifiers::MOD_CONTROL)) {
             std::string selectedText = text->getRenderable<Text>()->getSelectedText();
+            if (selectedText.empty()) {
+                return;
+            }
             text->getRenderable<Text>()->changeText("", true, false, TextAmount::Character);
             window->set_clipboard(selectedText);
+            notifyChange(text->getRenderable<Text>()->getText());
         } else if (event.key == Key::KEY_ENTER || event.key == Key::KEY_KP_ENTER) {
             text->getRenderable<Text>()->changeText("\n", false, false, TextAmount::Character);
+            notifyChange(text->getRenderable<Text>()->getText());
         }
         calcTextOffset(text, box);
     });
 }
+
+void EditText::notifyChange(const std::string &text) {
+    for (auto &callback : changeCallbacks) {
+        callback(text);
+    }
+}
+
+void EditText::setText(const std::string &text) {
+    this->text->getRenderable<Text>()->select(Vec2(0, 0), TextAmount::All);
+    this->text->getRenderable<Text>()->changeText(text);
+    notifyChange(this->text->getRenderable<Text>()->getText());
+    calcTextOffset(this->text, box);
+}
+
+std::string EditText::getText() { return text->getRenderable<Text>()->getText(); }
 
 } // namespace gltk

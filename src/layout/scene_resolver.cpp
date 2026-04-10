@@ -109,8 +109,8 @@ void resolveLayouts(const std::vector<Layout *> &relativeLayouts, const Layout *
     }
     for (auto &child : parent->children) {
         BoundingBox boundingBox = BoundingBox(child->transform.Position, child->transform.Size);
-        boundingBox.intersect(parent->transform.clipRegion);
-        child->transform.clipRegion = boundingBox;
+        boundingBox.intersect(parent->transform.bbox);
+        child->transform.bbox = boundingBox;
         resolveLayouts(relativeLayouts, child, viewportSize);
     }
 }
@@ -118,7 +118,7 @@ void resolveLayouts(const std::vector<Layout *> &relativeLayouts, const Layout *
 void resolveRootLayout(Layout *rootLayout, Vec2 viewportSize) {
     calculateSize(rootLayout, viewportSize);
     calculatePosition(rootLayout, viewportSize, viewportSize / 2.0f);
-    rootLayout->transform.clipRegion = BoundingBox(rootLayout->transform.Position, rootLayout->transform.Size);
+    rootLayout->transform.bbox = BoundingBox(rootLayout->transform.Position, rootLayout->transform.Size);
 }
 
 void sendTransformChangeEvents(

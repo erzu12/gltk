@@ -13,7 +13,6 @@ class Ivec2 {
     int y;
 
     Ivec2() : x(0), y(0) {}
-    Ivec2(int xy) : x(xy), y(xy) {}
     Ivec2(int x, int y) : x(x), y(y) {}
 
     Ivec2 operator+(const Ivec2 b) const;
@@ -29,6 +28,16 @@ class Ivec2 {
     float Dot(const Ivec2 b) const;
 
     bool operator==(const Ivec2 &b) const;
+
+    bool operator!=(const Ivec2 &b) const;
+
+    bool operator<(const Ivec2 &b) const;
+
+    bool operator>(const Ivec2 &b) const;
+
+    bool operator<=(const Ivec2 &b) const;
+
+    bool operator>=(const Ivec2 &b) const;
 
     float operator[](int index) const;
 
