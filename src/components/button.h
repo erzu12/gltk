@@ -18,6 +18,7 @@ struct ButtonSettings {
 
 class Button {
     std::vector<std::function<void()>> clickCallbacks;
+    ButtonSettings settings;
 
   public:
     Button(Scene *scene, Layout *parent, ButtonSettings settings = {});

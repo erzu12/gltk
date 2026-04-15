@@ -12,11 +12,12 @@ namespace gltk {
 struct EditTextSettings {
     std::string text = "Edit Text";
     std::optional<StyleSheet> styleSheet = std::nullopt;
-    MessureVec2 size = MessureVec2(AbsoluteMessure(200), AbsoluteMessure(75));
+    MessureVec2 size = MessureVec2(AbsoluteMessure(300), AbsoluteMessure(75));
     Style textStyle = Style({.color = Color(1.0f, 1.0f, 1.0f), .font = "Arial", .fontSize = 32});
     Style boxStyle = Style({.color = Color(0.1f, 0.1f, 0.1f), .radius = 5});
     Color selectColor = Color(0.3f, 0.3f, 0.8f);
     bool multiline = false;
+    bool selectOnFocus = false;
     HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left;
     VerticalTextAlign verticalAlign = VerticalTextAlign::Center;
     float scrollTriggerSize = 20.0f;
@@ -47,6 +48,8 @@ class EditText {
 
     void setText(const std::string &text);
     std::string getText();
+
+    Layout *getLayout() { return box; }
 };
 
 } // namespace gltk

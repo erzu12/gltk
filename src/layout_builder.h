@@ -19,7 +19,7 @@ class LayoutBuilder {
     LayoutBuilder &setPadding(Padding padding);
     LayoutBuilder &setChildPlacement(ChildPlacement childPlacement);
     LayoutBuilder &setListDirection(ListDirection listDirection);
-    LayoutBuilder &setOverflow(Overflow overflow);
+    LayoutBuilder &setClipOverflow(bool overflow);
     Layout *build();
 
   private:
@@ -36,7 +36,7 @@ class LayoutBuilder {
     MessureVec2 size = MessureVec2(0_px, 0_px);
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
-    Overflow overflow = Overflow::Scroll;
+    bool clipOverflow = true;
 };
 
 } // namespace gltk

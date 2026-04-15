@@ -2,6 +2,7 @@
 
 #include "animation.h"
 #include "vec_math.h"
+#include <iostream>
 #include <memory>
 
 class IMessure {
@@ -94,8 +95,8 @@ class RelativeMessure : public IMessure {
 };
 
 struct MessureVec2 {
-    std::unique_ptr<IMessure> x = nullptr;
-    std::unique_ptr<IMessure> y = nullptr;
+    std::shared_ptr<IMessure> x = nullptr;
+    std::shared_ptr<IMessure> y = nullptr;
 
     MessureVec2() : x(std::make_unique<AbsoluteMessure>(0)), y(std::make_unique<AbsoluteMessure>(0)) {}
     MessureVec2(const AbsoluteMessure &x_, const AbsoluteMessure &y_)
@@ -104,11 +105,12 @@ struct MessureVec2 {
     MessureVec2(const RelativeMessure &x_, const RelativeMessure &y_)
         : x(std::make_unique<RelativeMessure>(x_)), y(std::make_unique<RelativeMessure>(y_)) {}
 
-    MessureVec2(AbsoluteMessure x_, RelativeMessure y_)
+    MessureVec2(const AbsoluteMessure &x_, const RelativeMessure &y_)
         : x(std::make_unique<AbsoluteMessure>(x_)), y(std::make_unique<RelativeMessure>(y_)) {}
 
-    MessureVec2(RelativeMessure x_, AbsoluteMessure y_)
+    MessureVec2(const RelativeMessure &x_, const AbsoluteMessure &y_)
         : x(std::make_unique<RelativeMessure>(x_)), y(std::make_unique<AbsoluteMessure>(y_)) {}
+    MessureVec2(std::shared_ptr<IMessure> x_, std::shared_ptr<IMessure> y_) : x(x_), y(y_) {}
 
     Vec2 resolve(Vec2 parentSize);
 
@@ -117,7 +119,7 @@ struct MessureVec2 {
         y->update(deltaTime);
     }
 
-    std::unique_ptr<IMessure> &operator[](int index);
+    std::shared_ptr<IMessure> &operator[](int index);
 };
 
 AbsoluteMessure operator""_px(unsigned long long int value);

@@ -29,7 +29,7 @@ Vec2 Typesetter::getSize() {
         float lineWidth = lineEnd - lineStartX;
         width = std::max(width, lineWidth);
     }
-    float height = font->fontSize + font->fontSize * (lines.size() - 1) * lineHeight;
+    float height = font->heightCap + font->fontSize * (lines.size() - 1) * lineHeight;
     return Vec2(width + 4, height); // leave some padding for caret and selection
 }
 
@@ -235,7 +235,7 @@ std::string Typesetter::getSelectedText() {
 void Typesetter::typeset() {
     std::vector<std::string> strLines = splitTextToLines();
     lines.clear();
-    float startY = font->fontSize;
+    float startY = font->heightCap;
     for (std::string strLine : strLines) {
         std::vector<Character> line;
         float startX = 2;

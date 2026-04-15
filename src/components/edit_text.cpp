@@ -84,6 +84,10 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
             for (auto &callback : enterCallbacks) {
                 callback();
             }
+            if (settings.selectOnFocus) {
+                text->getRenderable<Text>()->select(Vec2(0, 0), TextAmount::All);
+                return;
+            }
         }
         textAmount = TextAmount::Character;
         if (event.repeat == 1) {
@@ -132,7 +136,7 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
         text->positioning.offset.x->stopAnimation();
     });
     window->add_mouse_down_callback([this](auto event) {
-        if (!box->transform.bbox.contains(event.pos)) {
+        if (!box->transform.clipBox.contains(event.pos) && text->getRenderable<Text>()->isActive()) {
             for (auto &callback : leaveCallbacks) {
                 callback();
             }
@@ -202,10 +206,14 @@ void EditText::notifyChange(const std::string &text) {
 }
 
 void EditText::setText(const std::string &text) {
+    bool wasActive = this->text->getRenderable<Text>()->isActive();
     this->text->getRenderable<Text>()->select(Vec2(0, 0), TextAmount::All);
     this->text->getRenderable<Text>()->changeText(text);
     notifyChange(this->text->getRenderable<Text>()->getText());
     calcTextOffset(this->text, box);
+    if (!wasActive) {
+        this->text->getRenderable<Text>()->deactivate();
+    }
 }
 
 std::string EditText::getText() { return text->getRenderable<Text>()->getText(); }

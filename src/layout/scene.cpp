@@ -80,8 +80,9 @@ void Scene::render() const {
         if (layout->renderable.has_value()) {
             Mat3 modelMatrix = Mat3::translationMatrix(layout->transform.Position);
             modelMatrix = modelMatrix * Mat3::scalingMatrix(layout->transform.Size);
+
             layout->renderable.value()->render(
-                root.value()->transform.Size, modelMatrix, layout->transform.Size, layout->transform.bbox
+                root.value()->transform.Size, modelMatrix, layout->transform.Size, layout->transform.clipBox
             );
         }
     }

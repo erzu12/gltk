@@ -18,6 +18,7 @@ void Font::loadCharacters(const FontSettings &settings, FontLoader &fontLoader, 
     }
 
     FT_Set_Pixel_Sizes(face, 0, settings.fontSize);
+    this->descent = face->size->metrics.descender >> 6;
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
 
@@ -56,6 +57,7 @@ void Font::loadCharacters(const FontSettings &settings, FontLoader &fontLoader, 
         };
         characters.insert(std::pair<char, Glyph>(c, character));
     }
+    this->heightCap = characters['H'].bearing.y;
     glBindTexture(GL_TEXTURE_2D, 0);
     FT_Done_Face(face);
 }

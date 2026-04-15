@@ -5,7 +5,8 @@
 
 namespace gltk {
 
-Button::Button(Scene *scene, Layout *parent, ButtonSettings settings) {
+Button::Button(Scene *scene, Layout *parent, ButtonSettings inSettings) {
+    this->settings = inSettings;
 
     if (settings.styleSheet.has_value()) {
         settings.boxStyle = settings.styleSheet->getStyle("inputBackground");
@@ -27,10 +28,11 @@ Button::Button(Scene *scene, Layout *parent, ButtonSettings settings) {
                 )
             )
             .setSize(MessureVec2(100_pct, 100_pct))
+            .setSizing({SizingMode::Content, SizingMode::Layout})
             .setAnchor(Anchors::Center)
             .build();
 
-    scene->addEventCallback<MouseButtonEvent>(buttonBox, [=, &settings, this](MouseButtonEvent &event) {
+    scene->addEventCallback<MouseButtonEvent>(buttonBox, [=, this](MouseButtonEvent &event) {
         if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
             Style *style = buttonBox->renderable.value()->getStyle();
             style->color = settings.activeColor;

@@ -254,6 +254,11 @@ void Window::debug_message_callback(
     std::cout << full_message << std::endl;
 }
 
-Window::~Window() { glfwTerminate(); }
+Window::~Window() {
+    // make sure to clean up resources before terminating GLFW
+    scene.reset();
+    window.reset();
+    glfwTerminate();
+}
 
 } // namespace gltk

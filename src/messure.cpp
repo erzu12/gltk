@@ -6,7 +6,7 @@ float AbsoluteMessure::resolve(float parentSize) { return value.get(); }
 
 float RelativeMessure::resolve(float parentSize) { return value.get() * parentSize; }
 
-std::unique_ptr<IMessure> &MessureVec2::operator[](int index) {
+std::shared_ptr<IMessure> &MessureVec2::operator[](int index) {
     if (index == 0) {
         return x;
     } else if (index == 1) {

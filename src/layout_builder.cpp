@@ -57,8 +57,8 @@ LayoutBuilder &LayoutBuilder::setListDirection(ListDirection listDirection) {
     return *this;
 }
 
-LayoutBuilder &LayoutBuilder::setOverflow(Overflow overflow) {
-    this->overflow = overflow;
+LayoutBuilder &LayoutBuilder::setClipOverflow(bool overflow) {
+    this->clipOverflow = overflow;
     return *this;
 }
 
@@ -76,7 +76,7 @@ Layout *LayoutBuilder::build() {
         .padding = padding,
         .childPlacement = childPlacement,
         .listDirection = listDirection,
-        .overflow = overflow
+        .clipOverflow = clipOverflow,
     };
     auto layout = std::make_unique<Layout>();
     layout->positioning = std::move(positioning);
