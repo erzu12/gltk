@@ -173,11 +173,11 @@ class BoundingBox {
     BoundingBox(Vec2 position, Vec2 size) : min(position - size / 2.0f), max(position + size / 2.0f) {}
     void add(const BoundingBox &other);
     void addPadding(float top, float right, float bottom, float left);
-    bool contains(Vec2 point);
-    bool isZero() { return max.x - min.x < 0.00001f && max.y - min.y < 0.00001f; }
-    float width() { return std::max(max.x - min.x, 0.0f); }
-    float height() { return std::max(max.y - min.y, 0.0f); }
-    Vec2 size() { return Vec2(width(), height()); }
+    bool contains(Vec2 point) const;
+    bool isZero() const { return max.x - min.x < 0.00001f && max.y - min.y < 0.00001f; }
+    float width() const { return std::max(max.x - min.x, 0.0f); }
+    float height() const { return std::max(max.y - min.y, 0.0f); }
+    Vec2 size() const { return Vec2(width(), height()); }
     BoundingBox intersect(const BoundingBox &other);
     static BoundingBox fromPoints(std::vector<Vec2> points);
 

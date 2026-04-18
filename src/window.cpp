@@ -13,7 +13,7 @@ void Window::framebuffer_size_callback(GLFWwindow *glfwWindow, int width, int he
     Window *window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
     window->width = width;
     window->height = height;
-    window->scene->getRoot()->positioning.size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height));
+    window->scene->getRoot()->getPositioning().size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height));
 }
 
 void Window::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -157,10 +157,12 @@ Window::Window(std::string title, int width, int height) : width(width), height(
     glEnable(GL_MULTISAMPLE);
 
     scene = std::make_unique<Scene>();
-    scene->addRelativeLayout(std::make_unique<Layout>());
-    scene->getRoot()->positioning.anchor = Anchors::TopLeft;
-    scene->getRoot()->positioning.pivot = Anchors::TopLeft;
-    scene->getRoot()->positioning.size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height));
+    Positioning positioning{
+        .size = MessureVec2(AbsoluteMessure(width), AbsoluteMessure(height)),
+        .anchor = Anchors::TopLeft,
+        .pivot = Anchors::TopLeft,
+    };
+    scene->addRelativeLayout(std::make_unique<Layout>(std::move(positioning)));
 }
 
 void Window::run(std::function<void(Vec2)> render_callback) {
@@ -169,7 +171,7 @@ void Window::run(std::function<void(Vec2)> render_callback) {
     while (!glfwWindowShouldClose(window.get())) {
         glClearColor(.1f, .1f, .1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        resolveScene(*scene, Vec2(width, height));
+        LayoutResolver::resolveScene(*scene, Vec2(width, height));
         scene->render();
         render_callback(Vec2(width, height));
 

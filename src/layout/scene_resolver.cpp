@@ -2,7 +2,7 @@
 
 namespace gltk {
 
-Vec2 getFinalSize(Vec2 size, Sizing sizing, IRenderable *renderable) {
+Vec2 LayoutResolver::getFinalSize(Vec2 size, Sizing sizing, IRenderable *renderable) {
     Vec2 finalSize = size;
     Vec2 renderableSize =
         renderable->getSize(size, sizing.horizontal == SizingMode::Layout, sizing.vertical == SizingMode::Layout);
@@ -15,7 +15,7 @@ Vec2 getFinalSize(Vec2 size, Sizing sizing, IRenderable *renderable) {
     return finalSize;
 }
 
-void calculateSize(Layout *layout, Vec2 parentSize) {
+void LayoutResolver::calculateSize(Layout *layout, Vec2 parentSize) {
     Vec2 size = layout->positioning.size.resolve(parentSize);
     if (layout->renderable.has_value()) {
         size = getFinalSize(size, layout->positioning.sizing, layout->renderable->get());
@@ -23,7 +23,7 @@ void calculateSize(Layout *layout, Vec2 parentSize) {
     layout->transform.Size = size;
 }
 
-void calculatePosition(Layout *layout, Vec2 parentSize, Vec2 parentPosition) {
+void LayoutResolver::calculatePosition(Layout *layout, Vec2 parentSize, Vec2 parentPosition) {
 
     Vec2 pivotPosition = layout->positioning.offset.resolve(parentSize) +
                          layout->positioning.anchor.get() * parentSize + (parentPosition - parentSize / 2.0f);
@@ -32,14 +32,16 @@ void calculatePosition(Layout *layout, Vec2 parentSize, Vec2 parentPosition) {
     layout->transform.Position = pivotPosition + pivotOffsetFromCenter;
 }
 
-void calculateFreeTransforms(const std::vector<Layout *> &children, Vec2 parentSize, Vec2 parentPosition) {
+void LayoutResolver::calculateFreeTransforms(
+    const std::vector<Layout *> &children, Vec2 parentSize, Vec2 parentPosition
+) {
     for (const auto &child : children) {
         calculateSize(child, parentSize);
         calculatePosition(child, parentSize, parentPosition);
     }
 }
 
-void calculateListTransforms(
+void LayoutResolver::calculateListTransforms(
     const std::vector<Layout *> &children, Vec2 parentSize, Vec2 parentPosition, ListDirection listDirection
 ) {
     Vec2 dirVec = ListDireectionVector[static_cast<int>(listDirection)];
@@ -55,7 +57,7 @@ void calculateListTransforms(
     }
 }
 
-void calculateListStretchTransforms(
+void LayoutResolver::calculateListStretchTransforms(
     const std::vector<Layout *> &children, Vec2 parentSize, Vec2 parentPosition, ListDirection listDirection
 ) {
     Vec2 dirVec = ListDireectionVector[static_cast<int>(listDirection)];
@@ -87,7 +89,9 @@ void calculateListStretchTransforms(
     }
 }
 
-void resolveLayouts(const std::vector<Layout *> &relativeLayouts, const Layout *parent, const Vec2 viewportSize) {
+void LayoutResolver::resolveLayouts(
+    const std::vector<Layout *> &relativeLayouts, const Layout *parent, const Vec2 viewportSize
+) {
     Vec2 paddingTopLeftOffset(parent->positioning.padding.left, parent->positioning.padding.top);
     Vec2 paddingBottomRightOffset(parent->positioning.padding.right, parent->positioning.padding.bottom);
     Vec2 paddedParentSize = parent->transform.Size - paddingTopLeftOffset - paddingBottomRightOffset;
@@ -110,21 +114,27 @@ void resolveLayouts(const std::vector<Layout *> &relativeLayouts, const Layout *
     for (auto &child : parent->children) {
         BoundingBox boundingBox = BoundingBox(child->transform.Position, child->transform.Size);
         child->transform.bbox = boundingBox;
-        if (parent->positioning.clipOverflow) {
-            boundingBox.intersect(parent->transform.clipBox);
+        if (child->positioning.clipOverflow) {
+            child->transform.clipBox = boundingBox.intersect(parent->transform.clipBox);
+        } else {
+            child->transform.clipBox = boundingBox;
         }
-        child->transform.clipBox = boundingBox;
+        child->transform.zIndex = parent->transform.zIndex + child->positioning.zOffset;
+        child->transform.visible = parent->transform.visible && child->positioning.visible;
         resolveLayouts(relativeLayouts, child, viewportSize);
     }
 }
 
-void resolveRootLayout(Layout *rootLayout, Vec2 viewportSize) {
+void LayoutResolver::resolveRootLayout(Layout *rootLayout, Vec2 viewportSize) {
     calculateSize(rootLayout, viewportSize);
     calculatePosition(rootLayout, viewportSize, viewportSize / 2.0f);
     rootLayout->transform.clipBox = BoundingBox(rootLayout->transform.Position, rootLayout->transform.Size);
+    rootLayout->transform.bbox = rootLayout->transform.clipBox;
+    rootLayout->transform.zIndex = 0;
+    rootLayout->transform.visible = true;
 }
 
-void sendTransformChangeEvents(
+void LayoutResolver::sendTransformChangeEvents(
     const std::vector<Layout *> &relativeLayouts, const std::vector<Transform> &startTransfomrs
 ) {
     for (size_t i = 0; i < relativeLayouts.size(); i++) {
@@ -141,7 +151,7 @@ void sendTransformChangeEvents(
     }
 }
 
-void resolveScene(Scene &scene, Vec2 viewportSize) {
+void LayoutResolver::resolveScene(Scene &scene, Vec2 viewportSize) {
     scene.updateAnimations();
 
     auto relativeLayouts = scene.getLayouts();

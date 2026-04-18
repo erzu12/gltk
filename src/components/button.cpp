@@ -32,15 +32,15 @@ Button::Button(Scene *scene, Layout *parent, ButtonSettings inSettings) {
             .setAnchor(Anchors::Center)
             .build();
 
-    scene->addEventCallback<MouseButtonEvent>(buttonBox, [=, this](MouseButtonEvent &event) {
+    buttonBox->addEventCallback<MouseButtonEvent>([=, this](MouseButtonEvent &event) {
         if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
-            Style *style = buttonBox->renderable.value()->getStyle();
+            Style *style = buttonBox->getRenderable().value()->getStyle();
             style->color = settings.activeColor;
             for (const auto &callback : clickCallbacks) {
                 callback();
             }
         } else if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::RELEASE) {
-            Style *style = buttonBox->renderable.value()->getStyle();
+            Style *style = buttonBox->getRenderable().value()->getStyle();
             style->color = settings.boxStyle.color;
         }
     });

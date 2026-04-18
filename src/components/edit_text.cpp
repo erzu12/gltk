@@ -7,20 +7,20 @@ namespace gltk {
 
 void calcTextOffset(Layout *textLayout, Layout *boxLayout) {
     Vec2 caretPos = textLayout->getRenderable<Text>()->getCaretPosition();
-    float boxWidth =
-        boxLayout->transform.Size.x - boxLayout->positioning.padding.left - boxLayout->positioning.padding.right;
+    float boxWidth = boxLayout->getTransform().Size.x - boxLayout->getPositioning().padding.left -
+                     boxLayout->getPositioning().padding.right;
     float textWidth = textLayout->getRenderable<Text>()->getSize(Vec2(0, 0), false, false).x;
-    float currentOffset = textLayout->positioning.offset.x->getValue();
+    float currentOffset = textLayout->getPositioning().offset.x->getValue();
     if (caretPos.x + currentOffset < 0) {
-        textLayout->positioning.offset.x->setValue(-caretPos.x + 2.0f);
+        textLayout->getPositioning().offset.x->setValue(-caretPos.x + 2.0f);
     } else if (caretPos.x + currentOffset > boxWidth) {
-        textLayout->positioning.offset.x->setValue(boxWidth - caretPos.x - 2.0f);
+        textLayout->getPositioning().offset.x->setValue(boxWidth - caretPos.x - 2.0f);
     }
     if (textWidth > boxWidth && textWidth + currentOffset < boxWidth) {
-        textLayout->positioning.offset.x->setValue(boxWidth - textWidth);
+        textLayout->getPositioning().offset.x->setValue(boxWidth - textWidth);
     }
     if (textWidth < boxWidth && currentOffset < 0) {
-        textLayout->positioning.offset.x->setValue(0);
+        textLayout->getPositioning().offset.x->setValue(0);
     }
 }
 
@@ -79,7 +79,7 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
                .setAnchor(ancher)
                .build();
 
-    scene->addEventCallback<MouseButtonEvent>(box, [this](MouseButtonEvent &event) {
+    box->addEventCallback<MouseButtonEvent>([this](MouseButtonEvent &event) {
         if (!text->getRenderable<Text>()->isActive()) {
             for (auto &callback : enterCallbacks) {
                 callback();
@@ -108,35 +108,35 @@ EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSetting
     window->add_mouse_move_callback([this](MouseMoveEvent event) {
         if (dragging) {
             text->getRenderable<Text>()->select(event.pos, textAmount);
-            Vec2 boxLocalPos = event.pos - box->transform.Position + box->transform.Size / 2.0f;
-            float startOffset = text->positioning.offset.x->getValue();
+            Vec2 boxLocalPos = event.pos - box->getTransform().Position + box->getTransform().Size / 2.0f;
+            float startOffset = text->getPositioning().offset.x->getValue();
             if (boxLocalPos.x < settings.scrollTriggerSize) {
                 float scrollSpeed = (boxLocalPos.x - settings.scrollTriggerSize) * settings.scrollSpeed * -1.0f;
                 float endOffset = 0.0f;
                 float duration = std::max((endOffset - startOffset) / scrollSpeed, 0.0f);
-                text->positioning.offset.x->animate(AbsoluteMessure(endOffset), duration);
+                text->getPositioning().offset.x->animate(AbsoluteMessure(endOffset), duration);
 
-            } else if (boxLocalPos.x > box->transform.Size.x - settings.scrollTriggerSize) {
-                float scrollSpeed =
-                    (boxLocalPos.x - box->transform.Size.x + settings.scrollTriggerSize) * settings.scrollSpeed * -1.0f;
-                float endOffset = box->transform.Size.x - text->transform.Size.x - 20.0f;
+            } else if (boxLocalPos.x > box->getTransform().Size.x - settings.scrollTriggerSize) {
+                float scrollSpeed = (boxLocalPos.x - box->getTransform().Size.x + settings.scrollTriggerSize) *
+                                    settings.scrollSpeed * -1.0f;
+                float endOffset = box->getTransform().Size.x - text->getTransform().Size.x - 20.0f;
                 float duration = std::max((endOffset - startOffset) / scrollSpeed, 0.0f);
-                text->positioning.offset.x->animate(
+                text->getPositioning().offset.x->animate(
                     AbsoluteMessure(endOffset),
                     duration,
                     [=, this](float delta, float value) { text->getRenderable<Text>()->select(event.pos, textAmount); }
                 );
             } else {
-                text->positioning.offset.x->stopAnimation();
+                text->getPositioning().offset.x->stopAnimation();
             }
         }
     });
     window->add_mouse_up_callback([this](auto event) {
         dragging = false;
-        text->positioning.offset.x->stopAnimation();
+        text->getPositioning().offset.x->stopAnimation();
     });
     window->add_mouse_down_callback([this](auto event) {
-        if (!box->transform.clipBox.contains(event.pos) && text->getRenderable<Text>()->isActive()) {
+        if (!box->getTransform().clipBox.contains(event.pos) && text->getRenderable<Text>()->isActive()) {
             for (auto &callback : leaveCallbacks) {
                 callback();
             }

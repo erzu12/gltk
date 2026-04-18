@@ -451,7 +451,7 @@ void BoundingBox::addPadding(float top, float right, float bottom, float left) {
     }
 }
 
-bool BoundingBox::contains(Vec2 point) {
+bool BoundingBox::contains(Vec2 point) const {
     return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y;
 }
 

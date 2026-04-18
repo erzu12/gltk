@@ -1,16 +1,9 @@
 #include "layout_builder.h"
-#include "renderables/box.h"
 
 namespace gltk {
 
 LayoutBuilder::LayoutBuilder(Scene *scene) : scene(scene), parent(scene->getRoot()) {}
 LayoutBuilder::LayoutBuilder(Scene *scene, Layout *parent) : scene(scene), parent(parent) {}
-
-LayoutBuilder &LayoutBuilder::addBox(Style style) {
-    this->style = style;
-    this->box = true;
-    return *this;
-}
 
 LayoutBuilder &LayoutBuilder::setAnchor(Vec2 anchor) {
     this->anchor = anchor;
@@ -62,6 +55,16 @@ LayoutBuilder &LayoutBuilder::setClipOverflow(bool overflow) {
     return *this;
 }
 
+LayoutBuilder &LayoutBuilder::setZIndex(int zIndex) {
+    this->zIndex = zIndex;
+    return *this;
+}
+
+LayoutBuilder &LayoutBuilder::setVisible(bool visible) {
+    this->visible = visible;
+    return *this;
+}
+
 Layout *LayoutBuilder::build() {
     if (pivot.x == -1) {
         pivot.x = anchor.x;
@@ -77,14 +80,10 @@ Layout *LayoutBuilder::build() {
         .childPlacement = childPlacement,
         .listDirection = listDirection,
         .clipOverflow = clipOverflow,
+        .visible = visible,
+        .zOffset = zIndex,
     };
-    auto layout = std::make_unique<Layout>();
-    layout->positioning = std::move(positioning);
-    layout->renderable = std::move(renderable);
-    layout->parent = parent;
-    if (box) {
-        layout->renderable = std::make_unique<Box>(style);
-    }
+    auto layout = std::make_unique<Layout>(std::move(positioning), std::move(renderable));
     auto layoutRef = scene->addRelativeLayout(std::move(layout), parent);
     return layoutRef;
 }

@@ -44,6 +44,7 @@ class Typesetter {
 
     float getLineHeight() { return lineHeight; }
 
+    void setText(const std::string &text);
     void changeText(
         const std::string &newText,
         bool deleteText = false,

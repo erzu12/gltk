@@ -54,6 +54,7 @@ class Text : public IRenderable {
     Style *getStyle() override { return &style; }
     Vec2 getCaretPosition() { return typesetter.getCaretPosition() + typesetter.getSize() / 2.0f; }
 
+    void setText(const std::string &text) { typesetter.setText(text); }
     void placeCaret(Vec2 position);
     void select(Vec2 toPos, TextAmount amount = TextAmount::Character);
     void moveCaret(bool forward, TextAmount amount, bool select);

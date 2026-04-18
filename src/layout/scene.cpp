@@ -6,7 +6,7 @@ Layout *Scene::addRelativeLayout(std::unique_ptr<Layout> layout) {
     if (root.has_value()) {
         Layout *old_root = root.value();
         root = layout.get();
-        root.value()->children.push_back(old_root);
+        root.value()->getChildren().push_back(old_root);
     } else {
         root = layout.get();
     }
@@ -72,12 +72,21 @@ void Scene::updateAnimations() {
     }
 }
 
-void Scene::render() const {
+void Scene::render() {
     if (!root.has_value()) {
         return;
     }
-    for (const auto &layout : layouts) {
-        if (layout->renderable.has_value()) {
+    std::stable_sort(
+        layouts.begin(),
+        layouts.end(),
+        [](const std::unique_ptr<Layout> &a, const std::unique_ptr<Layout> &b) {
+            return a->transform.zIndex < b->transform.zIndex;
+        }
+    );
+    for (int i = 0; i < layouts.size(); i++) {
+        Layout *layout = layouts[i].get();
+        layouts[i]->id = i;
+        if (layout->renderable.has_value() && layout->transform.visible) {
             Mat3 modelMatrix = Mat3::translationMatrix(layout->transform.Position);
             modelMatrix = modelMatrix * Mat3::scalingMatrix(layout->transform.Size);
 

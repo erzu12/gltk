@@ -11,7 +11,6 @@ class LayoutBuilder {
 
     LayoutBuilder &setSize(MessureVec2 size);
     LayoutBuilder &setRenderable(std::unique_ptr<IRenderable> renderable);
-    LayoutBuilder &addBox(Style style);
     LayoutBuilder &setOffset(MessureVec2 offset);
     LayoutBuilder &setSizing(Sizing sizing);
     LayoutBuilder &setAnchor(Vec2 anchor);
@@ -20,13 +19,13 @@ class LayoutBuilder {
     LayoutBuilder &setChildPlacement(ChildPlacement childPlacement);
     LayoutBuilder &setListDirection(ListDirection listDirection);
     LayoutBuilder &setClipOverflow(bool overflow);
+    LayoutBuilder &setZIndex(int zIndex);
+    LayoutBuilder &setVisible(bool visible);
     Layout *build();
 
   private:
     Scene *scene;
     Layout *parent;
-    bool box = false;
-    Style style;
     std::optional<std::unique_ptr<IRenderable>> renderable = std::nullopt;
     Vec2 anchor = Anchors::Center;
     Vec2 pivot = Vec2(-1, -1);
@@ -37,6 +36,8 @@ class LayoutBuilder {
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
     bool clipOverflow = true;
+    bool visible = true;
+    int zIndex = 0;
 };
 
 } // namespace gltk

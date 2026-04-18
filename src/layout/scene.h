@@ -72,16 +72,20 @@ struct Positioning {
     ChildPlacement childPlacement = ChildPlacement::Free;
     ListDirection listDirection = ListDirection::Down;
     bool clipOverflow = true;
+    bool visible = true;
+    int zOffset = 0;
 };
 
 struct Transform {
     Vec2 Position;
     Vec2 Size;
+    int zIndex;
+    bool visible;
     BoundingBox clipBox;
     BoundingBox bbox;
 };
 
-struct Layout {
+class Layout {
     size_t id = -1;
     std::optional<std::unique_ptr<IRenderable>> renderable;
     Positioning positioning;
@@ -89,6 +93,40 @@ struct Layout {
     std::vector<Layout *> children;
     std::optional<Layout *> parent = std::nullopt;
     std::unordered_map<std::type_index, std::vector<std::function<void(IEvent &)>>> eventCallbacks;
+
+  public:
+    Layout(Positioning positioning, std::optional<std::unique_ptr<IRenderable>> renderable = std::nullopt)
+        : positioning(std::move(positioning)), renderable(std::move(renderable)) {}
+
+    Positioning &getPositioning() { return positioning; }
+    const Positioning &getPositioning() const { return positioning; }
+
+    const Transform &getTransform() const { return transform; }
+
+    std::vector<Layout *> &getChildren() { return children; }
+    const std::vector<Layout *> &getChildren() const { return children; }
+
+    std::optional<Layout *> getParent() const { return parent; }
+
+    template <typename T>
+        requires std::derived_from<T, IEvent>
+    void sendEvent(T &event) {
+        if (transform.clipBox.contains(event.getPos())) {
+            for (const auto &callback : eventCallbacks[std::type_index(typeid(T))]) {
+                if constexpr (std::derived_from<T, IMouseEvent>) {
+                    event.localPos = event.getPos() - (transform.Position - transform.Size * 0.5f);
+                }
+                callback(event);
+            }
+        }
+    }
+
+    std::optional<IRenderable *> getRenderable() {
+        if (!renderable.has_value()) {
+            return std::nullopt;
+        }
+        return renderable.value().get();
+    }
 
     template <typename T>
         requires std::derived_from<T, IRenderable>
@@ -103,12 +141,22 @@ struct Layout {
         return ret;
     }
 
+    template <typename T>
+        requires std::derived_from<T, IEvent>
+    void addEventCallback(std::function<void(T &)> callback) {
+        auto wrapper = [callback](IEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
+        this->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
+    }
+
     Style *getStyle() {
         if (!renderable.has_value()) {
             throw std::runtime_error("Renderable is not set for this layout");
         }
         return renderable.value()->getStyle();
     }
+
+    friend class Scene;
+    friend class LayoutResolver;
 };
 
 class Scene {
@@ -123,32 +171,19 @@ class Scene {
 
     Layout *getRoot() const;
 
-    void render() const;
+    void render();
 
     std::vector<Layout *> getLayouts() const;
 
-    Layout *getLayout(size_t id) const { return layouts.at(id).get(); }
-
-    template <typename T>
-        requires std::derived_from<T, IEvent>
-    void addEventCallback(Layout *layout, std::function<void(T &)> callback) {
-        auto wrapper = [callback](IEvent &baseEvent) { callback(static_cast<T &>(baseEvent)); };
-        layout->eventCallbacks[std::type_index(typeid(T))].push_back(wrapper);
-    }
+    Layout *getLayout(const Layout *layout) const { return layouts.at(layout->id).get(); }
 
     template <typename T>
         requires std::derived_from<T, IMouseEvent>
     void sendEvent(T &event) {
         for (const auto &layout : layouts) {
-            if (layout->transform.clipBox.contains(event.getPos())) {
-                for (const auto &callback : layout->eventCallbacks[std::type_index(typeid(T))]) {
-                    event.localPos = event.getPos() - (layout->transform.Position - layout->transform.Size * 0.5f);
-                    callback(event);
-                }
-            }
+            layout->sendEvent(event);
         }
     }
-
     void updateAnimations();
 };
 

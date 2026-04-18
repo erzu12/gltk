@@ -118,6 +118,18 @@ Ivec2 Typesetter::moveCaretVertical(bool forward) {
     return Ivec2(newLineIndex, column);
 }
 
+void Typesetter::setText(const std::string &text) {
+    this->text = text;
+    typeset();
+    if (caretPosition != NO_POSITION) {
+        caretPosition = textIndexToIndex(std::min(indexToTextIndex(caretPosition), (int)this->text.size()));
+        preferredCaretX = indexToCoordinate(caretPosition).x;
+    }
+    if (selectionStart != NO_POSITION) {
+        selectionStart = textIndexToIndex(std::min(indexToTextIndex(selectionStart), (int)this->text.size()));
+    }
+}
+
 void Typesetter::changeText(const std::string &newText, bool deleteText, bool forward, TextAmount amount) {
     int carretTextIndex = indexToTextIndex(caretPosition);
     bool checkDoubleSpace = false;

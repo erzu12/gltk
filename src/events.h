@@ -70,6 +70,16 @@ struct MouseButtonEvent : public IMouseEvent {
     Vec2 getPos() const override { return pos; }
 };
 
+enum class HoverState { ENTER, LEAVE };
+
+struct MouseHoverEvent : public IMouseEvent {
+    MouseHoverEvent(Vec2 pos) : pos(pos) {}
+    HoverState state;
+    Vec2 pos;
+    Vec2 localPos;
+    Vec2 getPos() const override { return pos; }
+};
+
 enum class Key;
 enum class KeyModifiers;
 class KeyModifierFlags;

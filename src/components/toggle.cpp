@@ -12,18 +12,18 @@ ToggleButton::ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings se
         settings.dotColor = settings.styleSheet->getStyle("primaryForeground").color;
     }
 
-    auto toggleRoot = LayoutBuilder(scene, parent)
+    auto toggleBase = LayoutBuilder(scene, parent)
                           .setSize(MessureVec2(AbsoluteMessure(settings.size * 2), AbsoluteMessure(settings.size)))
                           .build();
     auto toggleSlider =
-        LayoutBuilder(scene, toggleRoot)
+        LayoutBuilder(scene, toggleBase)
             .setRenderable(
                 std::make_unique<Box>(Style{.color = settings.offColor, .radius = static_cast<float>(settings.size)})
             )
             .setSize(MessureVec2(100_pct, 100_pct))
             .build();
     auto toggleDot =
-        LayoutBuilder(scene, toggleRoot)
+        LayoutBuilder(scene, toggleBase)
             .setRenderable(
                 std::make_unique<Box>(Style{.color = settings.dotColor, .radius = static_cast<float>(settings.size)})
             )
@@ -33,14 +33,14 @@ ToggleButton::ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings se
             .setOffset(MessureVec2(25_pct, 0_px))
             .build();
 
-    scene->addEventCallback<MouseButtonEvent>(toggleRoot, [=, this](MouseButtonEvent &event) {
+    toggleBase->addEventCallback<MouseButtonEvent>([=, this](MouseButtonEvent &event) {
         if (event.button == MouseButton::MOUSE_BUTTON_LEFT && event.action == MouseAction::PRESS) {
-            Style *style = toggleSlider->renderable.value()->getStyle();
+            Style *style = toggleSlider->getRenderable().value()->getStyle();
             if (isOn) {
-                toggleDot->positioning.offset.x->animate(25_pct, settings.animationDuration, settings.easingFunc);
+                toggleDot->getPositioning().offset.x->animate(25_pct, settings.animationDuration, settings.easingFunc);
                 toggleSlider->getStyle()->color.animate(settings.offColor, settings.animationDuration);
             } else {
-                toggleDot->positioning.offset.x->animate(75_pct, settings.animationDuration, settings.easingFunc);
+                toggleDot->getPositioning().offset.x->animate(75_pct, settings.animationDuration, settings.easingFunc);
                 toggleSlider->getStyle()->color.animate(settings.onColor, settings.animationDuration);
             }
             isOn = !isOn;
