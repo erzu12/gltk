@@ -1,10 +1,9 @@
 #pragma once
 
-#include "layout/scene.h"
-#include "messure.h"
-#include "style.h"
-#include "window.h"
-#include <optional>
+#include <layout/scene.h>
+#include <messure.h>
+#include <style.h>
+#include <window.h>
 
 namespace gltk {
 
@@ -13,7 +12,7 @@ struct SliderSettings {
     double minValue = 0.0;
     double maxValue = 100.0;
     double step = 0.0;
-    std::optional<StyleSheet> styleSheet = std::nullopt;
+    std::shared_ptr<StyleSheet> styleSheet = nullptr;
     MessureVec2 size = MessureVec2(AbsoluteMessure(300), AbsoluteMessure(75));
     int thumbSize = 40;
     Color baseColor = Color(0.3f, 0.3f, 0.3f);

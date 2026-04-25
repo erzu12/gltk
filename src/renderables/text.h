@@ -4,6 +4,7 @@
 #include "renderables/renderable.h"
 #include "shader.h"
 #include "text/typesetter.h"
+#include <generated/embedded_shaders.h>
 
 namespace gltk {
 
@@ -22,7 +23,7 @@ class Text : public IRenderable {
     Color selectionColor;
     Typesetter typesetter;
 
-    const Shader shader = Shader("assets/text.vert", "assets/text.frag");
+    const Shader shader = Shader(text_vert, text_frag);
     BoxRenderer boxRenderer;
     unsigned int VAO, VBO;
 

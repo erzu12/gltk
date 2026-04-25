@@ -3,6 +3,7 @@
 #include "render_objects.h"
 #include "renderable.h"
 #include "shader.h"
+#include <generated/embedded_shaders.h>
 
 namespace gltk {
 
@@ -12,6 +13,7 @@ class CanvasObject {
     int operator<(const CanvasObject &other) { return z_index < other.z_index; }
 
   public:
+    virtual ~CanvasObject() = default;
     virtual void render(Mat3 &viewMatrix) = 0;
     virtual bool pointInObject(Vec2 point) = 0;
 };
@@ -19,7 +21,7 @@ class CanvasObject {
 class PathObject : public CanvasObject {
     std::vector<Vec2> points;
     std::vector<Vec2> borderTriangles;
-    const Shader shader = Shader("assets/color.vert", "assets/color.frag");
+    const Shader shader = Shader(color_vert, color_frag);
     unsigned int VAO, VBO;
     unsigned int quadVAO, quadVBO;
     unsigned int borderVAO, borderVBO, borderEBO;
@@ -77,6 +79,7 @@ class Canvas : public IRenderable {
     void render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRergion) override;
 
     void setStyle(Style style) override { this->style = style; }
+    Style *getStyle() override { return &style; }
 };
 
 } // namespace gltk

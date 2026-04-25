@@ -25,6 +25,10 @@ class LayoutResolver {
         const std::vector<Layout *> &relativeLayouts, const std::vector<Transform> &startTransfomrs
     );
 
+    const static Vec2 ListDireectionVector[4];
+
+    const static int ListDirectionAxis[4];
+
   public:
     static void resolveScene(Scene &scene, Vec2 viewportSize);
 };

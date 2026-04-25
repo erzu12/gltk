@@ -1,10 +1,11 @@
 #include "typesetter.h"
+#include <iostream>
 
 namespace gltk {
 
 const Ivec2 Typesetter::NO_POSITION = Ivec2(-1, -1);
 
-Typesetter::Typesetter(Font *font, std::string text) : font(font), text(text) { typeset(); }
+Typesetter::Typesetter(Font *font, std::string text) : font(font), text(utf8toUtf32(text)) { typeset(); }
 
 void Typesetter::setWidthLimit(float width) {
     if (width - 4 == widthLimit) {
@@ -119,7 +120,7 @@ Ivec2 Typesetter::moveCaretVertical(bool forward) {
 }
 
 void Typesetter::setText(const std::string &text) {
-    this->text = text;
+    this->text = utf8toUtf32(text);
     typeset();
     if (caretPosition != NO_POSITION) {
         caretPosition = textIndexToIndex(std::min(indexToTextIndex(caretPosition), (int)this->text.size()));
@@ -163,15 +164,16 @@ void Typesetter::changeText(const std::string &newText, bool deleteText, bool fo
             }
         }
     }
-    if (checkDoubleSpace && newText.size() == 0) {
+    std::u32string newTextUtf32 = utf8toUtf32(newText);
+    if (checkDoubleSpace && newTextUtf32.size() == 0) {
         if (carretTextIndex > 0 && text[carretTextIndex - 1] == ' ' &&
             (carretTextIndex >= text.size() || text[carretTextIndex] == ' ')) {
             text.erase(carretTextIndex, 1);
         }
     }
-    text.insert(carretTextIndex, newText);
+    text.insert(carretTextIndex, newTextUtf32);
     typeset();
-    caretPosition = textIndexToIndex(carretTextIndex + newText.size());
+    caretPosition = textIndexToIndex(carretTextIndex + newTextUtf32.size());
     preferredCaretX = indexToCoordinate(caretPosition).x;
 }
 
@@ -241,23 +243,23 @@ std::string Typesetter::getSelectedText() {
     }
     int selectionBegin = indexToTextIndex(std::min(selectionStart, caretPosition));
     int selectionEnd = indexToTextIndex(std::max(selectionStart, caretPosition));
-    return text.substr(selectionBegin, selectionEnd - selectionBegin);
+    return utf32toUtf8(text.substr(selectionBegin, selectionEnd - selectionBegin));
 }
 
 void Typesetter::typeset() {
-    std::vector<std::string> strLines = splitTextToLines();
+    std::vector<std::u32string> strLines = splitTextToLines();
     lines.clear();
     float startY = font->heightCap;
-    for (std::string strLine : strLines) {
+    for (auto strLine : strLines) {
         std::vector<Character> line;
         float startX = 2;
-        for (char c : strLine) {
-            Glyph ch = font->characters[c];
-            float xpos = startX + ch.bearing.x;
-            float ypos = startY - ch.bearing.y;
-            Character character = {c, ch, Vec2(xpos, ypos)};
+        for (uint32_t charCode : strLine) {
+            Glyph glyph = font->getGlyph(charCode);
+            float xpos = startX + glyph.bearing.x;
+            float ypos = startY - glyph.bearing.y;
+            Character character = {charCode, glyph, Vec2(xpos, ypos)};
             line.push_back(character);
-            startX += (ch.advance >> 6);
+            startX += (glyph.advance >> 6);
         }
         lines.push_back(line);
         startY += font->fontSize * lineHeight;
@@ -325,9 +327,9 @@ Vec2 Typesetter::indexToCoordinate(Ivec2 index) {
         }
     } else if (index.y < 0) {
         std::cout << "column index: " << index.y << " is out of bounds" << std::endl;
-        x = lines[index.x][0].position.x - font->characters[lines[index.x][0].character].bearing.x;
+        x = lines[index.x][0].position.x - font->getGlyph(lines[index.x][0].charCode).bearing.x;
     } else {
-        x = lines[index.x][index.y].position.x - font->characters[lines[index.x][index.y].character].bearing.x;
+        x = lines[index.x][index.y].position.x - font->getGlyph(lines[index.x][index.y].charCode).bearing.x;
     }
     float height = font->fontSize + font->fontSize * (lines.size() - 1) * lineHeight;
     float y = font->fontSize + index.x * font->fontSize * lineHeight - height / 2.0f;
@@ -352,28 +354,28 @@ Ivec2 Typesetter::getPreviousWordStart(Ivec2 index) {
     if (textIndex == 0) {
         return Ivec2();
     }
-    size_t prevNonSpace = text.find_last_not_of(" \n", textIndex - 1);
-    size_t prevSpace = text.find_last_of(" \n", prevNonSpace);
+    size_t prevNonSpace = text.find_last_not_of(U" \n", textIndex - 1);
+    size_t prevSpace = text.find_last_of(U" \n", prevNonSpace);
     return addToIndex(index, prevSpace - indexToTextIndex(index) + 1);
 }
 
 Ivec2 Typesetter::getNextWordEnd(Ivec2 index) {
-    size_t nextNonSpace = text.find_first_not_of(" \n", indexToTextIndex(index));
-    size_t nextSpace = text.find_first_of(" \n", nextNonSpace);
+    size_t nextNonSpace = text.find_first_not_of(U" \n", indexToTextIndex(index));
+    size_t nextSpace = text.find_first_of(U" \n", nextNonSpace);
     if (nextSpace == std::string::npos) {
         return Ivec2(lines.size() - 1, lines.back().size());
     }
     return addToIndex(index, nextSpace - indexToTextIndex(index));
 }
 
-std::vector<std::string> Typesetter::splitTextToLines() {
-    std::string line = "";
-    std::string word = "";
-    std::vector<std::string> lines;
+std::vector<std::u32string> Typesetter::splitTextToLines() {
+    std::u32string line = U"";
+    std::u32string word = U"";
+    std::vector<std::u32string> lines;
     lineStartIndices.clear();
     lineStartIndices.push_back(0);
     for (int i = 0; i < text.size(); i++) {
-        char c = text[i];
+        char32_t c = text[i];
         if (c != '\n') {
             word += c;
         }
@@ -382,28 +384,28 @@ std::vector<std::string> Typesetter::splitTextToLines() {
                 lines.push_back(line);
                 lineStartIndices.push_back(i - word.size() + 1);
                 line = word;
-                word = "";
+                word.clear();
             } else {
                 line += word;
-                word = "";
+                word.clear();
             }
         }
         if (c == '\n') {
             lines.push_back(line);
             lineStartIndices.push_back(i + 1);
-            line = "";
-            word = "";
+            line.clear();
+            word.clear();
         }
         if (c != ' ' && c != '\n') {
             if (getLineWidht(word + c) > widthLimit) {
                 if (!line.empty()) {
                     lines.push_back(line);
-                    line = "";
+                    line.clear();
                     lineStartIndices.push_back(i - word.size() + 1);
                 }
                 lines.push_back(word);
                 lineStartIndices.push_back(i + 1);
-                word = "";
+                word.clear();
             }
         }
     }
@@ -417,13 +419,65 @@ std::vector<std::string> Typesetter::splitTextToLines() {
     return lines;
 }
 
-int Typesetter::getLineWidht(std::string line) {
+int Typesetter::getLineWidht(std::u32string line) {
     int width = 0;
-    for (char c : line) {
-        Glyph ch = font->characters[c];
+    int index = 0;
+    for (uint32_t c : line) {
+        Glyph ch = font->getGlyph(c);
         width += (ch.advance >> 6);
     }
     return width;
+}
+
+std::u32string Typesetter::utf8toUtf32(const std::string &str) {
+    std::u32string utf32;
+    size_t index = 0;
+    while (index < str.size()) {
+        uint32_t charCode = 0;
+        if ((str[index] & 0x80) == 0) {
+            charCode = str[index];
+            index += 1;
+        } else if ((str[index] & 0xE0) == 0xC0) {
+            charCode = ((str[index] & 0x1F) << 6) | (str[index + 1] & 0x3F);
+            index += 2;
+        } else if ((str[index] & 0xF0) == 0xE0) {
+            charCode = ((str[index] & 0x0F) << 12) | ((str[index + 1] & 0x3F) << 6) | (str[index + 2] & 0x3F);
+            index += 3;
+        } else if ((str[index] & 0xF8) == 0xF0) {
+            charCode = ((str[index] & 0x07) << 18) | ((str[index + 1] & 0x3F) << 12) | ((str[index + 2] & 0x3F) << 6) |
+                       (str[index + 3] & 0x3F);
+            index += 4;
+        } else {
+            std::cout << "Invalid UTF-8 encoding at index " << index << std::endl;
+            index += 1;
+        }
+        utf32.push_back(charCode);
+    }
+    return utf32;
+}
+
+std::string Typesetter::utf32toUtf8(const std::u32string &utf32) {
+    std::string utf8;
+    for (uint32_t charCode : utf32) {
+        if (charCode <= 0x7F) {
+            utf8.push_back(static_cast<char>(charCode));
+        } else if (charCode <= 0x7FF) {
+            utf8.push_back(static_cast<char>(0xC0 | ((charCode >> 6) & 0x1F)));
+            utf8.push_back(static_cast<char>(0x80 | (charCode & 0x3F)));
+        } else if (charCode <= 0xFFFF) {
+            utf8.push_back(static_cast<char>(0xE0 | ((charCode >> 12) & 0x0F)));
+            utf8.push_back(static_cast<char>(0x80 | ((charCode >> 6) & 0x3F)));
+            utf8.push_back(static_cast<char>(0x80 | (charCode & 0x3F)));
+        } else if (charCode <= 0x10FFFF) {
+            utf8.push_back(static_cast<char>(0xF0 | ((charCode >> 18) & 0x07)));
+            utf8.push_back(static_cast<char>(0x80 | ((charCode >> 12) & 0x3F)));
+            utf8.push_back(static_cast<char>(0x80 | ((charCode >> 6) & 0x3F)));
+            utf8.push_back(static_cast<char>(0x80 | (charCode & 0x3F)));
+        } else {
+            std::cout << "Invalid UTF-32 code point: " << charCode << std::endl;
+        }
+    }
+    return utf8;
 }
 
 } // namespace gltk

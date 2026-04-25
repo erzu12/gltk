@@ -5,7 +5,7 @@
 namespace gltk {
 
 struct Character {
-    char character;
+    uint32_t charCode;
     Glyph glyph;
     Vec2 position;
 };
@@ -67,7 +67,11 @@ class Typesetter {
     Vec2 getSize();
 
     Font *getFont() { return font; }
-    std::string getText() { return text; }
+    void setFont(Font *font) {
+        this->font = font;
+        typeset();
+    }
+    std::string getText() { return utf32toUtf8(text); }
 
   private:
     static const Ivec2 NO_POSITION;
@@ -79,17 +83,19 @@ class Typesetter {
     Vec2 indexToCoordinate(Ivec2 index);
     Ivec2 getPreviousWordStart(Ivec2 index);
     Ivec2 getNextWordEnd(Ivec2 index);
-    std::vector<std::string> splitTextToLines();
-    int getLineWidht(std::string line);
+    std::vector<std::u32string> splitTextToLines();
+    int getLineWidht(std::u32string line);
     Ivec2 moveCaretVertical(bool forward);
     int indexToTextIndex(Ivec2 index);
     Ivec2 textIndexToIndex(int textIndex);
     Ivec2 addToIndex(Ivec2 index, int amount);
+    std::u32string utf8toUtf32(const std::string &str);
+    std::string utf32toUtf8(const std::u32string &utf32);
 
     Font *font;
     std::vector<std::vector<Character>> lines;
     std::vector<int> lineStartIndices;
-    std::string text;
+    std::u32string text;
     float widthLimit = std::numeric_limits<float>::max();
     float emptyLineCursorX = 0;
     HorizontalTextAlign horizontalAlign = HorizontalTextAlign::Left;

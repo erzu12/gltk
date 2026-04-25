@@ -1,15 +1,15 @@
 #include "toggle.h"
-#include "layout_builder.h"
-#include "renderables/box.h"
+#include <layout_builder.h>
+#include <renderables/box.h>
 
 namespace gltk {
 
 ToggleButton::ToggleButton(Scene *scene, Layout *parent, ToggleButtonSettings settings) {
 
-    if (settings.styleSheet.has_value()) {
-        settings.offColor = settings.styleSheet->getStyle("inputBackground").color;
-        settings.onColor = settings.styleSheet->getStyle("accentBackground").color;
-        settings.dotColor = settings.styleSheet->getStyle("primaryForeground").color;
+    if (settings.styleSheet != nullptr) {
+        settings.offColor = settings.styleSheet->inputBackground().color;
+        settings.onColor = settings.styleSheet->accentBackground().color;
+        settings.dotColor = settings.styleSheet->primaryForeground().color;
     }
 
     auto toggleBase = LayoutBuilder(scene, parent)

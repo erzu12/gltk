@@ -1,15 +1,15 @@
 #include "slider.h"
-#include "layout_builder.h"
-#include "renderables/box.h"
+#include <layout_builder.h>
+#include <renderables/box.h>
 
 namespace gltk {
 
 Slider::Slider(Scene *scene, Window *window, Layout *parent, SliderSettings settings) {
     this->settings = settings;
 
-    if (settings.styleSheet.has_value()) {
-        settings.baseColor = settings.styleSheet->getStyle("inputBackground").color;
-        settings.activeColor = settings.styleSheet->getStyle("accentBackground").color;
+    if (settings.styleSheet != nullptr) {
+        settings.baseColor = settings.styleSheet->inputBackground().color;
+        settings.activeColor = settings.styleSheet->accentBackground().color;
     }
     Style trackStyle = Style({.color = settings.baseColor, .radius = 1000.0f});
     currentValue = std::clamp(settings.initialValue, settings.minValue, settings.maxValue);

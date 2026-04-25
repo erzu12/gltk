@@ -1,14 +1,14 @@
 #pragma once
 
-#include "color.h"
-#include "layout/scene.h"
-#include "messure.h"
+#include <color.h>
+#include <layout/scene.h>
+#include <messure.h>
 
 namespace gltk {
 
 struct ButtonSettings {
     std::string text = "Button";
-    std::optional<StyleSheet> styleSheet = std::nullopt;
+    std::shared_ptr<StyleSheet> styleSheet = nullptr;
     MessureVec2 size = MessureVec2(AbsoluteMessure(200), AbsoluteMessure(75));
     Style boxStyle = Style({.color = Color(0.3f, 0.3f, 0.3f), .radius = 10.0f});
     Style textStyle = Style({.color = Color(1.0f, 1.0f, 1.0f), .font = "Arial", .fontSize = 32});

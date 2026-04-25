@@ -1,10 +1,7 @@
 #include "image.h"
 #include <glad/glad.h>
-#include <iostream>
 
 #include <stb_image.h>
-
-#include "fontloader.h"
 
 namespace gltk {
 
@@ -29,7 +26,6 @@ void Image::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clip
 }
 
 SVGImage::SVGImage(std::string path, Style style) : style(style), imageRenderer() {
-    FontLoader fontLoader;
     // lunasvg::FontManager::registerMissingFontCalback([&fontLoader](const std::string &family, bool bold, bool italic)
     // {
     //     FontSlant slant = italic ? FontSlant::Italic : FontSlant::Roman;

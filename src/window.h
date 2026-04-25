@@ -27,6 +27,7 @@ class Window {
     void add_mouse_move_callback(std::function<void(MouseMoveEvent)> callback);
     void add_mouse_down_callback(std::function<void(MouseButtonEvent)> callback);
     void add_mouse_up_callback(std::function<void(MouseButtonEvent)> callback);
+    void add_scroll_callback(std::function<void(MouseScrollEvent)> callback);
     void run(std::function<void(Vec2)> render_callback);
     Vec2 get_mouse_pos();
     Scene *getScene() { return scene.get(); }
@@ -62,6 +63,7 @@ class Window {
     std::vector<std::function<void(MouseButtonEvent)>> mouse_down_callbacks;
     std::vector<std::function<void(MouseButtonEvent)>> mouse_up_callbacks;
     std::vector<std::function<void(MouseMoveEvent)>> mouse_move_callbacks;
+    std::vector<std::function<void(MouseScrollEvent)>> scroll_callbacks;
 
     int width = 800;
     int height = 600;

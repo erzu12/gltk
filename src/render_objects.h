@@ -2,11 +2,12 @@
 
 #include "shader.h"
 #include "style.h"
+#include <generated/embedded_shaders.h>
 
 namespace gltk {
 
 class BoxRenderer {
-    const Shader shader = Shader("assets/box.vert", "assets/box.frag");
+    const Shader shader = Shader(box_vert, box_frag);
     unsigned int VAO, VBO;
 
   public:
@@ -17,7 +18,7 @@ class BoxRenderer {
 };
 
 class ImageRenderer {
-    const Shader shader = Shader("assets/image.vert", "assets/image.frag");
+    const Shader shader = Shader(image_vert, image_frag);
     unsigned int VAO, VBO;
     unsigned int texture;
 

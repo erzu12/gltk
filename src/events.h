@@ -70,13 +70,20 @@ struct MouseButtonEvent : public IMouseEvent {
     Vec2 getPos() const override { return pos; }
 };
 
+struct MouseScrollEvent : public IMouseEvent {
+    MouseScrollEvent(Vec2 offset, Vec2 pos) : offset(offset), pos(pos) {}
+    Vec2 offset;
+    Vec2 pos;
+    Vec2 localPos;
+    Vec2 getPos() const override { return pos; }
+};
+
 enum class HoverState { ENTER, LEAVE };
 
 struct MouseHoverEvent : public IMouseEvent {
     MouseHoverEvent(Vec2 pos) : pos(pos) {}
     HoverState state;
     Vec2 pos;
-    Vec2 localPos;
     Vec2 getPos() const override { return pos; }
 };
 

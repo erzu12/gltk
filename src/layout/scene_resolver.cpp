@@ -2,6 +2,20 @@
 
 namespace gltk {
 
+const Vec2 LayoutResolver::ListDireectionVector[4] = {
+    Vec2(0, 1),  // Down
+    Vec2(1, 0),  // Right
+    Vec2(-1, 0), // Left
+    Vec2(0, -1), // Up
+};
+
+const int LayoutResolver::ListDirectionAxis[4] = {
+    1, // Down
+    0, // Right
+    0, // Left
+    1, // Up
+};
+
 Vec2 LayoutResolver::getFinalSize(Vec2 size, Sizing sizing, IRenderable *renderable) {
     Vec2 finalSize = size;
     Vec2 renderableSize =

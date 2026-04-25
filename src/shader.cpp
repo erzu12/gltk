@@ -4,34 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
-
-
 namespace gltk {
 
-std::unique_ptr<GlResource> Shader::CompileShader(std::string shaderPath, GLuint shaderType) {
-    std::string computeCode;
-    std::ifstream cShaderFile;
-    // ensure ifstream objects can throw exceptions:
-    cShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try {
-        cShaderFile.open(shaderPath);
-        std::stringstream cShaderStream;
-        cShaderStream << cShaderFile.rdbuf();
-        cShaderFile.close();
-        computeCode = cShaderStream.str();
-    }
-    catch (std::ifstream::failure& e) {
-        throw shader_exception("failed to read shader file: " + shaderPath);
-    }
-
+std::unique_ptr<GlResource> Shader::CompileShader(const std::string &shaderCode, GLuint shaderType) {
 
     auto shader = std::make_unique<GlResource>(glCreateShader(shaderType), glDeleteShader);
 
-    const char* shaderCode = computeCode.c_str();
-    glShaderSource(*shader.get(), 1, &shaderCode, NULL);
+    const char *code = shaderCode.c_str();
+    glShaderSource(*shader.get(), 1, &code, NULL);
     glCompileShader(*shader.get());
 
     int success;
@@ -40,16 +20,17 @@ std::unique_ptr<GlResource> Shader::CompileShader(std::string shaderPath, GLuint
 
     if (!success) {
         glGetShaderInfoLog(*shader.get(), 512, NULL, infoLog);
-        throw shader_exception("shader: " + std::to_string(*shader.get()) + " failed to compile with error message: " + infoLog);
+        throw shader_exception(
+            "shader: " + std::to_string(*shader.get()) + " failed to compile with error message: " + infoLog
+        );
     }
 
     return shader;
 }
 
-Shader::Shader(std::string vertexPath, std::string fragmentPath)
-{
-    auto fragmentShader = CompileShader(fragmentPath, GL_FRAGMENT_SHADER);
-    auto vertexShader = CompileShader(vertexPath, GL_VERTEX_SHADER);
+Shader::Shader(const std::string &vertexShaderStr, const std::string &fragmentShaderStr) {
+    auto fragmentShader = CompileShader(fragmentShaderStr, GL_FRAGMENT_SHADER);
+    auto vertexShader = CompileShader(vertexShaderStr, GL_VERTEX_SHADER);
 
     // Shader Program
     shaderProgram = std::make_unique<GlResource>(glCreateProgram(), glDeleteProgram);
@@ -91,9 +72,6 @@ void Shader::UniformMat3(std::string name, Mat3 mat) const {
     glUniformMatrix3fv(glGetUniformLocation(*shaderProgram.get(), name.c_str()), 1, GL_TRUE, mat.data());
 }
 
-void Shader::use() const {
-    glUseProgram(*shaderProgram.get());
-}
+void Shader::use() const { glUseProgram(*shaderProgram.get()); }
 
-}  // namespace neith
-
+} // namespace gltk

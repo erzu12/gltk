@@ -1,17 +1,17 @@
 #pragma once
 
-#include "color.h"
-#include "layout/scene.h"
-#include "messure.h"
-#include "renderables/text.h"
-#include "text/typesetter.h"
-#include "window.h"
+#include <color.h>
+#include <layout/scene.h>
+#include <messure.h>
+#include <renderables/text.h>
+#include <text/typesetter.h>
+#include <window.h>
 
 namespace gltk {
 
 struct EditTextSettings {
     std::string text = "Edit Text";
-    std::optional<StyleSheet> styleSheet = std::nullopt;
+    std::shared_ptr<StyleSheet> styleSheet = nullptr;
     MessureVec2 size = MessureVec2(AbsoluteMessure(300), AbsoluteMessure(75));
     Style textStyle = Style({.color = Color(1.0f, 1.0f, 1.0f), .font = "Arial", .fontSize = 32});
     Style boxStyle = Style({.color = Color(0.1f, 0.1f, 0.1f), .radius = 5});

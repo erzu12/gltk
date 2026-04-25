@@ -1,20 +1,17 @@
-#include "components/drop_down.h"
-#include "components/edit_text.h"
-#include "components/numeric_input.h"
-#include "components/slider.h"
-#include "styleSheet.h"
 #include <components.h>
 #include <gltk.h>
 #include <iostream>
 
 using namespace gltk;
 
+struct CustomStyle : public StyleSheet {};
+
 int main() {
     gltk::Window window;
     window.add_key_down_callback([](auto e) { std::cout << "Key down: " << static_cast<int>(e.key) << std::endl; });
     auto rootLayout = window.getScene()->getRoot();
 
-    auto styleSheet = getStyleSheet();
+    auto styleSheet = std::make_shared<CustomStyle>();
 
     auto bg = LayoutBuilder(window.getScene())
                   .setSize(MessureVec2(80_pct, 80_pct))
@@ -47,10 +44,26 @@ int main() {
         bg,
         {.initialText = "Select Option", .options = {"Option 1", "Option 2", "Option 3"}, .styleSheet = styleSheet}
     );
+    dropDown.registerChangeCallback([](const std::string &option) {
+        std::cout << "Selected option: " << option << std::endl;
+    });
 
-    // window.getScene()->addEventCallback<MouseMoveEvent>(
-    //     [&](MouseMoveEvent &event) { std::cout << "Mouse moved at: " << event.pos << std::endl; }, svg.get()
-    // );
+    Layout *canvasLayout =
+        LayoutBuilder(window.getScene(), bg)
+            .setRenderable(std::make_unique<Canvas>(Style{.color = Color(0.2f, 0.2f, 0.8f)}, Vec2(1000, 1000)))
+            .setSizing({SizingMode::Content, SizingMode::Content})
+            .build();
+
+    std::vector<Vec2> bezierPoints{
+        Vec2(0, 0),
+        Vec2(0, 200),
+        Vec2(200, 200),
+        Vec2(200, 400),
+    };
+    std::unique_ptr<PathObject> bezier = std::make_unique<PathObject>(
+        bezierPoints, Vec2(50, 50), Style{.borderWidth = 5, .borderColor = Color(1.0f, 0.0f, 0.0f)}, true
+    );
+    canvasLayout->getRenderable<Canvas>()->addObject(std::move(bezier));
 
     window.run([&](Vec2 viewport) {});
     return 0;

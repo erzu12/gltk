@@ -1,18 +1,18 @@
 #include "button.h"
-#include "layout_builder.h"
-#include "renderables/box.h"
-#include "renderables/text.h"
+#include <layout_builder.h>
+#include <renderables/box.h>
+#include <renderables/text.h>
 
 namespace gltk {
 
 Button::Button(Scene *scene, Layout *parent, ButtonSettings inSettings) {
     this->settings = inSettings;
 
-    if (settings.styleSheet.has_value()) {
-        settings.boxStyle = settings.styleSheet->getStyle("inputBackground");
-        settings.textStyle = settings.styleSheet->getStyle("primaryForeground");
-        settings.activeColor = settings.styleSheet->getStyle("inputActive").color;
-        settings.hoverColor = settings.styleSheet->getStyle("inputHover").color;
+    if (settings.styleSheet != nullptr) {
+        settings.boxStyle = settings.styleSheet->inputBackground();
+        settings.textStyle = settings.styleSheet->primaryForeground();
+        settings.activeColor = settings.styleSheet->inputActive().color;
+        settings.hoverColor = settings.styleSheet->inputHover().color;
     }
 
     auto buttonBox = LayoutBuilder(scene, parent)

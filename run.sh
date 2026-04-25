@@ -2,7 +2,8 @@
 set -e
 
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-fsanitize=address" -B build
-# cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -B build
+#cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_CXX_COMPILER=clang++ -B build
+#cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -B build
 mv -f build/compile_commands.json .
 
 printf "\n\n=============================================================================\n\n"

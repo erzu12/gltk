@@ -1,7 +1,7 @@
 #include "edit_text.h"
-#include "layout_builder.h"
-#include "renderables/box.h"
-#include "renderables/text.h"
+#include <layout_builder.h>
+#include <renderables/box.h>
+#include <renderables/text.h>
 
 namespace gltk {
 
@@ -26,9 +26,9 @@ void calcTextOffset(Layout *textLayout, Layout *boxLayout) {
 
 EditText::EditText(Scene *scene, Window *window, Layout *parent, EditTextSettings inSettings) {
 
-    if (inSettings.styleSheet.has_value()) {
-        inSettings.textStyle = inSettings.styleSheet->getStyle("primaryForeground");
-        inSettings.boxStyle = inSettings.styleSheet->getStyle("inputBackground");
+    if (inSettings.styleSheet != nullptr) {
+        inSettings.textStyle = inSettings.styleSheet->primaryForeground();
+        inSettings.boxStyle = inSettings.styleSheet->inputBackground();
     }
 
     this->settings = std::move(inSettings);

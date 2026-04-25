@@ -1,7 +1,6 @@
 #include "text.h"
 #include "text/fonts.h"
 #include <glad/glad.h>
-#include <iostream>
 
 namespace gltk {
 
@@ -41,8 +40,16 @@ Text::Text(
 }
 
 void Text::render(Vec2 viewSize, Mat3 &modelMatrix, Vec2 size, BoundingBox clipRegion) {
+
     Vec2 inPos = Vec2(modelMatrix[0][2], modelMatrix[1][2]);
     this->currentInPos = inPos;
+    FontSettings currentFontSettings = typesetter.getFont()->getSettings();
+    if (currentFontSettings.font != style.font || currentFontSettings.slant != style.slant ||
+        currentFontSettings.weight != style.weight || currentFontSettings.fontSize != style.fontSize) {
+        typesetter.setFont(fontManager.getFont(
+            FontSettings{.font = style.font, .slant = style.slant, .weight = style.weight, .fontSize = style.fontSize}
+        ));
+    }
     currentTextOffset = getTextOffset(size) + inPos;
     renderSelection(viewSize, currentTextOffset, clipRegion);
     renderText(viewSize, currentTextOffset, size, clipRegion);
@@ -63,6 +70,7 @@ void Text::renderText(Vec2 viewSize, Vec2 offset, Vec2 size, BoundingBox clipReg
             Mat3 transform = viewMatrix * characterModelMat;
             shader.UniformMat3("transform", transform);
             shader.UniformVec2("pixelSize", size);
+            // std::cout << "rendering char: " << c.charCode << " textureID: " << c.glyph.textureID << std::endl;
             glBindTexture(GL_TEXTURE_2D, c.glyph.textureID);
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -149,5 +157,4 @@ Text::~Text() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
-
 }; // namespace gltk

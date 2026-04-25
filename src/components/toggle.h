@@ -1,13 +1,13 @@
 #pragma once
 
-#include "color.h"
-#include "layout/scene.h"
+#include <color.h>
 #include <functional>
+#include <layout/scene.h>
 
 namespace gltk {
 
 struct ToggleButtonSettings {
-    std::optional<StyleSheet> styleSheet = std::nullopt;
+    std::shared_ptr<StyleSheet> styleSheet = nullptr;
     int size = 50;
     float animationDuration = 0.15f;
     Color offColor = Color(0.3f, 0.3f, 0.3f);

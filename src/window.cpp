@@ -80,12 +80,19 @@ void Window::char_callback(GLFWwindow *window, unsigned int codepoint) {
 }
 
 void Window::scrole_callback(GLFWwindow *window, double xoffset, double yoffset) {
-    // double xpos, ypos;
-    // glfwGetCursorPos(window, &xpos, &ypos);
-    // float xscale, yscale;
-    // glfwGetWindowContentScale(window, &xscale, &yscale);
-    // Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    // w->rootLayout.scrollEventRecursive(Vec2(xpos * xscale, ypos * yscale), Vec2(xoffset, yoffset));
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    Window *w = static_cast<Window *>(glfwGetWindowUserPointer(window));
+    Vec2 mousePos(xpos * xscale, ypos * yscale);
+    MouseScrollEvent event(Vec2(xoffset, yoffset), mousePos);
+    for (auto &callback : w->scroll_callbacks) {
+        callback(event);
+    }
+    if (w->scene) {
+        w->scene->sendEvent(event);
+    }
 }
 
 void Window::cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
@@ -207,6 +214,10 @@ void Window::add_mouse_up_callback(std::function<void(MouseButtonEvent)> callbac
     mouse_up_callbacks.push_back(callback);
 }
 
+void Window::add_scroll_callback(std::function<void(MouseScrollEvent)> callback) {
+    scroll_callbacks.push_back(callback);
+}
+
 void Window::debug_message_callback(
     GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam
 ) {
@@ -260,6 +271,7 @@ Window::~Window() {
     // make sure to clean up resources before terminating GLFW
     scene.reset();
     window.reset();
+    std::cout << "Terminating GLFW" << std::endl;
     glfwTerminate();
 }
 

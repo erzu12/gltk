@@ -1,11 +1,10 @@
 #pragma once
 
-#include "animation.h"
-#include "events.h"
-#include "list_resolvers.h"
-#include "messure.h"
-#include "renderables/renderable.h"
-#include "vec_math.h"
+#include <animation.h>
+#include <events.h>
+#include <messure.h>
+#include <renderables/renderable.h>
+#include <vec_math.h>
 
 #include <cassert>
 #include <chrono>
@@ -34,6 +33,13 @@ enum class ChildPlacement {
     Free,
     List,
     ListStretch,
+};
+
+enum class ListDirection {
+    Down,
+    Right,
+    Left,
+    Up,
 };
 
 enum class Overflow {
@@ -93,6 +99,15 @@ class Layout {
     std::vector<Layout *> children;
     std::optional<Layout *> parent = std::nullopt;
     std::unordered_map<std::type_index, std::vector<std::function<void(IEvent &)>>> eventCallbacks;
+    bool isHovered = false;
+
+    void sendHoverEvent(Vec2 pos, HoverState state) {
+        MouseHoverEvent hoverEvent(pos);
+        hoverEvent.state = state;
+        for (const auto &callback : eventCallbacks[std::type_index(typeid(MouseHoverEvent))]) {
+            callback(hoverEvent);
+        }
+    }
 
   public:
     Layout(Positioning positioning, std::optional<std::unique_ptr<IRenderable>> renderable = std::nullopt)
@@ -111,6 +126,23 @@ class Layout {
     template <typename T>
         requires std::derived_from<T, IEvent>
     void sendEvent(T &event) {
+        if (!transform.visible) {
+            return;
+        }
+        if (eventCallbacks.find(std::type_index(typeid(MouseHoverEvent))) != eventCallbacks.end()) {
+            if constexpr (std::is_same_v<T, MouseMoveEvent>) {
+                if (transform.clipBox.contains(event.getPos()) && !isHovered) {
+                    sendHoverEvent(event.getPos(), HoverState::ENTER);
+                    isHovered = true;
+                } else if (!transform.clipBox.contains(event.getPos()) && isHovered) {
+                    sendHoverEvent(event.getPos(), HoverState::LEAVE);
+                    isHovered = false;
+                }
+            }
+        }
+        if (eventCallbacks.find(std::type_index(typeid(T))) == eventCallbacks.end()) {
+            return;
+        }
         if (transform.clipBox.contains(event.getPos())) {
             for (const auto &callback : eventCallbacks[std::type_index(typeid(T))]) {
                 if constexpr (std::derived_from<T, IMouseEvent>) {

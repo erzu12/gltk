@@ -1,16 +1,16 @@
 #pragma once
 
-#include "color.h"
-#include "components/button.h"
-#include "components/edit_text.h"
-#include "layout/scene.h"
-#include "layout_builder.h"
-#include "messure.h"
-#include "renderables/box.h"
-#include "renderables/text.h"
-#include "text/string_to_number.h"
-#include "text/typesetter.h"
-#include "window.h"
+#include <color.h>
+#include <components/button.h>
+#include <components/edit_text.h>
+#include <layout/scene.h>
+#include <layout_builder.h>
+#include <messure.h>
+#include <renderables/box.h>
+#include <renderables/text.h>
+#include <text/string_to_number.h>
+#include <text/typesetter.h>
+#include <window.h>
 
 namespace gltk {
 
@@ -21,7 +21,7 @@ struct NumericInputSettings {
     T increment = 1;
     T min = std::numeric_limits<T>::lowest();
     T max = std::numeric_limits<T>::max();
-    std::optional<StyleSheet> styleSheet = std::nullopt;
+    std::shared_ptr<StyleSheet> styleSheet = nullptr;
     MessureVec2 size = MessureVec2(AbsoluteMessure(300), AbsoluteMessure(75));
     Style textStyle = Style({.color = Color(1.0f, 1.0f, 1.0f), .font = "Arial", .fontSize = 32});
     Style boxStyle = Style({.color = Color(0.3f, 0.3f, 0.3f), .radius = 5});
@@ -46,9 +46,9 @@ class NumericInput {
         EditTextSettings editTextSettings;
         currentNumber = settings.number;
 
-        if (settings.styleSheet.has_value()) {
-            settings.boxStyle = settings.styleSheet->getStyle("inputBackground");
-            settings.textStyle = settings.styleSheet->getStyle("primaryForeground");
+        if (settings.styleSheet != nullptr) {
+            settings.boxStyle = settings.styleSheet->inputBackground();
+            settings.textStyle = settings.styleSheet->primaryForeground();
         }
 
         editTextSettings.text = stringTools::numberToString(settings.number);
